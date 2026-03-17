@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #003087;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* Inputs and textareas always use dark text */
+input, textarea, select {
+  color: #1a1a1a;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #001f5b;
+}
+::-webkit-scrollbar-thumb {
+  background: #FFD700;
+  border-radius: 2px;
+}
+
+/* Chat message animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg-animate {
+  animation: fadeInUp 0.3s ease;
+}
+
+/* ── Admin Dark Mode ───────────────────────────────────────────────── */
+.admin-dark {
+  background-color: #0f172a !important;
+  color: #e2e8f0;
+}
+.admin-dark main {
+  background-color: #0f172a !important;
+}
+.admin-dark .bg-gray-100 {
+  background-color: #0f172a !important;
+}
+.admin-dark .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+.admin-dark .bg-gray-50 {
+  background-color: #1e293b !important;
+}
+.admin-dark .text-kcc-dark {
+  color: #f1f5f9 !important;
+}
+.admin-dark .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+.admin-dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+.admin-dark .text-gray-500 {
+  color: #64748b !important;
+}
+.admin-dark .text-gray-400 {
+  color: #475569 !important;
+}
+.admin-dark .border-gray-100 {
+  border-color: #334155 !important;
+}
+.admin-dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+.admin-dark input,
+.admin-dark textarea,
+.admin-dark select {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+.admin-dark .bg-red-50   { background-color: #2d1515 !important; }
+.admin-dark .bg-green-50 { background-color: #0f2d1e !important; }
+.admin-dark .bg-blue-50  { background-color: #0f1e2d !important; }
+.admin-dark .bg-purple-50{ background-color: #1e1529 !important; }
+.admin-dark .bg-yellow-50{ background-color: #2d2510 !important; }
+.admin-dark .bg-orange-50{ background-color: #2d1e0f !important; }
+.admin-dark .bg-indigo-50{ background-color: #111827 !important; }
+.admin-dark .shadow-sm    { box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important; }
+
+/* Typing dots animation */
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40%           { transform: scale(1); }
+}
+.typing-dot {
+  animation: bounce 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.16s; }
+.typing-dot:nth-child(3) { animation-delay: 0.32s; }

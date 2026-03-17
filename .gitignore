@@ -1,0 +1,25 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/.env
+
+# Database (local only - contains passwords)
+backend/kccsmartinfox.db
+
+# Vector store (large, regenerate from docs)
+backend/knowledge_base/vectorstore/
+
+# Node
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

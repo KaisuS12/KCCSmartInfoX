@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+sqlalchemy
+pydantic
+python-dotenv
+groq
+chromadb
+sentence-transformers
+pdfplumber
+python-docx
+python-jose[cryptography]
+passlib[bcrypt]
+sendgrid
+slowapi
