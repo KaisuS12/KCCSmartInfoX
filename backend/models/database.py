@@ -66,6 +66,15 @@ class AdminUser(Base):
     password_hash = Column(String(255), nullable=False)
 
 
+class AdminAILog(Base):
+    __tablename__ = "admin_ai_logs"
+    id         = Column(Integer, primary_key=True, index=True)
+    action     = Column(String(100))
+    details    = Column(Text)
+    status     = Column(String(20), default="success")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 def get_db():
     db = SessionLocal()
     try:
