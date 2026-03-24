@@ -1,21 +1,25 @@
 import os
-import sendgrid
-from sendgrid.helpers.mail import Mail
+import smtplib
+import logging
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger("kccsmartinfox.notifications")
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-FROM_EMAIL       = os.getenv("SENDGRID_FROM_EMAIL", "noreply@kcc.edu.ph")
-APP_NAME         = "KCCSmartInfoX"
+EMAIL_USER     = os.getenv("EMAIL_USER", "")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
+APP_NAME       = "KCCSmartInfoX"
 
 
 def send_announcement_email(subscriber_emails: list, title: str, content: str):
-    if not SENDGRID_API_KEY or not subscriber_emails:
-        print("[Email] Skipped: no API key or no subscribers.")
+    if not EMAIL_USER or not EMAIL_PASSWORD:
+        logger.warning("[Email] Skipped: EMAIL_USER or EMAIL_PASSWORD not set in .env")
         return
-
-    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
+    if not subscriber_emails:
+        logger.info("[Email] Skipped: no subscribers.")
+        return
 
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
@@ -34,14 +38,21 @@ def send_announcement_email(subscriber_emails: list, title: str, content: str):
     </div>
     """
 
+    sent = 0
     for email in subscriber_emails:
         try:
-            message = Mail(
-                from_email=FROM_EMAIL,
-                to_emails=email,
-                subject=f"[KCC] {title}",
-                html_content=html,
-            )
-            sg.send(message)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"[KCC] {title}"
+            msg["From"]    = EMAIL_USER
+            msg["To"]      = email
+            msg.attach(MIMEText(html, "html"))
+
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(EMAIL_USER, EMAIL_PASSWORD)
+                server.sendmail(EMAIL_USER, email, msg.as_string())
+            sent += 1
+            logger.info("[Email] Sent to %s", email)
         except Exception as e:
-            print(f"[Email] Failed to send to {email}: {e}")
+            logger.error("[Email] Failed to send to %s: %s", email, e)
+
+    logger.info("[Email] Done: %d/%d sent", sent, len(subscriber_emails))
