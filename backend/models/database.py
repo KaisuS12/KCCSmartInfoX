@@ -32,24 +32,12 @@ class Subscriber(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-class User(Base):
-    __tablename__ = "users"
-    id            = Column(Integer, primary_key=True, index=True)
-    email         = Column(String(255), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    name          = Column(String(100), nullable=False)
-    course        = Column(String(100), nullable=True)
-    year_level    = Column(String(20), nullable=True)
-    created_at    = Column(DateTime, default=datetime.utcnow)
-
-
 class ChatLog(Base):
     __tablename__ = "chat_logs"
     id          = Column(Integer, primary_key=True, index=True)
     question    = Column(Text, nullable=False)
     answer      = Column(Text)
     is_answered = Column(Boolean, default=True)
-    user_id     = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at  = Column(DateTime, default=datetime.utcnow)
 
 
