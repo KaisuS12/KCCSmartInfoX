@@ -17,6 +17,7 @@ from slowapi.util import get_remote_address
 from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback, Announcement
 from utils.auth import verify_password, create_access_token, hash_password, get_current_admin
 from rag.ingestion import ingest_pdf, ingest_docx, ingest_txt, ingest_text, delete_document
+from groq import Groq
 
 router = APIRouter()
 logger = logging.getLogger("kccsmartinfox.admin")
@@ -159,6 +160,57 @@ async def export_unanswered(db: Session = Depends(get_db), admin=Depends(get_cur
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@router.post("/admin/analytics/faq-suggestions")
+async def generate_faq_suggestions(db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    unanswered = (
+        db.query(ChatLog)
+        .filter(ChatLog.is_answered == False)
+        .order_by(ChatLog.created_at.desc())
+        .limit(50)
+        .all()
+    )
+    if not unanswered:
+        return {"suggestions": [], "based_on": 0}
+
+    questions_text = "\n".join([f"- {q.question}" for q in unanswered])
+
+    prompt = f"""You are a knowledge base assistant for Kabankalan Catholic College (KCC).
+
+Students asked these questions that the AI chatbot could not answer:
+{questions_text}
+
+Generate 4 knowledge base entries that would help answer these questions. Each entry should be:
+- A complete, accurate-sounding school information paragraph
+- Written as official school information (the admin will verify and edit before adding)
+- Practical and specific to a Philippine Catholic college setting
+
+Format EXACTLY like this (repeat for each entry):
+TOPIC: [short topic name]
+CONTENT: [2-4 sentences of helpful school information content]
+
+Only output the 4 entries in that format. Nothing else."""
+
+    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    response = groq_client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+        max_tokens=800,
+    )
+
+    raw = response.choices[0].message.content.strip()
+    suggestions = []
+    for block in raw.split("TOPIC:")[1:]:
+        parts = block.split("CONTENT:", 1)
+        if len(parts) == 2:
+            topic = parts[0].strip()
+            content = parts[1].strip()
+            if topic and content:
+                suggestions.append({"topic": topic, "content": content})
+
+    return {"suggestions": suggestions, "based_on": len(unanswered)}
 
 
 # ── Knowledge Base ────────────────────────────────────────────────────────────

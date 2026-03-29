@@ -13,6 +13,7 @@ limiter = Limiter(key_func=get_remote_address)
 class ChatRequest(BaseModel):
     question: str
     history: list = []
+    lang: str = "en"   # "en" or "fil"
 
 
 class FeedbackRequest(BaseModel):
@@ -25,7 +26,7 @@ class FeedbackRequest(BaseModel):
 @router.post("/chat")
 @limiter.limit("20/minute")
 async def chat(request: Request, body: ChatRequest, db: Session = Depends(get_db)):
-    answer, is_answered, sources = query_rag(body.question, history=body.history)
+    answer, is_answered, sources = query_rag(body.question, history=body.history, lang=body.lang)
 
     log = ChatLog(
         question=body.question,

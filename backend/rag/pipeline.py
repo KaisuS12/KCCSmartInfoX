@@ -47,11 +47,33 @@ FORMATTING RULES:
 - Never write a wall of text. Break it up so it's easy to read.
 - Use numbered list for steps/procedures. Use bullet points for features/options/items."""
 
+SYSTEM_PROMPT_FIL = """Ikaw si KCCSmartInfoX, ang opisyal na AI assistant ng Kabankalan Catholic College (KCC).
+
+MGA PATAKARAN:
+1. Sagutin gamit ang konteksto mula sa opisyal na mga dokumento ng KCC.
+2. Kung ang sagot ay WALA sa konteksto, sabihin: "Wala pa akong impormasyon tungkol diyan. Ang iyong tanong ay naitala na para sa pagsusuri."
+3. Huwag gumawa ng mga detalye tulad ng bayad, petsa, o pangalan na wala sa konteksto.
+4. Maging magalang, makulay, at malinaw. Pwedeng mag-Taglish.
+5. Naiintindihan mo ang Taglish, Bisaya, at Filipino na mensahe.
+
+FORMATTING:
+- Gumamit ng bullet points o numbered list para sa maraming items o hakbang.
+- Gumamit ng maikling bold na heading bago ang listahan kung kailangan.
+- Kung isang simpleng tanong lang, isang talata o pangungusap lang ang sagot.
+- Huwag gumawa ng mahabang walang-break na teksto.
+- Gumamit ng numbered list para sa mga hakbang/proseso."""
+
 GREETING_PROMPT = """You are KCCSmartInfoX, the friendly AI assistant of Kabankalan Catholic College (KCC).
 
 Respond warmly and naturally to greetings or casual messages. Let them know you can help with:
 enrollment, courses, tuition fees, scholarships, TOR requests, and school policies.
 Keep it short and welcoming. Do not make up any school details."""
+
+GREETING_PROMPT_FIL = """Ikaw si KCCSmartInfoX, ang palakaibigang AI assistant ng Kabankalan Catholic College (KCC).
+
+Sumagot nang mainit at natural sa mga bati o casual na mensahe. Ipaalam na makakatulong ka sa:
+enrollment, mga kurso, tuition fees, scholarships, TOR requests, at mga patakaran ng paaralan.
+Maging maikli at masaya. Pwedeng mag-Taglish. Huwag gumawa ng mga detalye ng paaralan."""
 
 REWRITE_PROMPT = """You are a query understanding assistant. Your job is to interpret what a student is asking, even if they have:
 - typos or misspellings
@@ -143,21 +165,14 @@ def rewrite_query(question: str) -> str:
 
 # --- Main RAG Function ---
 
-def query_rag(question: str, history: list = None, user_profile: dict = None) -> tuple:
+def query_rag(question: str, history: list = None, user_profile: dict = None, lang: str = "en") -> tuple:
     """Returns (answer: str, is_answered: bool, sources: list[str])"""
 
     history = history or []
+    use_fil = lang == "fil"
 
-    # Build system prompt — append student profile context if logged in
-    system_prompt = SYSTEM_PROMPT
-    if user_profile and user_profile.get("name"):
-        profile_ctx = (
-            f"\nStudent context: {user_profile['name']}"
-            + (f", Course: {user_profile['course']}" if user_profile.get("course") else "")
-            + (f", Year: {user_profile['year_level']}" if user_profile.get("year_level") else "")
-            + ". When relevant, tailor your answer to their specific program."
-        )
-        system_prompt = SYSTEM_PROMPT + profile_ctx
+    # Pick system prompt based on language
+    system_prompt = SYSTEM_PROMPT_FIL if use_fil else SYSTEM_PROMPT
 
     # 1. Handle greetings / small talk — no RAG needed
     if is_greeting(question):
@@ -165,7 +180,7 @@ def query_rag(question: str, history: list = None, user_profile: dict = None) ->
         response = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
-                {"role": "system", "content": GREETING_PROMPT},
+                {"role": "system", "content": GREETING_PROMPT_FIL if use_fil else GREETING_PROMPT},
                 {"role": "user", "content": question},
             ],
             temperature=0.7,

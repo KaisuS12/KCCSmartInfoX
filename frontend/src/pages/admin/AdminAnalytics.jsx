@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   Cell,
 } from 'recharts'
-import { AlertCircle, TrendingUp, Download, RefreshCw, CheckCircle, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { AlertCircle, TrendingUp, Download, RefreshCw, CheckCircle, MessageSquare, ThumbsUp, ThumbsDown, Sparkles, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import axios from 'axios'
 
 const API = (path) => `/api${path}`
@@ -31,6 +31,9 @@ export default function AdminAnalytics() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [tab, setTab] = useState('unanswered') // 'unanswered' | 'top' | 'feedback'
+  const [faqSuggestions, setFaqSuggestions] = useState(null)
+  const [faqLoading, setFaqLoading] = useState(false)
+  const [faqOpen, setFaqOpen] = useState(false)
   const PAGE_SIZE = 15
 
   const fetchData = useCallback(() => {
@@ -46,6 +49,21 @@ export default function AdminAnalytics() {
     const interval = setInterval(fetchData, 30_000)
     return () => clearInterval(interval)
   }, [fetchData])
+
+  const handleFaqGenerate = async () => {
+    setFaqLoading(true)
+    setFaqOpen(true)
+    try {
+      const res = await axios.post(API('/admin/analytics/faq-suggestions'), {}, {
+        headers: { Authorization: `Bearer ${token()}` }
+      })
+      setFaqSuggestions(res.data)
+    } catch {
+      alert('Failed to generate suggestions. Try again.')
+    } finally {
+      setFaqLoading(false)
+    }
+  }
 
   const handleExport = async () => {
     setExporting(true)
@@ -160,19 +178,76 @@ export default function AdminAnalytics() {
           {/* Unanswered Tab */}
           {tab === 'unanswered' && (
             <>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <p className="text-gray-400 text-xs">Add info to the knowledge base to fix these gaps.</p>
-                {data?.unanswered > 0 && (
-                  <button
-                    onClick={handleExport}
-                    disabled={exporting}
-                    className="flex items-center gap-2 text-sm bg-kcc-blue text-white px-4 py-2 rounded-xl hover:bg-blue-800 transition disabled:opacity-60"
-                  >
-                    <Download size={14} />
-                    {exporting ? 'Exporting…' : 'Export CSV'}
-                  </button>
-                )}
+                <div className="flex gap-2">
+                  {data?.unanswered > 0 && (
+                    <button
+                      onClick={handleFaqGenerate}
+                      disabled={faqLoading}
+                      className="flex items-center gap-2 text-sm bg-kcc-gold text-kcc-dark px-4 py-2 rounded-xl hover:bg-yellow-400 transition disabled:opacity-60 font-medium"
+                    >
+                      <Sparkles size={14} />
+                      {faqLoading ? 'Generating…' : 'AI Suggest Content'}
+                    </button>
+                  )}
+                  {data?.unanswered > 0 && (
+                    <button
+                      onClick={handleExport}
+                      disabled={exporting}
+                      className="flex items-center gap-2 text-sm bg-kcc-blue text-white px-4 py-2 rounded-xl hover:bg-blue-800 transition disabled:opacity-60"
+                    >
+                      <Download size={14} />
+                      {exporting ? 'Exporting…' : 'Export CSV'}
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* FAQ Suggestions Panel */}
+              {faqOpen && (
+                <div className="mb-4 border border-kcc-gold/30 rounded-2xl overflow-hidden">
+                  <button
+                    onClick={() => setFaqOpen(o => !o)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-kcc-gold/10 hover:bg-kcc-gold/20 transition"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-semibold text-kcc-dark">
+                      <Sparkles size={15} className="text-kcc-gold" />
+                      AI-Suggested Knowledge Base Content
+                      {faqSuggestions && <span className="text-xs font-normal text-gray-500">({faqSuggestions.based_on} questions analyzed)</span>}
+                    </span>
+                    {faqOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  </button>
+                  <div className="p-4 space-y-3 bg-amber-50/50">
+                    {faqLoading ? (
+                      <div className="text-center py-6 text-gray-400 text-sm">Analyzing unanswered questions with AI…</div>
+                    ) : faqSuggestions?.suggestions?.length ? (
+                      <>
+                        <p className="text-xs text-gray-500 mb-2">Review and verify these before adding to the knowledge base. Click <strong>+ Add</strong> to copy to clipboard.</p>
+                        {faqSuggestions.suggestions.map((s, i) => (
+                          <div key={i} className="bg-white rounded-xl border border-amber-200 p-4">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <p className="text-sm font-semibold text-kcc-dark">{s.topic}</p>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${s.topic}\n\n${s.content}`)
+                                  alert('Copied! Paste it in Knowledge Base → Add Text.')
+                                }}
+                                className="flex items-center gap-1 text-xs bg-kcc-blue text-white px-2.5 py-1 rounded-lg hover:bg-blue-800 transition flex-shrink-0"
+                              >
+                                <Plus size={11} /> Add
+                              </button>
+                            </div>
+                            <p className="text-gray-600 text-xs leading-relaxed">{s.content}</p>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <p className="text-center text-gray-400 text-sm py-4">No suggestions generated. Try again.</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {data?.unanswered > 0 && (
                 <input

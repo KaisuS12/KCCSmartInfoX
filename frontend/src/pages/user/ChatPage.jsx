@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone } from 'lucide-react'
+import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
@@ -42,7 +42,10 @@ export default function ChatPage() {
   const [showAnnouncements, setShowAnnouncements] = useState(false)
   const [showInfo, setShowInfo]               = useState(false)
   const [darkMode, setDarkMode]               = useState(() => localStorage.getItem('theme') !== 'light')
+  const [lang, setLang]                       = useState(() => localStorage.getItem('lang') || 'en')
+  const [isListening, setIsListening]         = useState(false)
   const bottomRef                             = useRef(null)
+  const recognitionRef                        = useRef(null)
 
   // Handle initial question from landing page
   useEffect(() => {
@@ -60,6 +63,37 @@ export default function ChatPage() {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light')
   }, [darkMode])
 
+  useEffect(() => {
+    localStorage.setItem('lang', lang)
+  }, [lang])
+
+  function toggleVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('Voice input is not supported in this browser. Try Chrome.'); return }
+
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      return
+    }
+
+    const recognition = new SR()
+    recognition.lang = lang === 'fil' ? 'fil-PH' : 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript
+      setInput(prev => prev ? prev + ' ' + transcript : transcript)
+    }
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
+  }
+
   async function sendMessage(text) {
     const question = text || input.trim()
     if (!question) return
@@ -75,7 +109,7 @@ export default function ChatPage() {
     }))
 
     try {
-      const res = await axios.post('/api/chat', { question, history })
+      const res = await axios.post('/api/chat', { question, history, lang })
       const followups = getFollowups(res.data.answer)
       setMessages(prev => [...prev, {
         role: 'ai',
@@ -154,6 +188,18 @@ export default function ChatPage() {
         <div className="flex items-center gap-2">
           <button onClick={() => setDarkMode(d => !d)} className="p-2 rounded-lg hover:bg-gray-100/20 transition-all" title="Toggle theme">
             {darkMode ? <Sun size={15} className="text-kcc-gold" /> : <Moon size={15} className="text-gray-500" />}
+          </button>
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(l => l === 'en' ? 'fil' : 'en')}
+            className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all ${
+              lang === 'fil'
+                ? 'bg-kcc-gold text-kcc-dark border-kcc-gold'
+                : 'border-kcc-blue/40 text-gray-400 hover:border-kcc-gold hover:text-kcc-gold'
+            }`}
+            title="Toggle language"
+          >
+            {lang === 'fil' ? 'FIL' : 'EN'}
           </button>
           <button
             onClick={() => { setShowAnnouncements(true); setShowInfo(false) }}
@@ -326,11 +372,22 @@ export default function ChatPage() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Ask anything about KCC..."
+            placeholder={lang === 'fil' ? 'Magtanong tungkol sa KCC...' : 'Ask anything about KCC...'}
             rows={1}
             className={`flex-1 bg-transparent text-sm resize-none outline-none max-h-32 py-1 ${darkMode ? 'text-white placeholder-gray-400' : 'text-gray-800 placeholder-gray-400'}`}
             style={{ scrollbarWidth: 'none' }}
           />
+          <button
+            onClick={toggleVoice}
+            className={`p-2 rounded-xl transition-all flex-shrink-0 ${
+              isListening
+                ? 'bg-red-500 text-white animate-pulse'
+                : darkMode ? 'text-gray-400 hover:text-kcc-gold' : 'text-gray-400 hover:text-kcc-blue'
+            }`}
+            title={isListening ? 'Stop listening' : 'Voice input'}
+          >
+            {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}

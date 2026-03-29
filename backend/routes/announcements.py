@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from models.database import get_db, Announcement, Subscriber
 from notifications.service import send_announcement_email
@@ -35,6 +35,7 @@ async def get_all_announcements(db: Session = Depends(get_db), admin=Depends(get
 
 @router.post("/announcements")
 async def create_announcement(
+    background_tasks: BackgroundTasks,
     title:      str           = Form(...),
     content:    str           = Form(...),
     publish_at: Optional[str] = Form(None),
@@ -72,10 +73,10 @@ async def create_announcement(
     db.commit()
     db.refresh(announcement)
 
-    # Send email immediately for instant posts
+    # Send email in background for instant posts (avoids blocking the response)
     if is_instant:
         emails = [s.email for s in db.query(Subscriber).all()]
-        send_announcement_email(emails, title, content)
+        background_tasks.add_task(send_announcement_email, emails, title, content)
 
     return {"message": "Announcement created", "id": announcement.id}
 
