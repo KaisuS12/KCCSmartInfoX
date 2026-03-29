@@ -59,19 +59,21 @@ async def create_announcement(
             shutil.copyfileobj(image.file, f)
         image_path = f"/api/announcement-images/{safe_name}"
 
+    is_instant = pub is None
     announcement = Announcement(
         title=title,
         content=content,
         publish_at=pub,
         expires_at=exp,
         image_path=image_path,
+        email_sent=is_instant,   # mark True now if instant; scheduler handles scheduled ones
     )
     db.add(announcement)
     db.commit()
     db.refresh(announcement)
 
-    # Send email only for instant posts
-    if not pub:
+    # Send email immediately for instant posts
+    if is_instant:
         emails = [s.email for s in db.query(Subscriber).all()]
         send_announcement_email(emails, title, content)
 

@@ -22,6 +22,7 @@ class Announcement(Base):
     publish_at   = Column(DateTime, nullable=True)   # null = publish immediately
     expires_at   = Column(DateTime, nullable=True)   # null = never expires
     image_path   = Column(String(500), nullable=True)
+    email_sent   = Column(Boolean, default=False)    # True once subscribers have been emailed
     created_at   = Column(DateTime, default=datetime.now)
 
 
