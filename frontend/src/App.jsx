@@ -7,6 +7,7 @@ import AdminKnowledge from './pages/admin/AdminKnowledge'
 import AdminAnnouncements from './pages/admin/AdminAnnouncements'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
 import AdminSubscribers from './pages/admin/AdminSubscribers'
+import AdminSchoolInfo from './pages/admin/AdminSchoolInfo'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="announcements" element={<AdminAnnouncements />} />
           <Route path="analytics"     element={<AdminAnalytics />} />
           <Route path="subscribers"   element={<AdminSubscribers />} />
+          <Route path="school-info"   element={<AdminSchoolInfo />} />
         </Route>
 
         {/* Fallback */}

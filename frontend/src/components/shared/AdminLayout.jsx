@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BookOpen, Megaphone,
-  BarChart2, Users, LogOut, Sun, Moon
+  BarChart2, Users, LogOut, Sun, Moon, Info
 } from 'lucide-react'
 import kccLogo from '../../assets/kcc-logo.png'
 import AdminAIAssistant from '../admin/AdminAIAssistant'
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/announcements', icon: Megaphone,       label: 'Announcements' },
   { to: '/admin/analytics',     icon: BarChart2,       label: 'Analytics' },
   { to: '/admin/subscribers',   icon: Users,           label: 'Subscribers' },
+  { to: '/admin/school-info',   icon: Info,            label: 'School Info' },
 ]
 
 export default function AdminLayout({ children }) {

@@ -60,6 +60,15 @@ class Feedback(Base):
     created_at  = Column(DateTime, default=datetime.utcnow)
 
 
+class SchoolInfo(Base):
+    __tablename__ = "school_info"
+    id         = Column(Integer, primary_key=True, index=True)
+    title      = Column(String(255), nullable=False)
+    content    = Column(Text, nullable=False)
+    order      = Column(Integer, default=0)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class AdminUser(Base):
     __tablename__ = "admin_users"
     id            = Column(Integer, primary_key=True, index=True)
