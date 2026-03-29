@@ -146,6 +146,7 @@ curl -X POST http://localhost:8000/api/admin/setup \
 - **School Info** — editable school information sections shown in chat sidebar
 - **Subscribers** — manage email subscribers
 - **Admin AI Assistant** — floating chatbot for admin queries and actions
+- **QR Code Generator** — generate, download PNG, or print QR code for campus posters; students scan to open chatbot instantly
 
 ---
 
@@ -224,6 +225,7 @@ KCCSmartInfoX/
 
 | Date | Change |
 |---|---|
+| 2026-03-30 | QR Code Generator — admin generates scannable QR for campus posters |
 | 2026-03-30 | Voice input + EN/FIL language toggle + FAQ Auto-Generator |
 | 2026-03-29 | Landing page redesign (carousel, office cards, about section) |
 | 2026-03-29 | Announcement posting fix (background email task) |
