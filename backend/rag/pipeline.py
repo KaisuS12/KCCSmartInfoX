@@ -1,20 +1,16 @@
 import os
 import re
 import logging
-import chromadb
 from groq import Groq
-from sentence_transformers import SentenceTransformer
 from spellchecker import SpellChecker
 from dotenv import load_dotenv
+from rag.chroma_store import embedding_model, collection
 
 load_dotenv()
 logger = logging.getLogger("kccsmartinfox.rag")
 
-# --- Clients & Models ---
-groq_client     = Groq(api_key=os.getenv("GROQ_API_KEY"))
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-chroma_client   = chromadb.PersistentClient(path="./knowledge_base/vectorstore")
-collection      = chroma_client.get_or_create_collection("kcc_knowledge")
+# --- Clients ---
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Spell checker — knows KCC/Filipino terms so it never over-corrects them
 spell = SpellChecker()

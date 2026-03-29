@@ -1,14 +1,8 @@
 import pdfplumber
-import chromadb
 import uuid
 import os
 from docx import Document as DocxDocument
-from sentence_transformers import SentenceTransformer
-
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-chroma_client = chromadb.PersistentClient(path="./knowledge_base/vectorstore")
-collection    = chroma_client.get_or_create_collection("kcc_knowledge")
+from rag.chroma_store import embedding_model, collection
 
 
 def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> list:
