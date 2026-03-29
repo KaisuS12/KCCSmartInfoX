@@ -7,7 +7,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from models.database import init_db
-from routes import chat, announcements, subscribers, admin, admin_ai
+from routes import chat, announcements, subscribers, admin, admin_ai, users
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,6 +34,7 @@ app.include_router(announcements.router, prefix="/api")
 app.include_router(subscribers.router,   prefix="/api")
 app.include_router(admin.router,         prefix="/api")
 app.include_router(admin_ai.router,      prefix="/api")
+app.include_router(users.router,         prefix="/api")
 
 
 @app.on_event("startup")

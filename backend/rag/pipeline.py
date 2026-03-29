@@ -147,8 +147,21 @@ def rewrite_query(question: str) -> str:
 
 # --- Main RAG Function ---
 
-def query_rag(question: str) -> tuple:
-    """Returns (answer: str, is_answered: bool)"""
+def query_rag(question: str, history: list = None, user_profile: dict = None) -> tuple:
+    """Returns (answer: str, is_answered: bool, sources: list[str])"""
+
+    history = history or []
+
+    # Build system prompt — append student profile context if logged in
+    system_prompt = SYSTEM_PROMPT
+    if user_profile and user_profile.get("name"):
+        profile_ctx = (
+            f"\nStudent context: {user_profile['name']}"
+            + (f", Course: {user_profile['course']}" if user_profile.get("course") else "")
+            + (f", Year: {user_profile['year_level']}" if user_profile.get("year_level") else "")
+            + ". When relevant, tailor your answer to their specific program."
+        )
+        system_prompt = SYSTEM_PROMPT + profile_ctx
 
     # 1. Handle greetings / small talk — no RAG needed
     if is_greeting(question):
@@ -162,7 +175,7 @@ def query_rag(question: str) -> tuple:
             temperature=0.7,
             max_tokens=150,
         )
-        return response.choices[0].message.content.strip(), True
+        return response.choices[0].message.content.strip(), True, []
 
     # 2. Quick spell fix (fast, no API call)
     spell_fixed = quick_spell_fix(question)
@@ -176,32 +189,44 @@ def query_rag(question: str) -> tuple:
     results = collection.query(
         query_embeddings=[question_embedding],
         n_results=5,
+        include=["documents", "distances", "metadatas"],
     )
 
     docs      = results.get("documents", [[]])[0]
     distances = results.get("distances", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
 
     # 5. No relevant docs found
     if not docs or (distances and distances[0] > 1.3):
         logger.warning("No relevant context for: %s (rewritten: %s)", question[:60], clean_question[:60])
-        return UNANSWERED_PHRASE + ". Your question has been noted for review.", False
+        return UNANSWERED_PHRASE + ". Your question has been noted for review.", False, []
 
     context = "\n\n---\n\n".join(docs)
 
-    # 6. Generate answer using context + original question (so LLM sees what user actually typed)
+    # Extract unique source filenames from metadata
+    seen = set()
+    sources = []
+    for meta in metadatas:
+        src = meta.get("source", "") if meta else ""
+        if src and src not in seen:
+            seen.add(src)
+            sources.append(src)
+
+    # 6. Build messages: system + recent history (last 3 pairs) + current RAG question
+    messages = [{"role": "system", "content": system_prompt}]
+    messages += history[-6:]   # last 3 user/assistant pairs
+    messages.append({
+        "role": "user",
+        "content": (
+            f"Context from KCC documents:\n\n{context}\n\n"
+            f"Student's question: {question}\n"
+            f"(Interpreted as: {clean_question})"
+        ),
+    })
+
     response = groq_client.chat.completions.create(
         model="llama-3.1-8b-instant",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": (
-                    f"Context from KCC documents:\n\n{context}\n\n"
-                    f"Student's question: {question}\n"
-                    f"(Interpreted as: {clean_question})"
-                ),
-            },
-        ],
+        messages=messages,
         temperature=0.2,
         max_tokens=600,
     )
@@ -210,4 +235,4 @@ def query_rag(question: str) -> tuple:
     is_answered = UNANSWERED_PHRASE not in answer
 
     logger.info("Answered=%s | original: %s | clean: %s", is_answered, question[:50], clean_question[:50])
-    return answer, is_answered
+    return answer, is_answered, sources

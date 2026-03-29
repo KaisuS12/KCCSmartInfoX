@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon } from 'lucide-react'
+import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, LogIn, LogOut, User, History, X } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
@@ -41,8 +41,20 @@ export default function ChatPage() {
   const [loading, setLoading]                 = useState(false)
   const [showAnnouncements, setShowAnnouncements] = useState(false)
   const [showInfo, setShowInfo]               = useState(false)
+  const [showHistory, setShowHistory]         = useState(false)
   const [darkMode, setDarkMode]               = useState(() => localStorage.getItem('theme') !== 'light')
+  const [user, setUser]                       = useState(null)
+  const [chatHistory, setChatHistory]         = useState([])
   const bottomRef                             = useRef(null)
+
+  // Load logged-in user on mount
+  useEffect(() => {
+    const token = localStorage.getItem('user_token')
+    const saved = localStorage.getItem('user_profile')
+    if (token && saved) {
+      try { setUser(JSON.parse(saved)) } catch { /* invalid JSON */ }
+    }
+  }, [])
 
   // Handle initial question from landing page
   useEffect(() => {
@@ -60,6 +72,29 @@ export default function ChatPage() {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light')
   }, [darkMode])
 
+  function logout() {
+    localStorage.removeItem('user_token')
+    localStorage.removeItem('user_profile')
+    setUser(null)
+    setShowHistory(false)
+  }
+
+  async function loadHistory() {
+    const token = localStorage.getItem('user_token')
+    if (!token) return
+    try {
+      const res = await axios.get('/api/users/history', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setChatHistory(res.data)
+    } catch { /* silent */ }
+  }
+
+  function openHistory() {
+    setShowHistory(true)
+    loadHistory()
+  }
+
   async function sendMessage(text) {
     const question = text || input.trim()
     if (!question) return
@@ -68,21 +103,35 @@ export default function ChatPage() {
     setMessages(prev => [...prev, { role: 'user', text: question }])
     setLoading(true)
 
+    // Build conversation history for context (last 6 messages = 3 pairs)
+    const history = messages.slice(-6).map(m => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text,
+    }))
+
+    const token = localStorage.getItem('user_token')
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
     try {
-      const res = await axios.post('/api/chat', { question })
+      const res = await axios.post('/api/chat', { question, history }, { headers })
       const followups = getFollowups(res.data.answer)
       setMessages(prev => [...prev, {
         role: 'ai',
         text: res.data.answer,
         chat_log_id: res.data.chat_log_id,
+        is_answered: res.data.is_answered,
+        sources: res.data.sources || [],
         feedback: null,
         followups,
       }])
-    } catch {
+    } catch (err) {
+      const isRateLimit = err.response?.status === 429
       setMessages(prev => [...prev, {
         role: 'ai',
-        text: "Sorry, I'm having trouble connecting right now. Please try again.",
-        error: true
+        text: isRateLimit
+          ? "You're sending messages too fast. Please wait a moment before trying again."
+          : "Sorry, I'm having trouble connecting right now. Please try again.",
+        error: true,
       }])
     } finally {
       setLoading(false)
@@ -118,11 +167,11 @@ export default function ChatPage() {
 
   const isEmpty = messages.length === 0
 
-  const bg      = darkMode ? 'bg-kcc-dark'   : 'bg-gray-50'
-  const hdr     = darkMode ? 'bg-kcc-dark border-kcc-blue/40' : 'bg-white border-gray-200'
-  const bubble  = darkMode ? 'bg-kcc-blue/50 text-white' : 'bg-white text-gray-800 border border-gray-100 shadow-sm'
-  const inp     = darkMode ? 'bg-kcc-blue/30 border-kcc-blue/40 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400'
-  const bot     = darkMode ? 'bg-kcc-dark border-kcc-blue/40' : 'bg-white border-gray-200'
+  const bg     = darkMode ? 'bg-kcc-dark'   : 'bg-gray-50'
+  const hdr    = darkMode ? 'bg-kcc-dark border-kcc-blue/40' : 'bg-white border-gray-200'
+  const bubble = darkMode ? 'bg-kcc-blue/50 text-white' : 'bg-white text-gray-800 border border-gray-100 shadow-sm'
+  const inp    = darkMode ? 'bg-kcc-blue/30 border-kcc-blue/40 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400'
+  const bot    = darkMode ? 'bg-kcc-dark border-kcc-blue/40' : 'bg-white border-gray-200'
 
   return (
     <div className={`flex flex-col h-screen ${bg} relative`}>
@@ -136,11 +185,14 @@ export default function ChatPage() {
           <img src={kccLogo} alt="KCC Logo" className="w-8 h-8 rounded-full object-cover" />
           <div>
             <h1 className={`font-semibold text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>KCCSmartInfoX</h1>
-            <p className="text-gray-400 text-xs">Kabankalan Catholic College</p>
+            {user
+              ? <p className="text-kcc-gold text-xs">{user.name}{user.course ? ` • ${user.course}` : ''}{user.year_level ? ` ${user.year_level}` : ''}</p>
+              : <p className="text-gray-400 text-xs">Kabankalan Catholic College</p>
+            }
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button onClick={() => setDarkMode(d => !d)} className="p-2 rounded-lg hover:bg-gray-100/20 transition-all" title="Toggle theme">
             {darkMode ? <Sun size={15} className="text-kcc-gold" /> : <Moon size={15} className="text-gray-500" />}
           </button>
@@ -158,6 +210,32 @@ export default function ChatPage() {
             <BookOpen size={14} />
             <span className="hidden sm:inline">School Info</span>
           </button>
+          {user ? (
+            <>
+              <button
+                onClick={openHistory}
+                className="p-2 rounded-lg hover:bg-gray-100/20 transition-all"
+                title="Chat History"
+              >
+                <History size={15} className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
+              </button>
+              <button
+                onClick={logout}
+                className="p-2 rounded-lg hover:bg-gray-100/20 transition-all"
+                title="Logout"
+              >
+                <LogOut size={15} className="text-gray-400" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-kcc-gold/20 hover:bg-kcc-gold hover:text-kcc-dark text-kcc-gold text-xs transition-all"
+            >
+              <LogIn size={14} />
+              <span className="hidden sm:inline">Login</span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -166,10 +244,20 @@ export default function ChatPage() {
         {isEmpty && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4 pb-20">
             <img src={kccLogo} alt="KCC Logo" className="w-16 h-16 rounded-full object-cover mb-4" />
-            <h2 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Hi! I'm KCCSmartInfoX</h2>
+            <h2 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              {user ? `Welcome back, ${user.name.split(' ')[0]}!` : "Hi! I'm KCCSmartInfoX"}
+            </h2>
             <p className="text-gray-400 text-sm mb-6 max-w-xs">
               Ask me anything about Kabankalan Catholic College — enrollment, policies, offices, and more.
             </p>
+            {!user && (
+              <p className="text-xs text-kcc-gold/70 mb-4">
+                <button onClick={() => navigate('/login')} className="underline hover:text-kcc-gold">Login</button>
+                {' '}or{' '}
+                <button onClick={() => navigate('/register')} className="underline hover:text-kcc-gold">Register</button>
+                {' '}to save your chat history
+              </p>
+            )}
             <div className="flex flex-col gap-2 w-full max-w-sm">
               {SUGGESTED.map((q) => (
                 <button
@@ -214,6 +302,33 @@ export default function ChatPage() {
                 ) : msg.text}
               </div>
             </div>
+
+            {/* Source citation */}
+            {msg.role === 'ai' && !msg.error && msg.sources && msg.sources.length > 0 && (
+              <div className="ml-9 mt-1 flex flex-wrap gap-1.5">
+                {msg.sources.map(src => (
+                  <span
+                    key={src}
+                    className="flex items-center gap-1 text-xs text-gray-400 bg-kcc-blue/10 border border-kcc-blue/20 px-2 py-0.5 rounded-full"
+                  >
+                    <FileText size={10} />
+                    {src}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Human fallback card when AI can't answer */}
+            {msg.role === 'ai' && msg.is_answered === false && (
+              <div className={`ml-9 mt-2 max-w-[80%] rounded-xl border px-4 py-3 text-xs ${darkMode ? 'bg-kcc-blue/20 border-kcc-blue/40 text-gray-300' : 'bg-blue-50 border-blue-200 text-gray-600'}`}>
+                <p className="font-semibold mb-1.5 flex items-center gap-1">
+                  <Phone size={11} /> Still need help? Contact us directly:
+                </p>
+                <p>📧 registrar@kcc.edu.ph</p>
+                <p>📍 KCC Main Campus, Kabankalan City, Negros Occidental</p>
+                <p>🕐 Mon–Fri: 8:00 AM – 5:00 PM &nbsp;|&nbsp; Sat: 8:00 AM – 12:00 PM</p>
+              </div>
+            )}
 
             {/* AI action bar: copy + feedback */}
             {msg.role === 'ai' && !msg.error && (
@@ -320,7 +435,48 @@ export default function ChatPage() {
           <BookOpen size={20} />
           <span className="text-xs mt-0.5">Info</span>
         </button>
+        {user ? (
+          <button onClick={openHistory} className="flex-1 flex flex-col items-center py-3 text-gray-400 hover:text-kcc-gold transition-all">
+            <History size={20} />
+            <span className="text-xs mt-0.5">History</span>
+          </button>
+        ) : (
+          <button onClick={() => navigate('/login')} className="flex-1 flex flex-col items-center py-3 text-gray-400 hover:text-kcc-gold transition-all">
+            <User size={20} />
+            <span className="text-xs mt-0.5">Login</span>
+          </button>
+        )}
       </nav>
+
+      {/* Chat History Panel */}
+      {showHistory && (
+        <div className="fixed inset-0 z-30 flex justify-end">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowHistory(false)} />
+          <div className={`relative w-full max-w-sm h-full overflow-y-auto flex flex-col ${darkMode ? 'bg-kcc-dark' : 'bg-white'}`}>
+            <div className={`flex items-center justify-between px-4 py-4 border-b ${darkMode ? 'border-kcc-blue/40' : 'border-gray-200'}`}>
+              <h2 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Chat History</h2>
+              <button onClick={() => setShowHistory(false)}>
+                <X size={20} className="text-gray-400 hover:text-white transition-all" />
+              </button>
+            </div>
+            <div className="flex-1 px-4 py-3 space-y-3 overflow-y-auto">
+              {chatHistory.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center mt-8">No history yet.</p>
+              ) : chatHistory.map(log => (
+                <div
+                  key={log.id}
+                  className={`rounded-xl p-3 border cursor-pointer hover:border-kcc-gold transition-all ${darkMode ? 'bg-kcc-blue/20 border-kcc-blue/40' : 'bg-gray-50 border-gray-200'}`}
+                  onClick={() => { sendMessage(log.question); setShowHistory(false) }}
+                >
+                  <p className={`text-sm font-medium truncate ${darkMode ? 'text-white' : 'text-gray-800'}`}>{log.question}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 truncate">{log.answer}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(log.created_at).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Panels */}
       {showAnnouncements && <AnnouncementsPanel onClose={() => setShowAnnouncements(false)} />}
