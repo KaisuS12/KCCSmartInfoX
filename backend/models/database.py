@@ -47,6 +47,7 @@ class KnowledgeDoc(Base):
     id          = Column(Integer, primary_key=True, index=True)
     filename    = Column(String(255), nullable=False)
     filepath    = Column(String(500), nullable=False)
+    content     = Column(Text, nullable=True)   # stored for text entries only; null for file uploads
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -74,6 +75,18 @@ class AdminUser(Base):
     id            = Column(Integer, primary_key=True, index=True)
     username      = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
+
+
+class OfficeProcess(Base):
+    __tablename__ = "office_processes"
+    id         = Column(Integer, primary_key=True, index=True)
+    name       = Column(String(255), nullable=False)
+    tagline    = Column(String(255), nullable=False)
+    icon       = Column(String(50), default="BookOpen")   # lucide icon name
+    color      = Column(String(20), default="blue")        # yellow | blue | green | purple
+    order      = Column(Integer, default=0)
+    sections   = Column(Text, nullable=False, default="[]") # JSON: [{heading, steps:[]}]
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class AdminAILog(Base):

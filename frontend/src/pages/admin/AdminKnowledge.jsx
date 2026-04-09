@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import AdminLayout from '../../components/shared/AdminLayout'
-import { Upload, Trash2, FileText, Plus, Files } from 'lucide-react'
+import { Upload, Trash2, FileText, Plus, Files, Pencil, X, Save } from 'lucide-react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
@@ -9,15 +9,17 @@ function authHeader() {
 }
 
 export default function AdminKnowledge() {
-  const [docs, setDocs]         = useState([])
-  const [uploading, setUploading]   = useState(false)
+  const [docs, setDocs]               = useState([])
+  const [uploading, setUploading]     = useState(false)
   const [bulkUploading, setBulkUploading] = useState(false)
-  const [textForm, setTextForm] = useState({ source: '', content: '' })
-  const [addingText, setAddingText] = useState(false)
+  const [textForm, setTextForm]       = useState({ source: '', content: '' })
+  const [addingText, setAddingText]   = useState(false)
   const [showTextForm, setShowTextForm] = useState(false)
-  const [bulkResults, setBulkResults]   = useState([])
-  const fileRef     = useRef()
-  const bulkRef     = useRef()
+  const [bulkResults, setBulkResults] = useState([])
+  const [editingDoc, setEditingDoc]   = useState(null)   // { id, source, content }
+  const [savingEdit, setSavingEdit]   = useState(false)
+  const fileRef = useRef()
+  const bulkRef = useRef()
 
   function fetchDocs() {
     axios.get('/api/admin/knowledge', { headers: authHeader() })
@@ -98,6 +100,29 @@ export default function AdminKnowledge() {
     }
   }
 
+  function startEdit(doc) {
+    setEditingDoc({ id: doc.id, source: doc.filename, content: doc.content || '' })
+    setShowTextForm(false)
+  }
+
+  async function handleSaveEdit() {
+    if (!editingDoc.content.trim()) { toast.error('Content cannot be empty'); return }
+    setSavingEdit(true)
+    try {
+      await axios.put(`/api/admin/knowledge/${editingDoc.id}`, {
+        source: editingDoc.source,
+        content: editingDoc.content,
+      }, { headers: authHeader() })
+      toast.success('Updated — AI knowledge refreshed')
+      setEditingDoc(null)
+      fetchDocs()
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -119,7 +144,7 @@ export default function AdminKnowledge() {
           </label>
 
           <button
-            onClick={() => setShowTextForm(!showTextForm)}
+            onClick={() => { setShowTextForm(!showTextForm); setEditingDoc(null) }}
             className="flex items-center gap-2 px-4 py-2 bg-kcc-gold text-kcc-dark rounded-xl hover:bg-yellow-400 transition-all text-sm font-medium"
           >
             <Plus size={16} />
@@ -141,7 +166,7 @@ export default function AdminKnowledge() {
           </div>
         )}
 
-        {/* Text Form */}
+        {/* Add Text Form */}
         {showTextForm && (
           <form onSubmit={handleAddText} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 space-y-3">
             <h3 className="font-semibold text-kcc-dark">Add Text Information</h3>
@@ -171,6 +196,46 @@ export default function AdminKnowledge() {
           </form>
         )}
 
+        {/* Inline Edit Form */}
+        {editingDoc && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-kcc-blue/30 mb-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-kcc-dark">Edit Text Entry</h3>
+              <button onClick={() => setEditingDoc(null)} className="text-gray-400 hover:text-gray-600">
+                <X size={16} />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={editingDoc.source}
+              onChange={e => setEditingDoc(p => ({ ...p, source: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 bg-white outline-none focus:border-kcc-blue"
+              placeholder="Source name"
+            />
+            <textarea
+              value={editingDoc.content}
+              onChange={e => setEditingDoc(p => ({ ...p, content: e.target.value }))}
+              rows={8}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 bg-white outline-none focus:border-kcc-blue resize-none"
+              placeholder="Content..."
+            />
+            <p className="text-xs text-gray-400">Saving will remove the old AI knowledge and replace it with this updated content.</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={savingEdit}
+                className="flex items-center gap-2 px-4 py-2 bg-kcc-gold text-kcc-dark rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-50"
+              >
+                <Save size={14} /> {savingEdit ? 'Saving...' : 'Save & Update AI'}
+              </button>
+              <button type="button" onClick={() => setEditingDoc(null)} className="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Documents List */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h2 className="font-semibold text-kcc-dark mb-4">Indexed Documents ({docs.length})</h2>
@@ -180,14 +245,28 @@ export default function AdminKnowledge() {
             <div className="space-y-2">
               {docs.map(doc => (
                 <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                  <FileText size={18} className="text-kcc-blue flex-shrink-0" />
+                  <FileText size={18} className={doc.content != null ? 'text-kcc-gold' : 'text-kcc-blue'} />
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-800 text-sm font-medium truncate">{doc.filename}</p>
-                    <p className="text-gray-400 text-xs">{new Date(doc.uploaded_at).toLocaleDateString()}</p>
+                    <p className="text-gray-400 text-xs">
+                      {new Date(doc.uploaded_at).toLocaleDateString()}
+                      {doc.content != null && <span className="ml-2 text-kcc-gold font-medium">· Text entry</span>}
+                    </p>
                   </div>
+                  {/* Edit only for text entries */}
+                  {doc.content != null && (
+                    <button
+                      onClick={() => startEdit(doc)}
+                      className="p-2 text-kcc-blue hover:bg-blue-50 rounded-lg transition-all"
+                      title="Edit content"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDelete(doc.id, doc.filename)}
                     className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-all"
+                    title="Delete"
                   >
                     <Trash2 size={16} />
                   </button>

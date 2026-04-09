@@ -40,6 +40,10 @@ class TextIngestion(BaseModel):
     source: str = "manual"
     content: str
 
+class TextUpdate(BaseModel):
+    source: str
+    content: str
+
 
 class AnnouncementCreate(BaseModel):
     title: str
@@ -299,9 +303,29 @@ async def add_text(
     admin=Depends(get_current_admin),
 ):
     chunks = ingest_text(data.content, data.source)
-    db.add(KnowledgeDoc(filename=data.source, filepath="text://manual"))
+    db.add(KnowledgeDoc(filename=data.source, filepath="text://manual", content=data.content))
     db.commit()
     return {"message": f"Added {chunks} chunks from text.", "source": data.source}
+
+
+@router.put("/admin/knowledge/{doc_id}")
+async def update_text(
+    doc_id: int,
+    data: TextUpdate,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    doc = db.query(KnowledgeDoc).filter(KnowledgeDoc.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Not found")
+    if doc.content is None:
+        raise HTTPException(status_code=400, detail="File uploads cannot be edited — delete and re-upload")
+    delete_document(doc.filename)          # remove old ChromaDB chunks
+    ingest_text(data.content, data.source) # re-ingest updated content
+    doc.filename = data.source
+    doc.content  = data.content
+    db.commit()
+    return {"message": "Updated and re-indexed successfully.", "source": data.source}
 
 
 @router.get("/admin/knowledge")

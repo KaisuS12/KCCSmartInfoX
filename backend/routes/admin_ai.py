@@ -13,10 +13,10 @@ from dotenv import load_dotenv
 
 from models.database import (
     get_db, AdminAILog, ChatLog, KnowledgeDoc,
-    Subscriber, Feedback, Announcement
+    Subscriber, Feedback, Announcement, OfficeProcess
 )
 from utils.auth import get_current_admin
-from rag.ingestion import ingest_text
+from rag.ingestion import ingest_text, delete_document
 
 load_dotenv()
 router = APIRouter()
@@ -30,6 +30,8 @@ Analyze the admin's message and return ONLY a valid JSON object — no extra tex
 Available intents:
 - add_knowledge: Admin wants to add information/text to the knowledge base
   params: { "content": "the text to add", "source": "short label for this info" }
+- delete_knowledge: Admin wants to delete a knowledge document by name/source
+  params: { "filename": "exact source name or filename to delete" }
 - post_announcement: Admin wants to create/post an announcement
   params: { "title": "announcement title", "content": "announcement body text" }
 - delete_announcement: Admin wants to delete an announcement by ID
@@ -43,6 +45,8 @@ Available intents:
 - get_subscribers: Admin wants subscriber count or list
   params: {}
 - get_documents: Admin wants to see uploaded knowledge base documents
+  params: {}
+- get_office_processes: Admin wants to see the office process cards on the landing page
   params: {}
 - general: Anything else — you answer it directly
   params: { "answer": "your concise answer" }
@@ -58,14 +62,17 @@ Examples:
 Input: "add to knowledge base: library is open 8am to 5pm"
 Output: {"intent":"add_knowledge","params":{"content":"library is open 8am to 5pm","source":"library hours"},"message":"Adding library hours to the knowledge base."}
 
+Input: "delete knowledge: sdf"
+Output: {"intent":"delete_knowledge","params":{"filename":"sdf"},"message":"Deleting knowledge entry named sdf."}
+
+Input: "show office processes"
+Output: {"intent":"get_office_processes","params":{},"message":"Fetching office process cards."}
+
 Input: "post announcement: no classes on friday"
 Output: {"intent":"post_announcement","params":{"title":"No Classes on Friday","content":"There will be no classes on Friday."},"message":"Posting announcement about no classes on Friday."}
 
 Input: "show me the stats"
 Output: {"intent":"get_stats","params":{},"message":"Fetching dashboard statistics."}
-
-Input: "what are the most asked questions?"
-Output: {"intent":"get_top_questions","params":{},"message":"Fetching top asked questions."}
 """
 
 
@@ -219,11 +226,39 @@ async def ai_chat(
         elif intent == "get_documents":
             docs = db.query(KnowledgeDoc).order_by(KnowledgeDoc.uploaded_at.desc()).limit(10).all()
             if docs:
-                items = "\n".join([f"- {d.filename}" for d in docs])
+                items = "\n".join([f"- {d.filename} {'*(text)*' if d.content is not None else ''}" for d in docs])
                 reply = f"📁 **Knowledge Base** ({len(docs)} latest)\n\n{items}"
             else:
                 reply = "No documents uploaded yet."
             action_details = "Viewed documents"
+
+        elif intent == "delete_knowledge":
+            filename = params.get("filename", "").strip()
+            if filename:
+                doc = db.query(KnowledgeDoc).filter(KnowledgeDoc.filename == filename).first()
+                if doc:
+                    delete_document(doc.filename)
+                    if doc.filepath and not doc.filepath.startswith("text://") and __import__('os').path.exists(doc.filepath):
+                        __import__('os').remove(doc.filepath)
+                    db.delete(doc)
+                    db.commit()
+                    reply = f"✅ Deleted **\"{filename}\"** from the knowledge base. The AI no longer has that info."
+                    action_details = f"Deleted knowledge: {filename}"
+                else:
+                    reply = f"❌ No knowledge entry found with the name **\"{filename}\"**.\n\nTry: *\"show documents\"* to see exact names."
+                    status = "error"
+            else:
+                reply = "❌ Please specify what to delete, e.g.:\n\n*\"delete knowledge: library hours\"*"
+                status = "error"
+
+        elif intent == "get_office_processes":
+            offices = db.query(OfficeProcess).order_by(OfficeProcess.order).all()
+            if offices:
+                items = "\n".join([f"{i+1}. **{o.name}** — {o.tagline}" for i, o in enumerate(offices)])
+                reply = f"🏢 **Office Processes** ({len(offices)} cards on landing page)\n\n{items}\n\nTo edit steps, go to **Admin → Office Processes**."
+            else:
+                reply = "No office processes yet. Add them at Admin → Office Processes."
+            action_details = "Viewed office processes"
 
         else:  # general
             answer = params.get("answer", "").strip()

@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -26,7 +27,10 @@ class FeedbackRequest(BaseModel):
 @router.post("/chat")
 @limiter.limit("20/minute")
 async def chat(request: Request, body: ChatRequest, db: Session = Depends(get_db)):
-    answer, is_answered, sources = query_rag(body.question, history=body.history, lang=body.lang)
+    loop = asyncio.get_event_loop()
+    answer, is_answered, sources = await loop.run_in_executor(
+        None, lambda: query_rag(body.question, history=body.history, lang=body.lang)
+    )
 
     log = ChatLog(
         question=body.question,

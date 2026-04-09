@@ -6,34 +6,37 @@ import ReactMarkdown from 'react-markdown'
 const API = 'http://localhost:8000/api'
 
 const QUICK_CHIPS = [
-  { label: '📊 Show Stats',        message: 'show me the dashboard stats' },
+  { label: '📊 Stats',             message: 'show me the dashboard stats' },
   { label: '❓ Unanswered',         message: 'show unanswered questions' },
   { label: '🔥 Top Questions',      message: 'show top asked questions' },
   { label: '➕ Add Knowledge',      message: 'add to knowledge base: ' },
-  { label: '📢 Post Announcement',  message: 'post announcement: ' },
   { label: '📁 Documents',          message: 'show knowledge base documents' },
+  { label: '🏢 Office Processes',   message: 'show office processes' },
   { label: '👥 Subscribers',        message: 'show subscribers' },
+  { label: '📢 Post Announcement',  message: 'post announcement: ' },
 ]
 
 const ACTION_LABELS = {
-  add_knowledge:       '➕ Added Knowledge',
-  post_announcement:   '📢 Posted Announcement',
-  delete_announcement: '🗑️ Deleted Announcement',
-  get_stats:           '📊 Viewed Stats',
-  get_unanswered:      '❓ Viewed Unanswered',
-  get_top_questions:   '🔥 Viewed Top Questions',
-  get_subscribers:     '👥 Viewed Subscribers',
-  get_documents:       '📁 Viewed Documents',
+  add_knowledge:        '➕ Added Knowledge',
+  delete_knowledge:     '🗑️ Deleted Knowledge',
+  post_announcement:    '📢 Posted Announcement',
+  delete_announcement:  '🗑️ Deleted Announcement',
+  get_stats:            '📊 Viewed Stats',
+  get_unanswered:       '❓ Viewed Unanswered',
+  get_top_questions:    '🔥 Viewed Top Questions',
+  get_subscribers:      '👥 Viewed Subscribers',
+  get_documents:        '📁 Viewed Documents',
+  get_office_processes: '🏢 Viewed Office Processes',
 }
 
 const WELCOME = `Hi Admin! 👋 I'm your **AI Assistant**.
 
 I can help you:
-- **Add info** to the knowledge base
-- **Post announcements** instantly
-- **Show stats**, top questions, unanswered
-- **Delete** announcements by ID
-- **Answer** any admin questions
+- **Add / delete** knowledge base entries
+- **Show** documents, office processes, subscribers
+- **Post / delete** announcements
+- **View stats**, top questions, unanswered
+- **Answer** any admin question
 
 What can I do for you?`
 

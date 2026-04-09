@@ -8,9 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from models.database import init_db, SessionLocal, Announcement, Subscriber, SchoolInfo
+from models.database import init_db, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
 from notifications.service import send_announcement_email
-from routes import chat, announcements, subscribers, admin, admin_ai, school_info
+from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,7 +37,8 @@ app.include_router(announcements.router, prefix="/api")
 app.include_router(subscribers.router,   prefix="/api")
 app.include_router(admin.router,         prefix="/api")
 app.include_router(admin_ai.router,      prefix="/api")
-app.include_router(school_info.router,   prefix="/api")
+app.include_router(school_info.router,        prefix="/api")
+app.include_router(office_processes.router,   prefix="/api")
 
 
 async def scheduled_email_dispatcher():
@@ -110,13 +111,48 @@ async def startup():
     os.makedirs(img_dir, exist_ok=True)
     app.mount("/api/announcement-images", StaticFiles(directory=img_dir), name="announcement-images")
 
-    # Seed school info sections if table is empty
+    import json as _json
     db = SessionLocal()
+
+    # Seed school info
     if db.query(SchoolInfo).count() == 0:
         for i, (title, content) in enumerate(DEFAULT_SCHOOL_INFO):
             db.add(SchoolInfo(title=title, content=content, order=i))
         db.commit()
         logger.info("School info seeded with %d sections", len(DEFAULT_SCHOOL_INFO))
+
+    # Seed office processes
+    if db.query(OfficeProcess).count() == 0:
+        defaults = [
+            OfficeProcess(name="Cashier / Accounting", tagline="Payments, fees & receipts", icon="DollarSign", color="yellow", order=0, sections=_json.dumps([
+                {"heading": "How to Pay School Fees", "steps": ["Go to the Cashier's Office during office hours (Mon–Fri 8AM–5PM).", "Present your Assessment Form / Statement of Account.", "Choose your payment option: full payment or installment plan.", "Pay the required amount. Official Receipt (OR) will be issued immediately.", "Keep your OR — it is required for clearance and enrollment."]},
+                {"heading": "Payment Methods", "steps": ["Cash payment at the Cashier's Window.", "Installment plan — inquire at the Accounting Office for terms.", "Scholarships & discounts are applied automatically — confirm with Accounting."]},
+            ])),
+            OfficeProcess(name="Registrar's Office", tagline="Enrollment, TOR & records", icon="BookOpen", color="blue", order=1, sections=_json.dumps([
+                {"heading": "Enrollment Process", "steps": ["Secure an Enrollment Form from the Registrar's Office.", "Fill out the form completely and accurately.", "Submit required documents: Report Card, Birth Certificate, ID photo.", "Have your form assessed and get your Statement of Account.", "Pay the required fees at the Cashier's Office.", "Return your Official Receipt to the Registrar to receive your Class Schedule."]},
+                {"heading": "How to Request a TOR", "steps": ["Visit the Registrar's Office and request a TOR form.", "Fill out the form and indicate the purpose.", "Pay the required fee at the Cashier's Office.", "Submit the Official Receipt to the Registrar.", "Wait for processing — typically 3–5 working days.", "Claim your TOR on the specified release date."]},
+                {"heading": "Other Documents", "steps": ["Certifications (Good Moral, Enrollment, Grades) — request at the window.", "Diploma — available upon graduation; inquire for release schedule.", "For transferees: present Transfer Credentials and Honorable Dismissal."]},
+            ])),
+            OfficeProcess(name="Scholarship Office", tagline="Financial aid & grants", icon="Award", color="green", order=2, sections=_json.dumps([
+                {"heading": "Types of Scholarships", "steps": ["Academic Scholarship — for students with outstanding grades (GWA 1.0–1.5).", "Government Scholarships — CHED, UNIFAST, TUPAD beneficiaries.", "Institutional Grants — partial discounts for deserving students.", "Sports & Cultural Grants — for varsity athletes and cultural performers."]},
+                {"heading": "Application Requirements", "steps": ["Accomplished Scholarship Application Form (from Scholarship Office).", "Latest Report Card / Grade Sheet with qualifying GWA.", "Certificate of Good Moral Character.", "Copy of Enrollment Form / Registration."]},
+                {"heading": "Application Process", "steps": ["Get an application form from the Scholarship Office.", "Fill out the form and attach all required documents.", "Submit to the Scholarship Office on or before the deadline.", "Wait for evaluation — results are posted on the bulletin board.", "If approved, report to Accounting for discount application."]},
+            ])),
+        ]
+        for op in defaults:
+            db.add(op)
+        db.commit()
+        logger.info("Office processes seeded with %d entries", len(defaults))
+
+    # Sync all office processes into AI knowledge base on every startup
+    from rag.ingestion import ingest_text, delete_document
+    from routes.office_processes import build_knowledge_text, kb_source
+    all_offices = db.query(OfficeProcess).all()
+    for op in all_offices:
+        delete_document(kb_source(op.id))
+        ingest_text(build_knowledge_text(op), source=kb_source(op.id))
+    logger.info("Synced %d office processes to AI knowledge base", len(all_offices))
+
     db.close()
 
     asyncio.create_task(scheduled_email_dispatcher())

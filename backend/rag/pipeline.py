@@ -197,9 +197,13 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
     # 4. Embed the clean question for semantic search
     question_embedding = embedding_model.encode(clean_question).tolist()
 
+    doc_count = collection.count()
+    if doc_count == 0:
+        return "I don't have any knowledge base documents yet. Please ask the admin to upload KCC documents.", False, []
+
     results = collection.query(
         query_embeddings=[question_embedding],
-        n_results=5,
+        n_results=min(3, doc_count),
         include=["documents", "distances", "metadatas"],
     )
 
@@ -212,7 +216,12 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
         logger.warning("No relevant context for: %s (rewritten: %s)", question[:60], clean_question[:60])
         return UNANSWERED_PHRASE + ". Your question has been noted for review.", False, []
 
-    context = "\n\n---\n\n".join(docs)
+    # Truncate each chunk to ~150 words to stay within Groq's free-tier token limit
+    def trim(text, max_words=150):
+        words = text.split()
+        return " ".join(words[:max_words]) + ("..." if len(words) > max_words else "")
+
+    context = "\n\n---\n\n".join(trim(d) for d in docs)
 
     # Extract unique source filenames from metadata
     seen = set()
@@ -225,7 +234,7 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
 
     # 6. Build messages: system + recent history (last 3 pairs) + current RAG question
     messages = [{"role": "system", "content": system_prompt}]
-    messages += history[-6:]   # last 3 user/assistant pairs
+    messages += history[-4:]   # last 2 user/assistant pairs
     messages.append({
         "role": "user",
         "content": (
@@ -239,7 +248,7 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
         model="llama-3.1-8b-instant",
         messages=messages,
         temperature=0.2,
-        max_tokens=600,
+        max_tokens=400,
     )
 
     answer      = response.choices[0].message.content.strip()

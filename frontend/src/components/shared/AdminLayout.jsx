@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BookOpen, Megaphone,
-  BarChart2, Users, LogOut, Sun, Moon, Info, QrCode
+  BarChart2, Users, LogOut, Sun, Moon, Info, QrCode, Building2
 } from 'lucide-react'
 import kccLogo from '../../assets/kcc-logo.png'
 import AdminAIAssistant from '../admin/AdminAIAssistant'
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/admin/analytics',     icon: BarChart2,       label: 'Analytics' },
   { to: '/admin/subscribers',   icon: Users,           label: 'Subscribers' },
   { to: '/admin/school-info',   icon: Info,            label: 'School Info' },
+  { to: '/admin/office-processes', icon: Building2,    label: 'Office Processes' },
   { to: '/admin/qrcode',        icon: QrCode,          label: 'QR Code' },
 ]
 
