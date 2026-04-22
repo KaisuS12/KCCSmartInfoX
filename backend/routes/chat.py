@@ -1,6 +1,9 @@
 import asyncio
+import socket
+from datetime import date
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -47,6 +50,29 @@ async def chat(request: Request, body: ChatRequest, db: Session = Depends(get_db
         "chat_log_id": log.id,
         "sources": sources,
     }
+
+
+@router.get("/stats")
+async def public_stats(db: Session = Depends(get_db)):
+    total = db.query(ChatLog).count()
+    answered = db.query(ChatLog).filter(ChatLog.is_answered == True).count()
+    rate = round(answered / total * 100) if total else 0
+    today_count = db.query(ChatLog).filter(
+        func.date(ChatLog.created_at) == date.today()
+    ).count()
+    return {"total": total, "answer_rate": rate, "today": today_count}
+
+
+@router.get("/local-ip")
+async def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return {"ip": ip}
+    except Exception:
+        return {"ip": "localhost"}
 
 
 @router.post("/chat/feedback")

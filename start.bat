@@ -1,23 +1,33 @@
 @echo off
-echo Starting KCCSmartInfoX...
+title KCCSmartInfoX Launcher
+color 0A
+
+echo ================================================
+echo   KCCSmartInfoX - Starting System...
+echo ================================================
 echo.
 
-start "Backend" cmd /k "cd /d C:\KCCSmartInfoX\backend && call venv\Scripts\activate.bat && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+REM Start Backend (must run from backend folder so DB path is correct)
+echo [1/2] Starting Backend...
+start "KCCSmartInfoX Backend" cmd /k "cd /d C:\KCCSmartInfoX\backend && call venv\Scripts\activate.bat && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 
 timeout /t 3 /nobreak >nul
 
-start "Frontend" cmd /k "cd /d C:\KCCSmartInfoX\frontend && npm run dev -- --host"
+REM Start Frontend
+echo [2/2] Starting Frontend...
+start "KCCSmartInfoX Frontend" cmd /k "cd /d C:\KCCSmartInfoX\frontend && npm run dev -- --host"
 
 echo.
-echo Servers starting...
+echo ================================================
+echo   IMPORTANT: Wait ~20 seconds for AI to load!
 echo.
-echo   Chat (Local):    http://localhost:5173
-echo   Chat (Phone):    http://192.168.0.109:5173
+echo   Admin Panel  : http://localhost:5173/admin/login
+echo   Chatbot      : http://localhost:5173/chat
+echo   Phone access : http://192.168.0.106:5173
 echo.
-echo   Admin (Local):   http://localhost:5173/admin/login
-echo   Admin (Phone):   http://192.168.0.109:5173/admin/login
+echo   Login: admin ^/ admin123
 echo.
-echo   Admin credentials: admin / admin123
+echo   NOTE: Internet required for AI answers (Groq API)
+echo ================================================
 echo.
-echo Wait ~20 seconds for the AI model to load.
 pause

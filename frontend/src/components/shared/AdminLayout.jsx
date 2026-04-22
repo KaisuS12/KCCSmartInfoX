@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import {
   LayoutDashboard, BookOpen, Megaphone,
-  BarChart2, Users, LogOut, Sun, Moon, Info, QrCode, Building2
+  BarChart2, Users, LogOut, Sun, Moon, Info, QrCode, Building2, MessageSquare, Settings, AlertTriangle
 } from 'lucide-react'
 import kccLogo from '../../assets/kcc-logo.png'
 import AdminAIAssistant from '../admin/AdminAIAssistant'
@@ -15,7 +16,10 @@ const navItems = [
   { to: '/admin/subscribers',   icon: Users,           label: 'Subscribers' },
   { to: '/admin/school-info',   icon: Info,            label: 'School Info' },
   { to: '/admin/office-processes', icon: Building2,    label: 'Office Processes' },
+  { to: '/admin/chatlogs',      icon: MessageSquare,   label: 'Chat Logs' },
+  { to: '/admin/concerns',      icon: AlertTriangle,   label: 'Concerns' },
   { to: '/admin/qrcode',        icon: QrCode,          label: 'QR Code' },
+  { to: '/admin/settings',      icon: Settings,        label: 'Settings' },
 ]
 
 export default function AdminLayout({ children }) {
@@ -25,6 +29,20 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     localStorage.setItem('admin_theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      res => res,
+      err => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('admin_token')
+          navigate('/admin/login')
+        }
+        return Promise.reject(err)
+      }
+    )
+    return () => axios.interceptors.response.eject(interceptor)
+  }, [navigate])
 
   function handleLogout() {
     localStorage.removeItem('admin_token')

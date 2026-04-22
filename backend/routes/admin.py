@@ -4,7 +4,7 @@ import csv
 import logging
 import shutil
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from fastapi.responses import StreamingResponse
@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback, Announcement
+from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback
 from utils.auth import verify_password, create_access_token, hash_password, get_current_admin
 from rag.ingestion import ingest_pdf, ingest_docx, ingest_txt, ingest_text, delete_document
 from groq import Groq
@@ -36,6 +36,11 @@ class SetupRequest(BaseModel):
     password: str
 
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class TextIngestion(BaseModel):
     source: str = "manual"
     content: str
@@ -43,13 +48,6 @@ class TextIngestion(BaseModel):
 class TextUpdate(BaseModel):
     source: str
     content: str
-
-
-class AnnouncementCreate(BaseModel):
-    title: str
-    content: str
-    publish_at: Optional[str] = None   # ISO datetime string or null
-    expires_at: Optional[str] = None
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -70,6 +68,28 @@ async def setup(request: SetupRequest, db: Session = Depends(get_db)):
     db.add(AdminUser(username=request.username, password_hash=hash_password(request.password)))
     db.commit()
     return {"message": "Admin account created"}
+
+
+# ── Settings ──────────────────────────────────────────────────────────────────
+
+@router.put("/admin/change-password")
+async def change_password(
+    data: PasswordChange,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    # get_current_admin returns the full JWT payload dict e.g. {"sub": "admin", "exp": ...}
+    username = admin["sub"]
+    admin_user = db.query(AdminUser).filter(AdminUser.username == username).first()
+    if not admin_user:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    if not verify_password(data.current_password, admin_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    admin_user.password_hash = hash_password(data.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
 
 
 # ── Analytics ─────────────────────────────────────────────────────────────────
@@ -360,38 +380,31 @@ async def get_subscribers(db: Session = Depends(get_db), admin=Depends(get_curre
     return [{"id": s.id, "email": s.email, "created_at": str(s.created_at)} for s in subs]
 
 
-# ── Announcements (admin) ──────────────────────────────────────────────────────
-
-@router.post("/admin/announcements")
-async def create_announcement(
-    data: AnnouncementCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(get_current_admin),
-):
-    publish_at = datetime.fromisoformat(data.publish_at) if data.publish_at else None
-    expires_at = datetime.fromisoformat(data.expires_at) if data.expires_at else None
-
-    ann = Announcement(
-        title=data.title,
-        content=data.content,
-        publish_at=publish_at,
-        expires_at=expires_at,
-    )
-    db.add(ann)
-    db.commit()
-    db.refresh(ann)
-    return {"message": "Announcement created", "id": ann.id}
-
-
-@router.delete("/admin/announcements/{id}")
-async def delete_announcement(
+@router.delete("/admin/subscribers/{id}")
+async def delete_subscriber(
     id: int,
     db: Session = Depends(get_db),
     admin=Depends(get_current_admin),
 ):
-    ann = db.query(Announcement).filter(Announcement.id == id).first()
-    if not ann:
+    sub = db.query(Subscriber).filter(Subscriber.id == id).first()
+    if not sub:
         raise HTTPException(status_code=404, detail="Not found")
-    db.delete(ann)
+    db.delete(sub)
     db.commit()
-    return {"message": "Deleted"}
+    return {"message": "Subscriber removed"}
+
+
+@router.get("/admin/chatlogs")
+async def get_chatlogs(db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    rows = db.query(ChatLog).order_by(ChatLog.created_at.desc()).limit(2000).all()
+    return [
+        {
+            "id": r.id,
+            "question": r.question,
+            "answer": r.answer,
+            "is_answered": r.is_answered,
+            "created_at": str(r.created_at),
+        }
+        for r in rows
+    ]
+

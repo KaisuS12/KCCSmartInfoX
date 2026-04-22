@@ -1,13 +1,28 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import AdminLayout from '../../components/shared/AdminLayout'
 import QRCode from 'react-qr-code'
 import { QrCode, Download, Printer, Copy, Check, Smartphone } from 'lucide-react'
+import axios from 'axios'
 
 export default function AdminQRCode() {
-  const defaultUrl = `${window.location.protocol}//${window.location.hostname}:5173/chat`
-  const [url, setUrl] = useState(defaultUrl)
+  const [url, setUrl] = useState('')
+  const [networkIp, setNetworkIp] = useState('localhost')
+  const [loadingIp, setLoadingIp] = useState(true)
   const [copied, setCopied] = useState(false)
   const qrRef = useRef(null)
+
+  useEffect(() => {
+    axios.get('/api/local-ip')
+      .then(r => {
+        const ip = r.data.ip
+        setNetworkIp(ip)
+        setUrl(`http://${ip}:4173/chat`)
+      })
+      .catch(() => {
+        setUrl('http://localhost:4173/chat')
+      })
+      .finally(() => setLoadingIp(false))
+  }, [])
 
   function handleCopy() {
     navigator.clipboard.writeText(url)
@@ -103,7 +118,7 @@ export default function AdminQRCode() {
               style={{ padding: 20, border: '4px solid #C9A84C', display: 'inline-block' }}
             >
               <QRCode
-                value={url || 'http://localhost:5173/chat'}
+                value={url || 'http://localhost:4173/chat'}
                 size={220}
                 bgColor="#ffffff"
                 fgColor="#000000"
@@ -163,16 +178,22 @@ export default function AdminQRCode() {
               <div className="mt-3 space-y-1">
                 <p className="text-xs text-gray-400 font-medium">Quick presets:</p>
                 <button
-                  onClick={() => setUrl(`http://${window.location.hostname}:5173/chat`)}
+                  onClick={() => setUrl(`http://${networkIp}:4173/chat`)}
                   className="text-xs text-kcc-blue hover:underline block"
                 >
-                  Local network ({window.location.hostname}:5173/chat)
+                  Network IP + PWA preview ({networkIp}:4173) ✓ Recommended
                 </button>
                 <button
-                  onClick={() => setUrl('http://localhost:5173/chat')}
+                  onClick={() => setUrl(`http://${networkIp}:5173/chat`)}
                   className="text-xs text-kcc-blue hover:underline block"
                 >
-                  Localhost (localhost:5173/chat)
+                  Network IP + dev server ({networkIp}:5173)
+                </button>
+                <button
+                  onClick={() => setUrl('http://localhost:4173/chat')}
+                  className="text-xs text-kcc-blue hover:underline block"
+                >
+                  Localhost (localhost:4173/chat)
                 </button>
               </div>
             </div>

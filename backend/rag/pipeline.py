@@ -20,7 +20,7 @@ spell.word_frequency.load_words([
     "bsit", "bsn", "beed", "bsed", "tor", "transcript", "credentials",
     "promissory", "miscellaneous", "prelim", "midterm", "finals",
     "cashier", "dormitory", "canteen", "chapel", "filipiniana",
-    "negros", "occidental", "barangay",
+    "negros", "occidental", "barangay", "help", "library",
 ])
 
 PRESERVE_WORDS = {
@@ -41,11 +41,12 @@ RULES:
 5. You understand Filipino-English mixed messages (Taglish/Bisaya). Always respond in clear English.
 
 FORMATTING RULES:
-- If the answer has multiple items, steps, or points — always use bullet points (•) or numbered list.
+- If the answer has multiple items, steps, or points — use a proper markdown list. Use "- " (dash space) for bullet points and "1. 2. 3." for numbered steps.
+- NEVER use the • character. Always use "- " for bullets.
 - Use a short bold heading before a list when helpful (e.g., **Requirements:**).
 - If the answer is a single simple fact, one sentence or short paragraph is fine.
-- Never write a wall of text. Break it up so it's easy to read.
-- Use numbered list for steps/procedures. Use bullet points for features/options/items."""
+- Never write a wall of text. Break it up so it's easy to read on a phone screen.
+- Use numbered list for steps/procedures. Use "- " bullet list for features/options/items."""
 
 SYSTEM_PROMPT_FIL = """Ikaw si KCCSmartInfoX, ang opisyal na AI assistant ng Kabankalan Catholic College (KCC).
 
@@ -57,11 +58,11 @@ MGA PATAKARAN:
 5. Naiintindihan mo ang Taglish, Bisaya, at Filipino na mensahe.
 
 FORMATTING:
-- Gumamit ng bullet points o numbered list para sa maraming items o hakbang.
+- Gumamit ng markdown list para sa maraming items o hakbang. Gamitin ang "- " (dash space) para sa bullets, at "1. 2. 3." para sa mga hakbang.
+- HUWAG gumamit ng • character. Gamitin laging "- " para sa bullets.
 - Gumamit ng maikling bold na heading bago ang listahan kung kailangan.
 - Kung isang simpleng tanong lang, isang talata o pangungusap lang ang sagot.
-- Huwag gumawa ng mahabang walang-break na teksto.
-- Gumamit ng numbered list para sa mga hakbang/proseso."""
+- Huwag gumawa ng mahabang walang-break na teksto."""
 
 GREETING_PROMPT = """You are KCCSmartInfoX, the friendly AI assistant of Kabankalan Catholic College (KCC).
 
@@ -112,6 +113,20 @@ GREETING_PATTERNS = re.compile(
 
 
 # --- Helper Functions ---
+
+def clean_bullets(text: str) -> str:
+    """Replace any bullet characters with proper markdown list items."""
+    # Covers: • · ● ▪ ◆ ◉ ○ ▸ ► and similar
+    bullet_pattern = re.compile(r'[•·●▪◆◉○▸►]')
+    lines = []
+    for line in text.split('\n'):
+        if bullet_pattern.search(line):
+            parts = [p.strip() for p in bullet_pattern.split(line) if p.strip()]
+            line = '\n'.join('- ' + p for p in parts)
+        lines.append(line)
+    return '\n'.join(lines)
+
+
 
 def is_greeting(text: str) -> bool:
     result = bool(GREETING_PATTERNS.match(text.strip()))
@@ -251,7 +266,7 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
         max_tokens=400,
     )
 
-    answer      = response.choices[0].message.content.strip()
+    answer      = clean_bullets(response.choices[0].message.content.strip())
     is_answered = UNANSWERED_PHRASE not in answer
 
     logger.info("Answered=%s | original: %s | clean: %s", is_answered, question[:50], clean_question[:50])

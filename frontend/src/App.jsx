@@ -10,6 +10,9 @@ import AdminSubscribers from './pages/admin/AdminSubscribers'
 import AdminSchoolInfo from './pages/admin/AdminSchoolInfo'
 import AdminQRCode from './pages/admin/AdminQRCode'
 import AdminOfficeProcesses from './pages/admin/AdminOfficeProcesses'
+import AdminChatLogs from './pages/admin/AdminChatLogs'
+import AdminSettings from './pages/admin/AdminSettings'
+import AdminConcerns from './pages/admin/AdminConcerns'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 
 export default function App() {
@@ -36,6 +39,9 @@ export default function App() {
           <Route path="school-info"   element={<AdminSchoolInfo />} />
           <Route path="qrcode"           element={<AdminQRCode />} />
           <Route path="office-processes" element={<AdminOfficeProcesses />} />
+          <Route path="chatlogs"         element={<AdminChatLogs />} />
+          <Route path="settings"         element={<AdminSettings />} />
+          <Route path="concerns"         element={<AdminConcerns />} />
         </Route>
 
         {/* Fallback */}

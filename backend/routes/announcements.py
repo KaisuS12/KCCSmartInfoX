@@ -81,6 +81,27 @@ async def create_announcement(
     return {"message": "Announcement created", "id": announcement.id}
 
 
+@router.put("/announcements/{id}")
+async def update_announcement(
+    id: int,
+    title:      str           = Form(...),
+    content:    str           = Form(...),
+    publish_at: Optional[str] = Form(None),
+    expires_at: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    item = db.query(Announcement).filter(Announcement.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Not found")
+    item.title = title
+    item.content = content
+    item.publish_at = datetime.fromisoformat(publish_at.replace('Z', '+00:00')).replace(tzinfo=None) if publish_at else None
+    item.expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00')).replace(tzinfo=None) if expires_at else None
+    db.commit()
+    return {"message": "Updated"}
+
+
 @router.delete("/announcements/{id}")
 async def delete_announcement(
     id: int,

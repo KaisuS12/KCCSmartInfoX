@@ -98,6 +98,19 @@ class AdminAILog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class Concern(Base):
+    __tablename__ = "concerns"
+    id               = Column(Integer, primary_key=True, index=True)
+    name             = Column(String(255), nullable=False)
+    email            = Column(String(255), nullable=False)
+    message          = Column(Text, nullable=False)
+    related_question = Column(Text, nullable=True)
+    status           = Column(String(20), default="pending")  # "pending" | "resolved"
+    admin_reply      = Column(Text, nullable=True)
+    created_at       = Column(DateTime, default=datetime.utcnow)
+    replied_at       = Column(DateTime, nullable=True)
+
+
 def get_db():
     db = SessionLocal()
     try:

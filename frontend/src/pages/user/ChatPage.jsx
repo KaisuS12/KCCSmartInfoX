@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe } from 'lucide-react'
+import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
@@ -45,6 +45,9 @@ export default function ChatPage() {
   const [darkMode, setDarkMode]             = useState(() => localStorage.getItem('theme') !== 'light')
   const [lang, setLang]                     = useState(() => localStorage.getItem('lang') || 'en')
   const [isListening, setIsListening]       = useState(false)
+  const [concernModal, setConcernModal]     = useState(null) // { question, msgIndex }
+  const [concernForm, setConcernForm]       = useState({ name: '', email: '', message: '' })
+  const [concernSending, setConcernSending] = useState(false)
   const bottomRef  = useRef(null)
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
@@ -150,6 +153,29 @@ export default function ChatPage() {
 
   function copyText(text) {
     navigator.clipboard.writeText(text).catch(() => {})
+  }
+
+  async function submitConcern(e) {
+    e.preventDefault()
+    if (!concernModal) return
+    setConcernSending(true)
+    try {
+      await axios.post('/api/concerns', {
+        name: concernForm.name.trim(),
+        email: concernForm.email.trim(),
+        message: concernForm.message.trim(),
+        related_question: concernModal.question,
+      })
+      setMessages(prev => prev.map((m, i) =>
+        i === concernModal.msgIndex ? { ...m, concernSent: true } : m
+      ))
+      setConcernModal(null)
+      setConcernForm({ name: '', email: '', message: '' })
+    } catch {
+      alert('Failed to submit. Please try again.')
+    } finally {
+      setConcernSending(false)
+    }
   }
 
   function handleKey(e) {
@@ -296,7 +322,10 @@ export default function ChatPage() {
                       p:      ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
                     }}
                   >
-                    {msg.text}
+                    {msg.text.replace(/[•·●▪◆◉○▸►]/g, (_, offset, str) => {
+                      const before = str.slice(0, offset).trimEnd()
+                      return before.length > 0 ? '\n- ' : '- '
+                    })}
                   </ReactMarkdown>
                 ) : msg.text}
               </div>
@@ -321,12 +350,10 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* Human fallback */}
+            {/* Human fallback + Concern Form trigger */}
             {msg.role === 'ai' && msg.is_answered === false && (
               <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border px-4 py-3 text-xs ${
-                darkMode
-                  ? 'bg-white/5 border-white/10 text-gray-400'
-                  : 'bg-blue-50 border-blue-100 text-gray-500'
+                darkMode ? 'bg-white/5 border-white/10 text-gray-400' : 'bg-blue-50 border-blue-100 text-gray-500'
               }`}>
                 <p className="font-semibold mb-1.5 flex items-center gap-1.5">
                   <Phone size={11} /> Still need help? Contact us directly:
@@ -334,6 +361,23 @@ export default function ChatPage() {
                 <p>📧 registrar@kcc.edu.ph</p>
                 <p>📍 KCC Main Campus, Kabankalan City, Negros Occidental</p>
                 <p>🕐 Mon–Fri: 8:00 AM – 5:00 PM &nbsp;|&nbsp; Sat: 8:00 AM – 12:00 PM</p>
+                <div className="mt-3 pt-3 border-t border-current/10">
+                  {msg.concernSent ? (
+                    <p className="text-green-500 font-semibold flex items-center gap-1.5">
+                      ✓ Concern submitted! We'll reply to your email.
+                    </p>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setConcernModal({ question: messages[i - 1]?.text || msg.text, msgIndex: i })
+                        setConcernForm({ name: '', email: '', message: messages[i - 1]?.text || '' })
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-kcc-blue text-white rounded-lg text-xs font-medium hover:bg-kcc-dark transition"
+                    >
+                      <AlertTriangle size={11} /> Submit a Concern
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -473,6 +517,80 @@ export default function ChatPage() {
       {/* ── Panels ── */}
       {showAnnouncements && <AnnouncementsPanel onClose={() => setShowAnnouncements(false)} />}
       {showInfo          && <SchoolInfoPanel    onClose={() => setShowInfo(false)} />}
+
+      {/* ── Concern Modal ── */}
+      {concernModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl shadow-xl p-6 ${darkMode ? 'bg-[#1a2236]' : 'bg-white'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className={`font-bold text-base flex items-center gap-2 ${darkMode ? 'text-white' : 'text-kcc-dark'}`}>
+                <AlertTriangle size={16} className="text-kcc-gold" /> Submit a Concern
+              </h2>
+              <button onClick={() => setConcernModal(null)} className="text-gray-400 hover:text-gray-600">
+                <X size={18} />
+              </button>
+            </div>
+
+            {concernModal.question && (
+              <div className={`text-xs rounded-xl px-3 py-2 mb-4 ${darkMode ? 'bg-white/5 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+                <span className="font-semibold">Related question:</span> {concernModal.question}
+              </div>
+            )}
+
+            <form onSubmit={submitConcern} className="space-y-3">
+              <div>
+                <label className={`text-xs font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Your Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={concernForm.name}
+                  onChange={e => setConcernForm(p => ({ ...p, name: e.target.value }))}
+                  className={`w-full border rounded-xl px-3 py-2 text-sm outline-none focus:border-kcc-blue ${darkMode ? 'bg-white/5 border-white/10 text-white' : 'border-gray-200 text-gray-800'}`}
+                  placeholder="e.g. Juan dela Cruz"
+                />
+              </div>
+              <div>
+                <label className={`text-xs font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Your Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={concernForm.email}
+                  onChange={e => setConcernForm(p => ({ ...p, email: e.target.value }))}
+                  className={`w-full border rounded-xl px-3 py-2 text-sm outline-none focus:border-kcc-blue ${darkMode ? 'bg-white/5 border-white/10 text-white' : 'border-gray-200 text-gray-800'}`}
+                  placeholder="you@email.com"
+                />
+              </div>
+              <div>
+                <label className={`text-xs font-medium mb-1 block ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Your Concern / Message *</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={concernForm.message}
+                  onChange={e => setConcernForm(p => ({ ...p, message: e.target.value }))}
+                  className={`w-full border rounded-xl px-3 py-2 text-sm outline-none focus:border-kcc-blue resize-none ${darkMode ? 'bg-white/5 border-white/10 text-white' : 'border-gray-200 text-gray-800'}`}
+                  placeholder="Describe your concern in detail..."
+                />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setConcernModal(null)}
+                  className={`flex-1 py-2 rounded-xl text-sm border transition ${darkMode ? 'border-white/10 text-gray-400 hover:bg-white/5' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={concernSending}
+                  className="flex-1 py-2 rounded-xl text-sm bg-kcc-blue text-white font-medium hover:bg-kcc-dark disabled:opacity-50 transition"
+                >
+                  {concernSending ? 'Submitting...' : 'Submit Concern'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

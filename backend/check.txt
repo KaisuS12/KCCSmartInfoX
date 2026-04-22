@@ -1,2 +1,0 @@
-DB docs: [(1, 'asdasdad', 'text://manual'), (2, 'asasas', 'text://manual'), (3, 'Names Caps.docx', './knowledge_base/documents\\Names Caps.docx'), (4, 'test_enrollment.txt', './knowledge_base/documents\\test_enrollment.txt'), (5, 'Names Caps.docx', './knowledge_base/documents\\Names Caps.docx')]
-ChromaDB count: 6

@@ -4,7 +4,7 @@ import AdminLayout from '../../components/shared/AdminLayout'
 import {
   MessageSquare, AlertCircle, Users, FileText,
   TrendingUp, ThumbsUp, ThumbsDown, BookOpen,
-  ArrowRight, RefreshCw, CheckCircle
+  ArrowRight, RefreshCw, CheckCircle, AlertTriangle
 } from 'lucide-react'
 import axios from 'axios'
 
@@ -24,16 +24,19 @@ function StatCard({ icon: Icon, label, value, color, bg, sub }) {
 }
 
 export default function AdminDashboard() {
-  const [data, setData]       = useState(null)
-  const [loading, setLoading] = useState(true)
-  const navigate              = useNavigate()
+  const [data, setData]               = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [pendingConcerns, setPending] = useState(0)
+  const navigate                      = useNavigate()
 
   function fetchData() {
     const token = localStorage.getItem('admin_token')
+    const headers = { Authorization: `Bearer ${token}` }
     setLoading(true)
-    axios.get('/api/admin/analytics', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(res => setData(res.data)).catch(() => {}).finally(() => setLoading(false))
+    axios.get('/api/admin/analytics', { headers })
+      .then(res => setData(res.data)).catch(() => {}).finally(() => setLoading(false))
+    axios.get('/api/admin/concerns', { headers })
+      .then(res => setPending(res.data.filter(c => c.status === 'pending').length)).catch(() => {})
   }
 
   useEffect(() => {
@@ -73,10 +76,16 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={Users}      label="Subscribers"  value={data?.total_subscribers} color="text-purple-600" bg="bg-purple-50" />
-          <StatCard icon={FileText}   label="Documents"    value={data?.total_documents}   color="text-indigo-600" bg="bg-indigo-50" />
-          <StatCard icon={ThumbsUp}   label="Helpful"      value={data?.thumbs_up}         color="text-green-600" bg="bg-green-50" />
-          <StatCard icon={ThumbsDown} label="Not Helpful"  value={data?.thumbs_down}       color="text-red-500"   bg="bg-red-50" />
+          <StatCard icon={Users}         label="Subscribers"       value={data?.total_subscribers} color="text-purple-600" bg="bg-purple-50" />
+          <StatCard icon={FileText}      label="Documents"         value={data?.total_documents}   color="text-indigo-600" bg="bg-indigo-50" />
+          <StatCard icon={ThumbsUp}      label="Helpful"           value={data?.thumbs_up}         color="text-green-600" bg="bg-green-50" />
+          <StatCard
+            icon={AlertTriangle}
+            label="Pending Concerns"
+            value={pendingConcerns}
+            color={pendingConcerns > 0 ? 'text-orange-500' : 'text-gray-400'}
+            bg={pendingConcerns > 0 ? 'bg-orange-50' : 'bg-gray-50'}
+          />
         </div>
 
         {/* Quick Actions */}
@@ -108,6 +117,18 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3">
               <MessageSquare size={20} className="text-kcc-blue" />
               <span className="text-sm font-medium">Post Announcement</span>
+            </div>
+            <ArrowRight size={16} />
+          </button>
+          <button
+            onClick={() => navigate('/admin/concerns')}
+            className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 text-kcc-dark rounded-2xl hover:bg-orange-100 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <AlertTriangle size={20} className="text-orange-500" />
+              <span className="text-sm font-medium">
+                View Concerns {pendingConcerns > 0 && <span className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">{pendingConcerns}</span>}
+              </span>
             </div>
             <ArrowRight size={16} />
           </button>

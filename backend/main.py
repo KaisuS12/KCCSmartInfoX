@@ -10,7 +10,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from models.database import init_db, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
 from notifications.service import send_announcement_email
-from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes
+from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,6 +39,7 @@ app.include_router(admin.router,         prefix="/api")
 app.include_router(admin_ai.router,      prefix="/api")
 app.include_router(school_info.router,        prefix="/api")
 app.include_router(office_processes.router,   prefix="/api")
+app.include_router(concerns.router,           prefix="/api")
 
 
 async def scheduled_email_dispatcher():
