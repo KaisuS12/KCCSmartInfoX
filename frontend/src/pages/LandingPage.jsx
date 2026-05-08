@@ -33,7 +33,7 @@ function OfficeCard({ office }) {
 
   return (
     <div className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-      open ? `${colors.border} bg-gradient-to-b ${colors.bg}` : 'border-white/10 bg-white/5 hover:border-white/20'
+      open ? `${colors.border} bg-gradient-to-b ${colors.bg}` : 'border-white/10 bg-white/5 hover:border-white/20 hover:shadow-lg hover:shadow-black/20'
     }`}>
       {/* Card header */}
       <button
@@ -114,6 +114,7 @@ function OfficeCard({ office }) {
 function AnnouncementCarousel({ announcements }) {
   const [active, setActive] = useState(0)
   const timerRef = useRef(null)
+  const touchStartX = useRef(null)
 
   useEffect(() => {
     if (announcements.length <= 1) return
@@ -125,6 +126,18 @@ function AnnouncementCarousel({ announcements }) {
     setActive(idx)
     clearInterval(timerRef.current)
     timerRef.current = setInterval(() => setActive(i => (i + 1) % announcements.length), 4000)
+  }
+
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (delta < -40) goTo((active + 1) % announcements.length)
+    else if (delta > 40) goTo((active - 1 + announcements.length) % announcements.length)
   }
 
   if (!announcements.length) return null
@@ -142,7 +155,12 @@ function AnnouncementCarousel({ announcements }) {
         )}
       </div>
 
-      <div className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-white/5 flex flex-col min-h-[240px]">
+      <div
+        key={active}
+        className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-white/5 flex flex-col min-h-[240px] select-none animate-fadeIn"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {ann.image_url && (
           <img src={ann.image_url} alt={ann.title} className="w-full h-44 object-cover" />
         )}
@@ -234,11 +252,11 @@ export default function LandingPage() {
               <Sparkles size={12} className="text-kcc-gold" />
               <span className="text-kcc-gold text-xs font-semibold">AI-Powered Assistant</span>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight animate-fadeIn">
               Welcome to<br />
               <span className="text-kcc-gold">KCCSmartInfoX</span>
             </h2>
-            <p className="text-gray-400 text-sm max-w-sm mb-8 leading-relaxed">
+            <p className="text-gray-400 text-sm max-w-sm mb-8 leading-relaxed animate-fadeIn" style={{ animationDelay: '0.1s' }}>
               Your 24/7 AI assistant for Kabankalan Catholic College.
               Instant answers about enrollment, courses, policies, and more.
             </p>
@@ -286,13 +304,13 @@ export default function LandingPage() {
             quality education grounded in Christian values, academic excellence, and community service.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-8 text-left">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-kcc-gold/40 hover:shadow-lg hover:shadow-kcc-gold/10 transition-all duration-300">
               <p className="text-kcc-gold text-xs font-bold uppercase tracking-widest mb-2">Vision</p>
               <p className="text-gray-300 text-sm leading-relaxed">
                 A leading Catholic institution forming competent, morally upright, and socially responsible citizens for God and country.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-kcc-gold/40 hover:shadow-lg hover:shadow-kcc-gold/10 transition-all duration-300">
               <p className="text-kcc-gold text-xs font-bold uppercase tracking-widest mb-2">Mission</p>
               <p className="text-gray-300 text-sm leading-relaxed">
                 To provide accessible, quality, and values-based education that develops the full potential of every student.

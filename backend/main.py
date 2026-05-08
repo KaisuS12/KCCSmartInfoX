@@ -47,8 +47,8 @@ async def scheduled_email_dispatcher():
     and haven't been emailed yet, then sends emails and marks them as sent."""
     while True:
         await asyncio.sleep(60)
+        db = SessionLocal()
         try:
-            db = SessionLocal()
             now = datetime.utcnow()
             pending = (
                 db.query(Announcement)
@@ -64,9 +64,11 @@ async def scheduled_email_dispatcher():
                     ann.email_sent = True
                     logger.info("Scheduled email sent for announcement id=%s", ann.id)
                 db.commit()
-            db.close()
         except Exception as e:
             logger.error("Scheduled email dispatcher error: %s", e)
+            db.rollback()
+        finally:
+            db.close()
 
 
 DEFAULT_SCHOOL_INFO = [

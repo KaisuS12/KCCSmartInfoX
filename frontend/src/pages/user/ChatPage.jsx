@@ -266,10 +266,10 @@ export default function ChatPage() {
 
         {/* Empty state */}
         {isEmpty && (
-          <div className="flex flex-col items-center justify-center h-full text-center px-4 pb-24 gap-0">
+          <div className="flex flex-col items-center justify-center min-h-full text-center px-4 py-10 gap-0">
             <div className="relative mb-5">
               <div className="absolute inset-0 bg-kcc-gold/20 rounded-full blur-2xl scale-150" />
-              <img src={kccLogo} alt="KCC" className="relative w-20 h-20 rounded-full object-cover ring-4 ring-kcc-gold/30 shadow-xl" />
+              <img src={kccLogo} alt="KCC" className="relative w-20 h-20 rounded-full object-cover ring-4 ring-kcc-gold/30 shadow-xl animate-float" />
             </div>
             <h2 className={`text-xl font-bold mb-1.5 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
               Hi! I'm KCCSmartInfoX
@@ -439,7 +439,7 @@ export default function ChatPage() {
 
         {/* Typing indicator */}
         {loading && (
-          <div className="flex justify-start msg-animate">
+          <div className="flex justify-start animate-fadeIn">
             <img src={kccLogo} alt="KCC" className="w-7 h-7 rounded-full object-cover mr-2 mt-1 flex-shrink-0" />
             <div className={`px-4 py-3 rounded-2xl rounded-tl-sm ${darkMode ? 'bg-white/8 border border-white/10' : 'bg-white border border-gray-100 shadow-sm'}`}>
               <TypingIndicator />
@@ -515,13 +515,13 @@ export default function ChatPage() {
       </nav>
 
       {/* ── Panels ── */}
-      {showAnnouncements && <AnnouncementsPanel onClose={() => setShowAnnouncements(false)} />}
-      {showInfo          && <SchoolInfoPanel    onClose={() => setShowInfo(false)} />}
+      {showAnnouncements && <div className="animate-slideDown"><AnnouncementsPanel onClose={() => setShowAnnouncements(false)} /></div>}
+      {showInfo          && <div className="animate-slideDown"><SchoolInfoPanel    onClose={() => setShowInfo(false)} /></div>}
 
       {/* ── Concern Modal ── */}
       {concernModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className={`w-full max-w-md rounded-2xl shadow-xl p-6 ${darkMode ? 'bg-[#1a2236]' : 'bg-white'}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className={`w-full max-w-md rounded-2xl shadow-xl p-6 transition-all duration-200 scale-100 ${darkMode ? 'bg-[#1a2236]' : 'bg-white'}`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className={`font-bold text-base flex items-center gap-2 ${darkMode ? 'text-white' : 'text-kcc-dark'}`}>
                 <AlertTriangle size={16} className="text-kcc-gold" /> Submit a Concern

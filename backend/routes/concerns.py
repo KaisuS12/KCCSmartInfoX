@@ -68,7 +68,7 @@ async def submit_concern(data: ConcernCreate, background_tasks: BackgroundTasks,
 
 @router.get("/admin/concerns")
 async def list_concerns(db: Session = Depends(get_db), admin=Depends(get_current_admin)):
-    concerns = db.query(Concern).order_by(Concern.created_at.desc()).all()
+    concerns = db.query(Concern).order_by(Concern.created_at.asc()).all()
     return [_concern_dict(c) for c in concerns]
 
 

@@ -7,10 +7,11 @@ import {
   ArrowRight, RefreshCw, CheckCircle, AlertTriangle
 } from 'lucide-react'
 import axios from 'axios'
+import { SkeleStatCard, SkeleListItem, SkeleCard } from '../../components/shared/Skeleton'
 
 function StatCard({ icon: Icon, label, value, color, bg, sub }) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-center justify-between mb-2">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bg}`}>
           <Icon size={18} className={color} />
@@ -46,6 +47,31 @@ export default function AdminDashboard() {
   }, [])
 
   const answerRate = data?.answer_rate ?? null
+
+  if (loading && !data) return (
+    <AdminLayout>
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-kcc-dark">Dashboard</h1>
+            <p className="text-gray-500 text-sm">Overview of KCCSmartInfoX activity</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => <SkeleStatCard key={i} />)}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[...Array(4)].map((_, i) => <SkeleStatCard key={i} />)}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {[...Array(3)].map((_, i) => <SkeleCard key={i} lines={1} className="h-16" />)}
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-2">
+          {[...Array(5)].map((_, i) => <SkeleListItem key={i} />)}
+        </div>
+      </div>
+    </AdminLayout>
+  )
 
   return (
     <AdminLayout>
@@ -92,7 +118,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <button
             onClick={() => navigate('/admin/knowledge')}
-            className="flex items-center justify-between p-4 bg-kcc-blue text-white rounded-2xl hover:bg-kcc-dark transition-all"
+            className="flex items-center justify-between p-4 bg-kcc-blue text-white rounded-2xl hover:bg-kcc-dark hover:scale-[1.02] transition-all duration-150"
           >
             <div className="flex items-center gap-3">
               <BookOpen size={20} />
@@ -102,7 +128,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate('/admin/analytics')}
-            className="flex items-center justify-between p-4 bg-kcc-gold text-kcc-dark rounded-2xl hover:bg-yellow-400 transition-all"
+            className="flex items-center justify-between p-4 bg-kcc-gold text-kcc-dark rounded-2xl hover:bg-yellow-400 hover:scale-[1.02] transition-all duration-150"
           >
             <div className="flex items-center gap-3">
               <TrendingUp size={20} />
@@ -112,7 +138,7 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={() => navigate('/admin/announcements')}
-            className="flex items-center justify-between p-4 bg-white border border-gray-200 text-kcc-dark rounded-2xl hover:bg-gray-50 transition-all"
+            className="flex items-center justify-between p-4 bg-white border border-gray-200 text-kcc-dark rounded-2xl hover:bg-gray-50 hover:scale-[1.02] transition-all duration-150"
           >
             <div className="flex items-center gap-3">
               <MessageSquare size={20} className="text-kcc-blue" />
@@ -127,7 +153,7 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3">
               <AlertTriangle size={20} className="text-orange-500" />
               <span className="text-sm font-medium">
-                View Concerns {pendingConcerns > 0 && <span className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">{pendingConcerns}</span>}
+                View Concerns {pendingConcerns > 0 && <span className={`ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full animate-pulse`}>{pendingConcerns}</span>}
               </span>
             </div>
             <ArrowRight size={16} />

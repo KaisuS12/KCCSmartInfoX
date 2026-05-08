@@ -71,3 +71,5 @@ def delete_document(filename: str):
     results = collection.get(where={"source": filename})
     if results["ids"]:
         collection.delete(ids=results["ids"])
+
+

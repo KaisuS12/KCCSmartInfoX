@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KCCSmartInfoX — Deployment Plan</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+
+    /* Cover */
+    .cover {
+      background: linear-gradient(135deg, #003087 0%, #00214f 100%);
+      color: white;
+      padding: 52px 64px 44px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .logo-circle {
+      width: 76px; height: 76px; min-width: 76px;
+      background: #c9a84c; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 900; color: #003087;
+    }
+    .cover h1 { font-size: 26px; font-weight: 800; }
+    .cover .sub { color: #a8c0e8; font-size: 12px; margin-top: 3px; }
+    .cover .doc-title { color: #c9a84c; font-size: 15px; font-weight: 700; margin-top: 10px; }
+    .cover .doc-sub { color: #7a9fd4; font-size: 11px; margin-top: 4px; }
+
+    /* Body */
+    .page { padding: 40px 64px 56px; max-width: 920px; margin: 0 auto; }
+
+    /* Section */
+    .section-wrap { margin: 36px 0 16px; }
+    .section-title {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 4px;
+    }
+    .section-num {
+      width: 30px; height: 30px; min-width: 30px;
+      border-radius: 50%; background: #003087; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+    }
+    .section-num.gold { background: #c9a84c; color: #1a1a2e; }
+    .section-num.red  { background: #dc2626; }
+    .section-num.green { background: #16a34a; }
+    .section-label { font-size: 15px; font-weight: 700; color: #003087; }
+    .section-line { flex: 1; height: 1px; background: #d1d9f0; }
+    .section-desc { color: #6b7280; font-size: 11.5px; margin-left: 42px; margin-top: 2px; margin-bottom: 14px; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    thead tr { background: #003087; color: white; }
+    thead th { padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; }
+    tbody tr { background: white; border-bottom: 1px solid #e8eaf0; }
+    tbody tr:nth-child(even) { background: #f7f8fa; }
+    tbody td { padding: 9px 14px; font-size: 12px; color: #374151; vertical-align: top; }
+    .num-col { width: 36px; text-align: center; font-weight: 700; color: #003087; }
+    .tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 9px; border-radius: 10px; margin-right: 4px;
+    }
+    .tag-blue  { background: #dbeafe; color: #1e40af; }
+    .tag-gold  { background: #fef9c3; color: #92700a; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-red   { background: #fee2e2; color: #991b1b; }
+    .tag-gray  { background: #f3f4f6; color: #4b5563; }
+
+    /* Risk table specific */
+    .risk-high   { color: #dc2626; font-weight: 700; }
+    .risk-medium { color: #d97706; font-weight: 700; }
+    .risk-low    { color: #16a34a; font-weight: 700; }
+
+    /* Info box */
+    .info-box {
+      border-radius: 10px; padding: 14px 18px; margin: 12px 0;
+    }
+    .info-box.blue  { background: #eff6ff; border-left: 4px solid #003087; }
+    .info-box.gold  { background: #fffbeb; border-left: 4px solid #c9a84c; }
+    .info-box.green { background: #f0fdf4; border-left: 4px solid #16a34a; }
+    .info-box.red   { background: #fef2f2; border-left: 4px solid #dc2626; }
+    .info-box p { font-size: 12px; color: #374151; }
+    .info-box strong { color: #1a1a2e; }
+
+    /* URL box */
+    .url-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0; }
+    .url-box {
+      background: white; border: 1px solid #e8eaf0;
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .url-box .url-label { font-size: 10px; font-weight: 700; color: #9098a9; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+    .url-box .url-path { font-size: 12px; font-weight: 700; color: #003087; font-family: monospace; }
+    .url-box .url-desc { font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 0; margin: 12px 0; }
+    .step { display: flex; gap: 14px; align-items: flex-start; position: relative; }
+    .step:not(:last-child)::after {
+      content: ''; position: absolute; left: 14px; top: 34px;
+      width: 2px; height: calc(100% - 6px); background: #d1d9f0;
+    }
+    .step-n {
+      width: 30px; height: 30px; min-width: 30px;
+      border-radius: 50%; background: #003087; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; z-index: 1; margin-top: 2px;
+    }
+    .step-n.gold  { background: #c9a84c; color: #1a1a2e; }
+    .step-n.green { background: #16a34a; }
+    .step-body {
+      background: white; border: 1px solid #e8eaf0;
+      border-radius: 10px; padding: 10px 14px; flex: 1; margin-bottom: 8px;
+    }
+    .step-body .st { font-weight: 700; color: #1a1a2e; font-size: 12.5px; }
+    .step-body .sd { color: #6b7280; font-size: 11.5px; margin-top: 3px; }
+    code {
+      background: #f1f5f9; color: #1e40af;
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 11px; font-family: 'Consolas', monospace;
+    }
+    pre {
+      background: #1e293b; color: #e2e8f0;
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 11px; font-family: 'Consolas', monospace;
+      margin: 8px 0; overflow-x: auto; line-height: 1.7;
+    }
+
+    /* Footer */
+    .footer {
+      background: #003087; color: #a8c0e8;
+      text-align: center; padding: 14px;
+      font-size: 11px; margin-top: 24px;
+    }
+
+    @media print {
+      body { background: white; }
+      .cover, thead tr, .section-num, .step-n, .footer {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .info-box, .url-box, .step-body, .tag {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .page { padding: 28px 48px; }
+      .section-wrap { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo-circle">KCC</div>
+  <div>
+    <h1>KCCSmartInfoX</h1>
+    <p class="sub">Kabankalan Catholic College, Inc.</p>
+    <p class="doc-title">Online Deployment Plan — Pre-Oral Defense</p>
+    <p class="doc-sub">Platform: Railway &nbsp;·&nbsp; Strategy: Single-Service Deployment &nbsp;·&nbsp; Timeline: This Week</p>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══ WHY RAILWAY ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num gold">★</div>
+      <span class="section-label">Chosen Platform: Railway</span>
+      <div class="section-line"></div>
+    </div>
+  </div>
+
+  <div class="info-box blue">
+    <p><strong>Why Railway and not others?</strong> The frontend uses relative API paths (<code>/api/...</code>) with no base URL — meaning the frontend and backend must be served from the same domain. Railway lets us do this with one service. Render's free tier sleeps after 15 minutes of inactivity (causes a 30–60 second delay during demo). Vercel and Netlify are frontend-only. Railway wins: always-on, single URL, deploys from GitHub, free starter credit.</p>
+  </div>
+
+  <div class="url-grid">
+    <div class="url-box">
+      <div class="url-label">Landing Page</div>
+      <div class="url-path">/</div>
+      <div class="url-desc">Announcements + Office Processes</div>
+    </div>
+    <div class="url-box">
+      <div class="url-label">Student Chat</div>
+      <div class="url-path">/chat</div>
+      <div class="url-desc">AI Chatbot — shareable with panelists</div>
+    </div>
+    <div class="url-box">
+      <div class="url-label">Admin Panel</div>
+      <div class="url-path">/admin/login</div>
+      <div class="url-desc">Full admin dashboard online</div>
+    </div>
+  </div>
+
+  <div class="info-box green">
+    <p><strong>Final URL format:</strong> <code>https://kccsmartinfox.up.railway.app</code> — accessible from any device, any browser, anywhere. Panelists can open it on their phones during the defense.</p>
+  </div>
+
+  <!-- ══ CODE CHANGES ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num">1</div>
+      <span class="section-label">Code Changes Required (4 Files Only)</span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-desc">Minimal changes — the system already works locally; these changes adapt it for cloud hosting.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="num-col">#</th>
+        <th>File</th>
+        <th>What Changes</th>
+        <th>Why</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num-col">1</td>
+        <td><code>backend/requirements.txt</code></td>
+        <td>Remove <code>sendgrid</code> line</td>
+        <td>sendgrid is listed but never used (Gmail SMTP is used instead). Can cause Railway install errors.</td>
+      </tr>
+      <tr>
+        <td class="num-col">2</td>
+        <td><code>backend/main.py</code></td>
+        <td>Add 6 lines at the bottom — FastAPI serves the built React app as static files + SPA catch-all route</td>
+        <td>Since all axios calls use relative <code>/api/...</code> paths, the frontend must be served from the same origin as the backend. This is the cleanest solution with zero changes to the frontend.</td>
+      </tr>
+      <tr>
+        <td class="num-col">3</td>
+        <td><code>railway.toml</code> <span class="tag tag-gold">NEW FILE</span></td>
+        <td>Build command: install frontend → build React → install backend. Start command: uvicorn on Railway's dynamic port.</td>
+        <td>Railway needs to know how to build a project with both a Python backend and a Node/React frontend in the same repo.</td>
+      </tr>
+      <tr>
+        <td class="num-col">4</td>
+        <td><code>.gitignore</code></td>
+        <td>Ensure <code>kccsmartinfox.db</code> and <code>knowledge_base/vectorstore/</code> are <strong>not</strong> ignored</td>
+        <td>If the database and AI vectorstore are excluded from git, Railway will deploy with no data — AI cannot answer anything and the admin panel will be empty.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Code snippets -->
+  <p style="font-weight:700;color:#003087;margin:16px 0 6px;">Code added to <code>backend/main.py</code> (bottom of file):</p>
+  <pre>import pathlib
+from fastapi.responses import FileResponse
+
+_dist = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
+if _dist.exists():
+    app.mount("/assets", StaticFiles(directory=str(_dist / "assets")), name="spa-assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        return FileResponse(str(_dist / "index.html"))</pre>
+
+  <p style="font-weight:700;color:#003087;margin:16px 0 6px;">Contents of new <code>railway.toml</code>:</p>
+  <pre>[build]
+builder = "nixpacks"
+buildCommand = "cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt"
+
+[deploy]
+startCommand = "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/api/stats"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"</pre>
+
+  <!-- ══ ENV VARIABLES ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num">2</div>
+      <span class="section-label">Environment Variables (Set in Railway Dashboard)</span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-desc">These are NOT stored in any file — entered directly in Railway → Project → Variables tab.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Variable Name</th>
+        <th>Value</th>
+        <th>Where to Find It</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>GROQ_API_KEY</code></td>
+        <td>Your Groq API key</td>
+        <td><code>backend/.env</code> file</td>
+      </tr>
+      <tr>
+        <td><code>EMAIL_USER</code></td>
+        <td>kccsmartinfox@gmail.com</td>
+        <td><code>backend/.env</code> file</td>
+      </tr>
+      <tr>
+        <td><code>EMAIL_PASSWORD</code></td>
+        <td>Gmail app password (16 chars)</td>
+        <td><code>backend/.env</code> file</td>
+      </tr>
+      <tr>
+        <td><code>SECRET_KEY</code></td>
+        <td>Your JWT secret key</td>
+        <td><code>backend/.env</code> file</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box gold">
+    <p><strong>Note:</strong> Do NOT set <code>DATABASE_URL</code> — the default SQLite path works automatically when Railway starts from the <code>backend/</code> directory.</p>
+  </div>
+
+  <!-- ══ DEPLOYMENT STEPS ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num">3</div>
+      <span class="section-label">Step-by-Step Deployment Process</span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-desc">One-time setup. Do this the day before the defense — not on demo day.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="st">Apply the 4 code changes</div>
+        <div class="sd">Make the changes to requirements.txt, main.py, create railway.toml, and fix .gitignore. Commit and push everything to GitHub including the database and vectorstore.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="st">Create a Railway account</div>
+        <div class="sd">Go to <strong>railway.app</strong> → Sign up with GitHub. This links Railway directly to your repository — no manual file uploads needed.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="st">Create a new project from GitHub</div>
+        <div class="sd">Click <strong>New Project → Deploy from GitHub repo</strong> → select <strong>KaisuS12/KCCSmartInfoX</strong>. Railway reads <code>railway.toml</code> automatically and starts building.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="st">Set environment variables</div>
+        <div class="sd">In Railway → your project → <strong>Variables tab</strong> → add the 4 variables from Section 2 above. Railway will trigger a new build automatically.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">5</div>
+      <div class="step-body">
+        <div class="st">Generate a public domain</div>
+        <div class="sd">Go to <strong>Settings → Networking → Generate Domain</strong>. Railway gives you a <code>.up.railway.app</code> URL. This is your demo URL. Copy it and save it.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n gold">6</div>
+      <div class="step-body">
+        <div class="st">Wait for build to complete (~4–6 minutes)</div>
+        <div class="sd">The first build takes longer because sentence-transformers (~500MB) is downloaded. Watch the Railway build logs. When it shows a green checkmark, the system is live.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n green">7</div>
+      <div class="step-body">
+        <div class="st">Test everything before the defense</div>
+        <div class="sd">Open the URL → test chat → test admin login → ask a question the AI knows → submit a test concern. Confirm emails work. Share the URL with your group.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PRE-DEMO CHECKLIST ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num red">!</div>
+      <span class="section-label">Pre-Demo Checklist — Fix These Before Defense Day</span>
+      <div class="section-line"></div>
+    </div>
+    <p class="section-desc">These issues will cause the demo to fail or look bad in front of panelists if not addressed.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="num-col">#</th>
+        <th>Issue</th>
+        <th>Risk Level</th>
+        <th>How to Fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num-col">1</td>
+        <td><strong>ChromaDB vectorstore may be excluded from git</strong></td>
+        <td><span class="risk-high">CRITICAL</span></td>
+        <td>Check <code>.gitignore</code> — if <code>vectorstore/</code> is listed, remove it, then commit and push the folder. Without it, the AI cannot answer any question.</td>
+      </tr>
+      <tr>
+        <td class="num-col">2</td>
+        <td><strong>SQLite database may be excluded from git</strong></td>
+        <td><span class="risk-high">CRITICAL</span></td>
+        <td>Check <code>.gitignore</code> — if <code>*.db</code> is listed, remove it. Without the DB, the admin panel is empty and has no data to show.</td>
+      </tr>
+      <tr>
+        <td class="num-col">3</td>
+        <td><strong>Groq API quota may be used up</strong></td>
+        <td><span class="risk-high">HIGH</span></td>
+        <td>Log in to <strong>console.groq.com</strong> and check your usage. The free tier has rate limits. If near the limit, create a new free Groq account and update the API key.</td>
+      </tr>
+      <tr>
+        <td class="num-col">4</td>
+        <td><strong>Do a full test deploy the night before</strong></td>
+        <td><span class="risk-high">HIGH</span></td>
+        <td>Never deploy for the first time on demo day. Deploy the night before, test all features, then leave it running. The first build takes 4–6 minutes.</td>
+      </tr>
+      <tr>
+        <td class="num-col">5</td>
+        <td><strong>Admin password confirmation</strong></td>
+        <td><span class="risk-medium">MEDIUM</span></td>
+        <td>Log in to the live URL with <code>admin / admin123</code> before the defense. Confirm it works on the deployed version, not just locally.</td>
+      </tr>
+      <tr>
+        <td class="num-col">6</td>
+        <td><strong>Do not redeploy during or before the defense</strong></td>
+        <td><span class="risk-medium">MEDIUM</span></td>
+        <td>Railway resets the filesystem on redeploy. Any files uploaded during the demo (documents, images) will be lost. Upload demo content before the final deploy.</td>
+      </tr>
+      <tr>
+        <td class="num-col">7</td>
+        <td><strong>Open the URL 5 minutes before presenting</strong></td>
+        <td><span class="risk-low">LOW</span></td>
+        <td>Keep a browser tab open to prevent any idle timeout. Pre-load the chat page so the model is warm and the first response is fast.</td>
+      </tr>
+      <tr>
+        <td class="num-col">8</td>
+        <td><strong>Gmail app password still valid</strong></td>
+        <td><span class="risk-low">LOW</span></td>
+        <td>Test the email feature on the live URL by submitting a concern. If email fails, regenerate the Gmail app password and update the Railway variable.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══ TIMELINE ══ -->
+  <div class="section-wrap">
+    <div class="section-title">
+      <div class="section-num green">4</div>
+      <span class="section-label">Suggested Timeline This Week</span>
+      <div class="section-line"></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Task</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Today</strong></td>
+        <td>Apply the 4 code changes → commit and push to GitHub</td>
+      </tr>
+      <tr>
+        <td><strong>Day Before Defense</strong></td>
+        <td>Create Railway account → deploy → set env variables → test all features on live URL → fix any issues found</td>
+      </tr>
+      <tr>
+        <td><strong>Defense Morning</strong></td>
+        <td>Open the live URL → do one quick test → confirm everything works → do NOT redeploy</td>
+      </tr>
+      <tr>
+        <td><strong>During Defense</strong></td>
+        <td>Open the URL on the projector → demonstrate landing page → chat → admin panel → concerns flow</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box green">
+    <p><strong>Demo tip:</strong> Before showing the panelists, pre-ask one or two questions in the chat so answers are already visible in the chat history. This makes the AI response feel faster and shows the system already has activity.</p>
+  </div>
+
+</div><!-- /page -->
+
+<div class="footer">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Deployment Plan for Pre-Oral Defense
+</div>
+
+</body>
+</html>

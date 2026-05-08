@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCCSmartInfoX — System Features</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      font-size: 13px;
+    }
+
+    /* ── Cover Header ── */
+    .cover {
+      background: linear-gradient(135deg, #003087 0%, #00214f 100%);
+      color: white;
+      padding: 48px 56px 40px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .logo-circle {
+      width: 80px;
+      height: 80px;
+      min-width: 80px;
+      background: #c9a84c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      color: #003087;
+      letter-spacing: -1px;
+    }
+
+    .cover-text h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-text p {
+      color: #a8c0e8;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .cover-text .subtitle {
+      color: #c9a84c;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* ── Body ── */
+    .body {
+      padding: 36px 56px 48px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Section Header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 16px;
+    }
+
+    .section-badge {
+      background: #003087;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+    }
+
+    .section-badge.gold {
+      background: #c9a84c;
+      color: #1a1a2e;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: #e0e4ef;
+    }
+
+    /* ── Feature Group ── */
+    .group {
+      margin-bottom: 20px;
+    }
+
+    .group-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #003087;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      padding-left: 2px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .feature-grid.one-col {
+      grid-template-columns: 1fr;
+    }
+
+    .feature-item {
+      background: white;
+      border: 1px solid #e8eaf0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .feature-item .dot {
+      width: 6px;
+      height: 6px;
+      min-width: 6px;
+      border-radius: 50%;
+      background: #c9a84c;
+      margin-top: 5px;
+    }
+
+    .feature-item .dot.blue {
+      background: #003087;
+    }
+
+    .feature-item span {
+      color: #374151;
+      font-size: 12.5px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0 28px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: white;
+      border: 1px solid #e8eaf0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .stat-box .num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #003087;
+    }
+
+    .stat-box .label {
+      font-size: 11px;
+      color: #9098a9;
+      margin-top: 2px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #003087;
+      color: #a8c0e8;
+      text-align: center;
+      padding: 16px;
+      font-size: 11px;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: white; font-size: 12px; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .logo-circle { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .group { page-break-inside: avoid; }
+      .body { padding: 28px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="logo-circle">KCC</div>
+    <div class="cover-text">
+      <h1>KCCSmartInfoX</h1>
+      <p>Kabankalan Catholic College, Inc.</p>
+      <p class="subtitle">System Features Documentation</p>
+      <p style="color:#7a9fd4;font-size:11px;margin-top:6px;">AI-Powered Information Assistant &nbsp;·&nbsp; Admin Management System</p>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Stats summary -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="num">16</div>
+        <div class="label">User Features</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">45+</div>
+        <div class="label">Admin Features</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">11</div>
+        <div class="label">Admin Pages</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">3</div>
+        <div class="label">AI Capabilities</div>
+      </div>
+    </div>
+
+    <!-- ══ USER FEATURES ══ -->
+    <div class="section-header">
+      <span class="section-badge gold">User Features</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Landing Page</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot"></div><span>Announcement carousel (latest active announcements)</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Office process cards (loaded dynamically from database)</span></div>
+        <div class="feature-item"><div class="dot"></div><span>About Us section with school information</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Quick navigation button to open the chatbot</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Chat Interface</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot"></div><span>AI-powered chatbot — answers KCC questions using official documents</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Suggested starter questions shown on load</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Context-aware follow-up question suggestions after each answer</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Voice input — speak your question (Chrome required)</span></div>
+        <div class="feature-item"><div class="dot"></div><span>EN / Filipino language toggle — AI responds in chosen language</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Typing indicator while the AI is generating a response</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Source citation — shows which KCC document the answer came from</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Thumbs up / thumbs down feedback per AI answer</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Copy answer to clipboard button</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Announcements side panel — slides in to show all active announcements</span></div>
+        <div class="feature-item"><div class="dot"></div><span>School Info side panel — slides in with contact info and office hours</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Dark / light mode toggle</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Concern Form</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot"></div><span>Submit a Concern button appears when AI cannot answer a question</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Modal form: student fills name, email, and message</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Unanswered question is pre-filled automatically</span></div>
+        <div class="feature-item"><div class="dot"></div><span>Admin receives email notification of the new concern</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Subscriptions &amp; Accessibility</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot"></div><span>Subscribe to announcements — receive new announcements via email</span></div>
+        <div class="feature-item"><div class="dot"></div><span>PWA support — installable on mobile phone like a native app</span></div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN FEATURES ══ -->
+    <div class="section-header">
+      <span class="section-badge">Admin Features</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Dashboard</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>Stats overview: total questions, answered, unanswered, answer rate</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Stats: total subscribers, uploaded documents, helpful votes, pending concerns</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Recent unanswered questions list with link to fix knowledge gaps</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Quick action buttons: Add Knowledge, View Analytics, Post Announcement, View Concerns</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Auto-refreshes every 10 seconds</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Pending concerns badge — shows count when concerns are waiting</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Knowledge Base</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>Upload PDF, DOCX, or TXT files — auto-indexed into the AI</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Bulk upload multiple files at once</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Add text entries manually without a file</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Inline edit text entries and re-index automatically</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Delete documents — removes from both the database and AI index</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Announcements</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>Post announcements instantly or schedule for a future date and time</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Set expiry date — announcement hides automatically when expired</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Attach images to announcements</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Email all subscribers automatically when an announcement is published</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Edit existing announcements</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Delete announcements</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Analytics</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>Questions per day bar chart — last 7 days</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Top 10 most asked questions</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Full unanswered questions list</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Thumbs-down answers list — identifies poor AI responses</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Export unanswered questions as CSV file</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>FAQ Auto-Generator — AI suggests knowledge base entries from unanswered questions</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Student Concerns</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>View all concerns submitted by students from the chatbot</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Filter concerns: All / Pending / Resolved</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Reply to student — reply is sent to their email automatically</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Mark as resolved (without sending a reply)</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Delete concerns</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Summary cards: Total / Pending / Resolved count</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Chat Logs</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>View all chat history (up to 2,000 entries)</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Search logs by keyword</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Filter: All / Answered / Unanswered</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Expand each entry to see the full AI answer</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Export unanswered questions as CSV</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Other Admin Pages</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span><strong>Subscribers</strong> — view all email subscribers, delete individual entries</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span><strong>School Info</strong> — edit all school information sections shown in chat sidebar</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span><strong>Office Processes</strong> — add, edit, delete processes; auto-syncs to AI on every change</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span><strong>QR Code Generator</strong> — auto-detects network IP, generate and download QR code as PNG</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span><strong>Settings</strong> — change admin password with current password verification</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Admin AI Assistant</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>Floating AI bot available on every admin page</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Can add/delete knowledge, post announcements, view stats via chat</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Can manage office processes through natural language commands</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Conversation history tab — keeps context across messages</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-title">Security &amp; General</div>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="dot blue"></div><span>JWT-secured admin login with 24-hour session token</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Auto-logout and redirect to login when session expires</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Rate limiting on chat endpoint (20 requests per minute)</span></div>
+        <div class="feature-item"><div class="dot blue"></div><span>Dark / light mode toggle in the admin sidebar</span></div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <div class="footer">
+    KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Capstone Project
+  </div>
+
+</body>
+</html>

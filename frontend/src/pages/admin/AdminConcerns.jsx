@@ -3,6 +3,7 @@ import AdminLayout from '../../components/shared/AdminLayout'
 import { AlertTriangle, CheckCircle, Trash2, Send, ChevronDown, ChevronUp, Clock, Mail } from 'lucide-react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import { SkeleSummaryCard, SkeleListItem } from '../../components/shared/Skeleton'
 
 function authHeader() {
   return { Authorization: `Bearer ${localStorage.getItem('admin_token')}` }
@@ -79,42 +80,57 @@ export default function AdminConcerns() {
         </h1>
         <p className="text-gray-500 text-sm mb-6">View and reply to concerns submitted by students</p>
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        {/* Summary cards — Pending and Resolved are clickable filters */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <p className="text-2xl font-bold text-kcc-dark">{concerns.length}</p>
-            <p className="text-xs text-gray-400 mt-1">Total Concerns</p>
+            {loading ? <SkeleSummaryCard /> : <>
+              <p className="text-2xl font-bold text-kcc-dark">{concerns.length}</p>
+              <p className="text-xs text-gray-400 mt-1">Total Concerns</p>
+            </>}
           </div>
-          <div className="bg-orange-50 rounded-2xl p-4 border border-orange-100 shadow-sm">
-            <p className="text-2xl font-bold text-orange-500">{pending}</p>
-            <p className="text-xs text-orange-400 mt-1">Pending</p>
-          </div>
-          <div className="bg-green-50 rounded-2xl p-4 border border-green-100 shadow-sm">
-            <p className="text-2xl font-bold text-green-600">{resolved}</p>
-            <p className="text-xs text-green-400 mt-1">Resolved</p>
-          </div>
+          <button
+            onClick={() => setFilter(f => f === 'pending' ? 'all' : 'pending')}
+            className={`rounded-2xl p-4 border shadow-sm text-left transition-all ${
+              filter === 'pending'
+                ? 'bg-orange-500 border-orange-500'
+                : 'bg-orange-50 border-orange-100 hover:bg-orange-100'
+            }`}
+          >
+            <p className={`text-2xl font-bold ${filter === 'pending' ? 'text-white' : 'text-orange-500'}`}>{pending}</p>
+            <p className={`text-xs mt-1 ${filter === 'pending' ? 'text-orange-100' : 'text-orange-400'}`}>Pending</p>
+          </button>
+          <button
+            onClick={() => setFilter(f => f === 'resolved' ? 'all' : 'resolved')}
+            className={`rounded-2xl p-4 border shadow-sm text-left transition-all ${
+              filter === 'resolved'
+                ? 'bg-green-600 border-green-600'
+                : 'bg-green-50 border-green-100 hover:bg-green-100'
+            }`}
+          >
+            <p className={`text-2xl font-bold ${filter === 'resolved' ? 'text-white' : 'text-green-600'}`}>{resolved}</p>
+            <p className={`text-xs mt-1 ${filter === 'resolved' ? 'text-green-100' : 'text-green-400'}`}>Resolved</p>
+          </button>
         </div>
 
-        {/* Filter */}
+        {/* Filter — All button only */}
         <div className="flex gap-2 mb-4">
-          {['all', 'pending', 'resolved'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-xl text-sm font-medium transition ${
-                filter === f
-                  ? 'bg-kcc-blue text-white'
-                  : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
-              }`}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          ))}
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-1.5 rounded-xl text-sm font-medium transition ${
+              filter === 'all'
+                ? 'bg-kcc-blue text-white'
+                : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            All
+          </button>
         </div>
 
         {/* List */}
         {loading ? (
-          <p className="text-gray-400 text-sm text-center py-12">Loading...</p>
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => <SkeleListItem key={i} />)}
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
             <CheckCircle size={32} className="text-green-400 mx-auto mb-2" />

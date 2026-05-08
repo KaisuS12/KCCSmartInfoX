@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KCCSmartInfoX — System Flowchart</title>
+<style>
+  :root {
+    --blue: #003087;
+    --gold: #C9A84C;
+    --light-blue: #e8eef7;
+    --light-gold: #fdf6e3;
+    --gray: #f5f5f5;
+    --text: #1a1a1a;
+    --border: #d0d0d0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: var(--text);
+    padding: 24px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    border-bottom: 3px solid var(--gold);
+    padding-bottom: 16px;
+  }
+  .header .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .logo-circle {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+  .header h1 { font-size: 22px; color: var(--blue); font-weight: 900; }
+  .header h2 { font-size: 14px; color: var(--gold); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .header p  { font-size: 12px; color: #666; margin-top: 6px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 12px 24px;
+    justify-content: center;
+    margin-bottom: 28px;
+    font-size: 11px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .leg-rect  { width:22px; height:14px; background:#dbeafe; border:2px solid #3b82f6; border-radius:3px; }
+  .leg-diam  { width:18px; height:18px; background:#fef9c3; border:2px solid #eab308; transform:rotate(45deg); flex-shrink:0; }
+  .leg-io    { width:24px; height:14px; background:#dcfce7; border:2px solid #22c55e; clip-path:polygon(8% 0,100% 0,92% 100%,0 100%); }
+  .leg-round { width:22px; height:14px; background:#f3e8ff; border:2px solid #a855f7; border-radius:8px; }
+
+  /* ── Swimlane wrapper ── */
+  .swimlane-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 2px solid var(--blue);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* ── Lane headers ── */
+  .lane-header {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .lane-header.admin { background: var(--blue); color: #fff; }
+  .lane-header.user  { background: var(--gold); color: var(--blue); }
+
+  /* ── Lane bodies ── */
+  .lane-body {
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+  .lane-body.admin { background: #f0f4fb; border-right: 2px dashed #b0bec5; }
+  .lane-body.user  { background: #fffcf2; }
+
+  /* ── Shapes ── */
+  .node {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    font-size: 11.5px;
+    line-height: 1.4;
+    position: relative;
+  }
+
+  /* Terminal (rounded) */
+  .terminal {
+    background: var(--blue);
+    color: #fff;
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .terminal.gold {
+    background: var(--gold);
+    color: var(--blue);
+  }
+
+  /* Process (rectangle) */
+  .process {
+    background: #dbeafe;
+    border: 2px solid #3b82f6;
+    border-radius: 5px;
+    padding: 8px 12px;
+    color: #1e3a5f;
+    font-size: 11px;
+  }
+  .process.dark {
+    background: #bfdbfe;
+    border-color: #2563eb;
+    font-weight: 600;
+  }
+
+  /* I/O (parallelogram) */
+  .io-shape {
+    background: #dcfce7;
+    border: 2px solid #22c55e;
+    padding: 8px 18px;
+    color: #14532d;
+    font-size: 11px;
+    clip-path: polygon(8% 0,100% 0,92% 100%,0 100%);
+  }
+
+  /* Decision (diamond) — rendered as rotated square inside a wrapper */
+  .decision-wrap {
+    width: 100%;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+  }
+  .diamond-outer {
+    width: 120px; height: 120px;
+    position: relative;
+    margin: 4px 0;
+  }
+  .diamond-inner {
+    width: 100%; height: 100%;
+    background: #fef9c3;
+    border: 2.5px solid #eab308;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .diamond-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #713f12;
+    text-align: center;
+    width: 80px;
+    line-height: 1.3;
+    z-index: 1;
+  }
+  .diamond-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 160px;
+    font-size: 10px;
+    color: #555;
+    margin-top: -4px;
+  }
+  .yes-label { color: #16a34a; font-weight: 700; }
+  .no-label  { color: #dc2626; font-weight: 700; }
+
+  /* Arrow */
+  .arrow {
+    width: 2px;
+    background: #555;
+    height: 18px;
+    position: relative;
+    margin: 0 auto;
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #555;
+  }
+
+  /* Branch box for YES/NO side paths */
+  .branch-row {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 280px;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .branch-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    gap: 0;
+  }
+
+  /* Outcome pill */
+  .outcome {
+    border-radius: 6px;
+    padding: 7px 8px;
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .outcome.ok   { background: #dcfce7; border: 1.5px solid #22c55e; color: #14532d; }
+  .outcome.warn { background: #fee2e2; border: 1.5px solid #ef4444; color: #7f1d1d; }
+  .outcome.info { background: #e0f2fe; border: 1.5px solid #38bdf8; color: #0c4a6e; }
+  .outcome.gold { background: var(--light-gold); border: 1.5px solid var(--gold); color: #713f12; }
+
+  /* Sub-label (tiny annotation) */
+  .sub { font-size: 9.5px; color: #888; margin-top: 2px; font-style: italic; }
+
+  /* Section divider inside lane */
+  .section-divider {
+    width: 100%;
+    max-width: 280px;
+    border-top: 1.5px dashed var(--gold);
+    margin: 10px 0 6px;
+    text-align: center;
+    position: relative;
+  }
+  .section-divider span {
+    position: absolute;
+    top: -9px; left: 50%;
+    transform: translateX(-50%);
+    background: #fffcf2;
+    padding: 0 6px;
+    font-size: 9px;
+    color: var(--gold);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    font-size: 10px;
+    color: #999;
+    margin-top: 20px;
+  }
+
+  @media print {
+    body { padding: 12px; }
+    .swimlane-wrap { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="logo-row">
+    <div class="logo-circle">KCC</div>
+    <div>
+      <h1>KCCSmartInfoX</h1>
+      <h2>AI-Powered Information System</h2>
+    </div>
+  </div>
+  <p>System Flowchart — Input / Process / Output &nbsp;|&nbsp; Capstone Manuscript Chapter 1 &amp; 2</p>
+</div>
+
+<!-- ── Legend ── -->
+<div class="legend">
+  <div class="legend-item"><div class="leg-round"></div> Start / End</div>
+  <div class="legend-item"><div class="leg-rect"></div> Process</div>
+  <div class="legend-item" style="align-items:flex-start;padding-top:2px"><div class="leg-diam"></div> Decision</div>
+  <div class="legend-item"><div class="leg-io"></div> Input / Output</div>
+</div>
+
+<!-- ── Swimlane ── -->
+<div class="swimlane-wrap">
+
+  <!-- Lane Headers -->
+  <div class="lane-header admin">&#x1F4C2; Admin Side &mdash; Knowledge Ingestion</div>
+  <div class="lane-header user">&#x1F9D1;&#x200D;&#x1F393; User Side &mdash; AI Chat Pipeline</div>
+
+  <!-- Lane Bodies -->
+  <div class="lane-body admin">
+
+    <!-- START -->
+    <div class="node"><div class="terminal">START: Admin Logs In</div></div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Upload -->
+    <div class="node">
+      <div class="io-shape">Upload Document<br/><span class="sub">PDF / DOCX / TXT or plain text</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Extract -->
+    <div class="node">
+      <div class="process">Extract Text from File<br/><span class="sub">pdfplumber (PDF) · python-docx (DOCX) · open() (TXT)</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Chunk -->
+    <div class="node">
+      <div class="process">Split into Chunks<br/><span class="sub">400 words per chunk · 50-word overlap</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Embed -->
+    <div class="node">
+      <div class="process dark">Generate Embeddings<br/><span class="sub">all-MiniLM-L6-v2 → 384-dim vector per chunk</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Store -->
+    <div class="node">
+      <div class="process">Store in Vector Database<br/><span class="sub">ChromaDB — chunks + embeddings + metadata</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Output: KB Ready -->
+    <div class="node">
+      <div class="outcome ok">&#x2713; Knowledge Base Ready<br/><span class="sub">Documents indexed &amp; searchable by AI</span></div>
+    </div>
+
+    <div class="arrow" style="height:14px; background:transparent"></div>
+    <div class="section-divider"><span>Admin Monitoring</span></div>
+    <div class="arrow" style="height:6px; background:transparent"></div>
+
+    <!-- Admin can also view analytics -->
+    <div class="node">
+      <div class="process">View Analytics Dashboard<br/><span class="sub">Total Qs · Answer Rate · Unanswered Qs · Feedback</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+    <div class="node">
+      <div class="process">Manage Announcements<br/><span class="sub">Post / Schedule / Email Subscribers</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+    <div class="node">
+      <div class="outcome gold">&#x1F4CB; Admin Output<br/><span class="sub">Reports · Analytics · Knowledge updates</span></div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="node" style="margin-top:14px"><div class="terminal" style="background:#6b7280">END: Admin Session</div></div>
+
+  </div><!-- /admin lane -->
+
+  <!-- USER LANE -->
+  <div class="lane-body user">
+
+    <!-- START -->
+    <div class="node"><div class="terminal gold">START: Student Opens Chatbot</div></div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Input -->
+    <div class="node">
+      <div class="io-shape">Student Types a Question<br/><span class="sub">Keyboard · Voice input (Speech-to-Text) · EN / Filipino</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- POST -->
+    <div class="node">
+      <div class="process">Send to Backend<br/><span class="sub">POST /api/chat &nbsp;{ question, history, lang }</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- DECISION 1: Greeting? -->
+    <div class="decision-wrap">
+      <div class="diamond-outer">
+        <div class="diamond-inner"></div>
+        <div class="diamond-text">Is it a<br/>Greeting?</div>
+      </div>
+      <div class="diamond-labels">
+        <span class="no-label">NO ↓</span>
+        <span class="yes-label">YES →</span>
+      </div>
+    </div>
+
+    <!-- Greeting YES branch (right side note) -->
+    <div style="width:100%;max-width:280px;display:flex;justify-content:flex-end;margin-top:-10px;margin-bottom:4px">
+      <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:6px;padding:5px 8px;font-size:9.5px;color:#14532d;text-align:center;width:120px;line-height:1.4">
+        &#x1F44B; LLM Greeting Response<br/><span class="sub">temp=0.7 · 150 tokens</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:10px"></div>
+
+    <!-- Spell fix -->
+    <div class="node">
+      <div class="process">Spell Correction<br/><span class="sub">quick_spell_fix() — fixes common typos</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Rewrite -->
+    <div class="node">
+      <div class="process dark">LLM Rewrites Question<br/><span class="sub">rewrite_query() — cleans to formal English</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Embed question -->
+    <div class="node">
+      <div class="process">Generate Question Embedding<br/><span class="sub">all-MiniLM-L6-v2 → 384-dim vector</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- DECISION 2: KB empty? -->
+    <div class="decision-wrap">
+      <div class="diamond-outer">
+        <div class="diamond-inner"></div>
+        <div class="diamond-text">Knowledge<br/>Base Empty?</div>
+      </div>
+      <div class="diamond-labels">
+        <span class="no-label">NO ↓</span>
+        <span class="yes-label">YES →</span>
+      </div>
+    </div>
+
+    <!-- KB empty YES branch -->
+    <div style="width:100%;max-width:280px;display:flex;justify-content:flex-end;margin-top:-10px;margin-bottom:4px">
+      <div class="outcome warn" style="width:120px;font-size:9.5px">
+        "No documents yet"<br/><span class="sub">Return early</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:10px"></div>
+
+    <!-- Vector search -->
+    <div class="node">
+      <div class="process dark">ChromaDB Vector Search<br/><span class="sub">Cosine similarity · Top 3 matching chunks</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- DECISION 3: Relevant? -->
+    <div class="decision-wrap">
+      <div class="diamond-outer">
+        <div class="diamond-inner"></div>
+        <div class="diamond-text">Relevant<br/>Match Found?<br/><span style="font-size:9px;font-weight:400">(distance ≤ 1.3)</span></div>
+      </div>
+      <div class="diamond-labels">
+        <span class="yes-label">YES ↓</span>
+        <span class="no-label">NO →</span>
+      </div>
+    </div>
+
+    <!-- No match YES (right side note) -->
+    <div style="width:100%;max-width:280px;display:flex;justify-content:flex-end;margin-top:-10px;margin-bottom:4px">
+      <div class="outcome warn" style="width:120px;font-size:9.5px">
+        "I don't have info yet"<br/>Log as Unanswered<br/><span class="sub">Contact card shown</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:10px"></div>
+
+    <!-- Build context -->
+    <div class="node">
+      <div class="process">Build RAG Context<br/><span class="sub">Trim chunks to 150 words · Extract source filenames</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Build messages -->
+    <div class="node">
+      <div class="process">Build LLM Prompt<br/><span class="sub">System prompt + chat history (4 msgs) + RAG context</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Groq API -->
+    <div class="node">
+      <div class="process dark">Groq API — Generate Answer<br/><span class="sub">llama-3.1-8b-instant · temp=0.2 · max 400 tokens</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Clean bullets -->
+    <div class="node">
+      <div class="process">Format Answer<br/><span class="sub">clean_bullets() — normalize bullet points &amp; newlines</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- DECISION 4: is_answered? -->
+    <div class="decision-wrap">
+      <div class="diamond-outer">
+        <div class="diamond-inner"></div>
+        <div class="diamond-text">Answer<br/>Confident?</div>
+      </div>
+      <div class="diamond-labels">
+        <span class="yes-label">YES ↓</span>
+        <span class="no-label">NO →</span>
+      </div>
+    </div>
+
+    <!-- Not confident branch -->
+    <div style="width:100%;max-width:280px;display:flex;justify-content:flex-end;margin-top:-10px;margin-bottom:4px">
+      <div class="outcome info" style="width:120px;font-size:9.5px">
+        Log: is_answered=False<br/>Show Contact Card<br/><span class="sub">+Concern form</span>
+      </div>
+    </div>
+
+    <div class="arrow" style="height:10px"></div>
+
+    <!-- Log -->
+    <div class="node">
+      <div class="process">Log to Database<br/><span class="sub">ChatLog: question · answer · is_answered · timestamp</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Output -->
+    <div class="node">
+      <div class="io-shape">Display Answer to Student<br/><span class="sub">Markdown · Source filenames · Language (EN/FIL)</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- Post-answer actions -->
+    <div class="node">
+      <div class="process">Student Can:<br/><span class="sub">&#x1F44D; Thumbs up/down feedback &nbsp;·&nbsp; &#x1F4AC; Ask follow-up &nbsp;·&nbsp; &#x26A0;&#xFE0F; Submit concern</span></div>
+    </div>
+    <div class="arrow" style="height:14px"></div>
+
+    <!-- END -->
+    <div class="node"><div class="terminal gold">END: Question Answered</div></div>
+
+  </div><!-- /user lane -->
+
+</div><!-- /swimlane-wrap -->
+
+<!-- ── Tech Stack Note ── -->
+<div style="margin-top:20px;border:1.5px solid #e5e7eb;border-radius:8px;padding:14px 20px;font-size:10.5px;color:#444;line-height:1.8">
+  <strong style="color:var(--blue);font-size:11px;">TECHNOLOGY STACK</strong><br/>
+  <strong>Frontend:</strong> React 18 · Vite 5 · TailwindCSS · React Router · Axios · React Markdown<br/>
+  <strong>Backend:</strong> Python 3.11 · FastAPI · SQLAlchemy · SQLite · Uvicorn<br/>
+  <strong>AI / NLP:</strong> sentence-transformers (all-MiniLM-L6-v2) · ChromaDB (vector store) · Groq API (llama-3.1-8b-instant)<br/>
+  <strong>Supporting:</strong> pdfplumber · python-docx · passlib (bcrypt) · python-jose (JWT) · smtplib (Gmail SMTP)
+</div>
+
+<div class="footer">
+  KCCSmartInfoX — AI-Powered Information System &nbsp;|&nbsp; Kalinga-Apayao State College &nbsp;|&nbsp; Capstone Project 2025–2026<br/>
+  Generated for Chapter 1 &amp; 2 Manuscript Submission
+</div>
+
+</body>
+</html>

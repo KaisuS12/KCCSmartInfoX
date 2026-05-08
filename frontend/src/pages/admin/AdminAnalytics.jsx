@@ -4,15 +4,16 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   Cell,
 } from 'recharts'
-import { AlertCircle, TrendingUp, Download, RefreshCw, CheckCircle, MessageSquare, ThumbsUp, ThumbsDown, Sparkles, ChevronDown, ChevronUp, Plus } from 'lucide-react'
+import { AlertCircle, TrendingUp, Download, RefreshCw, CheckCircle, MessageSquare, ThumbsUp, ThumbsDown, Sparkles, ChevronDown, ChevronUp, Plus, Printer } from 'lucide-react'
 import axios from 'axios'
+import { SkeleStatCard, SkeleListItem, SkeleChartArea } from '../../components/shared/Skeleton'
 
 const API = (path) => `/api${path}`
 const token = () => localStorage.getItem('admin_token')
 
 function StatCard({ icon: Icon, label, value, color = 'text-kcc-blue', bg = 'bg-blue-50' }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
       <div className={`${bg} p-3 rounded-xl`}>
         <Icon size={22} className={color} />
       </div>
@@ -85,6 +86,104 @@ export default function AdminAnalytics() {
     }
   }
 
+  function handlePrint() {
+    if (!data) return
+    const dateStr = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
+
+    const topQRows = (data.top_questions ?? []).map((q, i) =>
+      `<tr><td>${i + 1}</td><td>${q.question}</td><td style="text-align:center;font-weight:bold;">${q.count}</td></tr>`
+    ).join('')
+
+    const unansRows = (data.unanswered_questions ?? []).slice(0, 50).map((q, i) =>
+      `<tr><td>${i + 1}</td><td>${q.question}</td><td>${new Date(q.created_at).toLocaleDateString('en-PH')}</td></tr>`
+    ).join('')
+
+    const dailyRows = (data.daily_data ?? []).map(d =>
+      `<tr><td>${d.date}</td><td style="text-align:center;">${d.count}</td></tr>`
+    ).join('')
+
+    const feedbackRows = (data.bad_answers ?? []).map((f, i) =>
+      `<tr><td>${i + 1}</td><td>${f.question}</td><td>${new Date(f.created_at).toLocaleDateString('en-PH')}</td></tr>`
+    ).join('')
+
+    const html = `<!DOCTYPE html>
+<html><head>
+  <meta charset="utf-8"/>
+  <title>KCCSmartInfoX Analytics Report — ${dateStr}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a1a;background:#fff;padding:36px}
+    .header{text-align:center;border-bottom:3px solid #003087;padding-bottom:18px;margin-bottom:28px}
+    .kcc-circle{display:inline-block;width:56px;height:56px;background:#c9a84c;border-radius:50%;line-height:56px;font-size:18px;font-weight:900;color:#003087;letter-spacing:-1px;margin-bottom:8px}
+    .header h1{font-size:20px;color:#003087;font-weight:900}
+    .header p{color:#666;font-size:11px;margin-top:4px}
+    .section{margin-bottom:30px}
+    .section-title{font-size:13px;font-weight:700;color:#003087;border-left:4px solid #c9a84c;padding-left:10px;margin-bottom:12px}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    th{background:#003087;color:#fff;padding:8px 10px;text-align:left}
+    td{padding:6px 10px;border-bottom:1px solid #e5e7eb}
+    tr:nth-child(even) td{background:#f9fafb}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+    .box{border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center}
+    .val{font-size:22px;font-weight:900;color:#003087}
+    .lbl{font-size:10px;color:#6b7280;margin-top:2px}
+    .green .val{color:#166534}.red .val{color:#991b1b}.gold .val{color:#92400e}
+    .footer{text-align:center;color:#9ca3af;font-size:10px;border-top:1px solid #e5e7eb;padding-top:12px;margin-top:24px}
+    @media print{body{padding:16px}}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="kcc-circle">KCC</div>
+    <h1>KCCSmartInfoX — Analytics Report</h1>
+    <p>Kalinga-Apayao State College Conner Campus &nbsp;|&nbsp; Generated: ${dateStr}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Overall Statistics</div>
+    <div class="grid">
+      <div class="box"><div class="val">${data.total_questions}</div><div class="lbl">Total Questions</div></div>
+      <div class="box green"><div class="val">${data.answered}</div><div class="lbl">Answered</div></div>
+      <div class="box red"><div class="val">${data.unanswered}</div><div class="lbl">Unanswered</div></div>
+      <div class="box gold"><div class="val">${data.answer_rate}%</div><div class="lbl">Answer Rate</div></div>
+    </div>
+    <div class="grid">
+      <div class="box green"><div class="val">${data.thumbs_up}</div><div class="lbl">Helpful Ratings</div></div>
+      <div class="box red"><div class="val">${data.thumbs_down}</div><div class="lbl">Not Helpful</div></div>
+      <div class="box"><div class="val">${data.total_documents}</div><div class="lbl">Knowledge Docs</div></div>
+      <div class="box"><div class="val">${data.total_subscribers}</div><div class="lbl">Subscribers</div></div>
+    </div>
+  </div>
+
+  ${dailyRows ? `<div class="section">
+    <div class="section-title">Questions Per Day (Last 7 Days)</div>
+    <table><thead><tr><th>Date</th><th>Questions Asked</th></tr></thead><tbody>${dailyRows}</tbody></table>
+  </div>` : ''}
+
+  ${topQRows ? `<div class="section">
+    <div class="section-title">Top 10 Most Asked Questions</div>
+    <table><thead><tr><th>#</th><th>Question</th><th style="text-align:center">Times Asked</th></tr></thead><tbody>${topQRows}</tbody></table>
+  </div>` : ''}
+
+  ${unansRows ? `<div class="section">
+    <div class="section-title">Unanswered Questions (up to 50 most recent)</div>
+    <table><thead><tr><th>#</th><th>Question</th><th>Date</th></tr></thead><tbody>${unansRows}</tbody></table>
+  </div>` : ''}
+
+  ${feedbackRows ? `<div class="section">
+    <div class="section-title">Questions Marked "Not Helpful"</div>
+    <table><thead><tr><th>#</th><th>Question</th><th>Date</th></tr></thead><tbody>${feedbackRows}</tbody></table>
+  </div>` : ''}
+
+  <div class="footer">KCCSmartInfoX &nbsp;|&nbsp; AI-Powered Campus Information System &nbsp;|&nbsp; ${dateStr}</div>
+</body></html>`
+
+    const w = window.open('', '_blank')
+    w.document.write(html)
+    w.document.close()
+    setTimeout(() => w.print(), 400)
+  }
+
   const filtered = (data?.unanswered_questions ?? []).filter(q =>
     q.question.toLowerCase().includes(search.toLowerCase())
   )
@@ -97,6 +196,31 @@ export default function AdminAnalytics() {
     count: q.count,
   }))
 
+  if (loading && !data) return (
+    <AdminLayout>
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-kcc-dark">Analytics</h1>
+            <p className="text-gray-500 text-sm">Questions asked, AI performance & knowledge gaps</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          {[...Array(4)].map((_, i) => <SkeleStatCard key={i} />)}
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {[...Array(2)].map((_, i) => <SkeleStatCard key={i} />)}
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+          <SkeleChartArea height={200} />
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-2">
+          {[...Array(6)].map((_, i) => <SkeleListItem key={i} />)}
+        </div>
+      </div>
+    </AdminLayout>
+  )
+
   return (
     <AdminLayout>
       <div className="p-6 max-w-5xl mx-auto">
@@ -105,14 +229,24 @@ export default function AdminAnalytics() {
             <h1 className="text-2xl font-bold text-kcc-dark">Analytics</h1>
             <p className="text-gray-500 text-sm">Questions asked, AI performance & knowledge gaps</p>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-kcc-blue transition"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePrint}
+              disabled={!data}
+              className="flex items-center gap-2 text-sm bg-kcc-blue text-white px-4 py-2 rounded-xl hover:bg-kcc-dark disabled:opacity-50 transition"
+            >
+              <Printer size={14} />
+              Print Report
+            </button>
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-kcc-blue transition"
+            >
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Stat Cards */}
@@ -177,7 +311,7 @@ export default function AdminAnalytics() {
 
           {/* Unanswered Tab */}
           {tab === 'unanswered' && (
-            <>
+            <div key="unanswered" className="animate-fadeIn">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <p className="text-gray-400 text-xs">Add info to the knowledge base to fix these gaps.</p>
                 <div className="flex gap-2">
@@ -197,7 +331,7 @@ export default function AdminAnalytics() {
                       disabled={exporting}
                       className="flex items-center gap-2 text-sm bg-kcc-blue text-white px-4 py-2 rounded-xl hover:bg-blue-800 transition disabled:opacity-60"
                     >
-                      <Download size={14} />
+                      {exporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
                       {exporting ? 'Exporting…' : 'Export CSV'}
                     </button>
                   )}
@@ -291,12 +425,12 @@ export default function AdminAnalytics() {
                   )}
                 </>
               )}
-            </>
+            </div>
           )}
 
           {/* Top Questions Tab */}
           {tab === 'top' && (
-            <>
+            <div key="top" className="animate-fadeIn">
               <p className="text-gray-400 text-xs mb-4">Most frequently asked questions by users.</p>
               {topChartData.length ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -315,12 +449,12 @@ export default function AdminAnalytics() {
               ) : (
                 <p className="text-gray-400 text-sm text-center py-10">No questions logged yet.</p>
               )}
-            </>
+            </div>
           )}
 
           {/* Feedback / Needs Improvement Tab */}
           {tab === 'feedback' && (
-            <>
+            <div key="feedback" className="animate-fadeIn">
               <p className="text-gray-400 text-xs mb-4">Questions users marked as "Not Helpful" — improve these answers in the knowledge base.</p>
               {!data?.bad_answers?.length ? (
                 <div className="text-center py-10">
@@ -338,7 +472,7 @@ export default function AdminAnalytics() {
                   ))}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 
