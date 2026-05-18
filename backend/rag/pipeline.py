@@ -1,5 +1,6 @@
 import os
 import re
+import random
 import logging
 from groq import Groq
 from spellchecker import SpellChecker
@@ -103,10 +104,32 @@ Output: "What are the scholarship requirements?"
 
 UNANSWERED_PHRASE = "I don't have information about that yet"
 
+THANKS_PATTERNS = re.compile(
+    r"^\s*(thank(s| you|s so much| you so much| you very much|s a lot| you a lot|ks+)?|"
+    r"ty|tysm|thx|thnks?|thnx|salamat|maraming salamat|daghan salamat|"
+    r"thank(s| you).{0,30})\s*[!?.]*\s*$",
+    re.IGNORECASE
+)
+
+THANKS_REPLIES_EN = [
+    "You're welcome! 😊 Feel free to ask if you have more questions.",
+    "Happy to help! Let me know if there's anything else you need.",
+    "You're welcome! Don't hesitate to ask anytime.",
+    "Glad I could help! Is there anything else you'd like to know?",
+    "No problem at all! Feel free to ask more questions anytime.",
+]
+
+THANKS_REPLIES_FIL = [
+    "Walang anuman! 😊 Huwag mag-atubiling magtanong kung mayroon ka pang katanungan.",
+    "Masaya akong makatulong! Kung may iba ka pang gusto malaman, andito lang ako.",
+    "Walang problema! Maaari kang magtanong anumang oras.",
+    "Ikaw naman! Kung may katanungan ka pa, huwag mag-alinlangan.",
+]
+
 GREETING_PATTERNS = re.compile(
     r"^\s*(hi+|hello+|hey+|good\s*(morning|afternoon|evening|day)|kumusta|kamusta|sup|howdy|greetings|yo+|helo|hii+|heyyy*|"
     r"magandang\s*(umaga|hapon|gabi|araw)|musta|how are you|how r u|"
-    r"thank(s| you)|salamat|maraming salamat|okay|ok|cool|nice|wow|great|noted|got it|"
+    r"okay|ok|cool|nice|wow|great|noted|got it|"
     r"bye+|goodbye|see you|ingat|take care)\s*[!?.]*\s*$",
     re.IGNORECASE
 )
@@ -127,6 +150,9 @@ def clean_bullets(text: str) -> str:
     return '\n'.join(lines)
 
 
+
+def is_thanks(text: str) -> bool:
+    return bool(THANKS_PATTERNS.match(text.strip()))
 
 def is_greeting(text: str) -> bool:
     result = bool(GREETING_PATTERNS.match(text.strip()))
@@ -189,19 +215,28 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
     # Pick system prompt based on language
     system_prompt = SYSTEM_PROMPT_FIL if use_fil else SYSTEM_PROMPT
 
-    # 1. Handle greetings / small talk — no RAG needed
+    # 1a. Handle thank-you messages — instant canned reply, no LLM needed
+    if is_thanks(question):
+        replies = THANKS_REPLIES_FIL if use_fil else THANKS_REPLIES_EN
+        return random.choice(replies), True, []
+
+    # 1b. Handle greetings / small talk — no RAG needed
     if is_greeting(question):
         logger.info("Greeting detected: %s", question[:80])
-        response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": GREETING_PROMPT_FIL if use_fil else GREETING_PROMPT},
-                {"role": "user", "content": question},
-            ],
-            temperature=0.7,
-            max_tokens=150,
-        )
-        return response.choices[0].message.content.strip(), True, []
+        try:
+            response = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": GREETING_PROMPT_FIL if use_fil else GREETING_PROMPT},
+                    {"role": "user", "content": question},
+                ],
+                temperature=0.7,
+                max_tokens=150,
+            )
+            return response.choices[0].message.content.strip(), True, []
+        except Exception as e:
+            logger.error("Groq API error on greeting: %s", e)
+            return "Hello! I'm KCCSmartInfoX. I'm having trouble connecting right now — please try again in a moment.", True, []
 
     # 2. Quick spell fix (fast, no API call)
     spell_fixed = quick_spell_fix(question)
@@ -259,14 +294,23 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
         ),
     })
 
-    response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=messages,
-        temperature=0.2,
-        max_tokens=400,
-    )
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=messages,
+            temperature=0.2,
+            max_tokens=400,
+        )
+        answer = clean_bullets(response.choices[0].message.content.strip())
+    except Exception as e:
+        logger.error("Groq API error on RAG answer: %s", e)
+        return (
+            "I'm sorry, I'm having trouble connecting to the AI service right now. "
+            "Please try again in a moment. If the problem persists, please contact the admin.",
+            False,
+            [],
+        )
 
-    answer      = clean_bullets(response.choices[0].message.content.strip())
     is_answered = UNANSWERED_PHRASE not in answer
 
     logger.info("Answered=%s | original: %s | clean: %s", is_answered, question[:50], clean_question[:50])

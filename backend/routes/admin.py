@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback
+from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback, AdminLoginLog
 from utils.auth import verify_password, create_access_token, hash_password, get_current_admin
 from rag.ingestion import ingest_pdf, ingest_docx, ingest_txt, ingest_text, delete_document
 from groq import Groq
@@ -53,12 +53,34 @@ class TextUpdate(BaseModel):
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 @router.post("/admin/login")
-async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    admin = db.query(AdminUser).filter(AdminUser.username == request.username).first()
-    if not admin or not verify_password(request.password, admin.password_hash):
+async def login(data: LoginRequest, req: Request, db: Session = Depends(get_db)):
+    ip = req.client.host if req.client else "unknown"
+    ua = req.headers.get("user-agent", "")[:255]
+    admin = db.query(AdminUser).filter(AdminUser.username == data.username).first()
+    if not admin or not verify_password(data.password, admin.password_hash):
+        db.add(AdminLoginLog(username=data.username, action="failed", ip_address=ip, user_agent=ua))
+        db.commit()
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    db.add(AdminLoginLog(username=admin.username, action="success", ip_address=ip, user_agent=ua))
+    db.commit()
     token = create_access_token({"sub": admin.username})
     return {"token": token}
+
+
+@router.get("/admin/login-logs")
+async def get_login_logs(db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    logs = db.query(AdminLoginLog).order_by(AdminLoginLog.created_at.desc()).limit(50).all()
+    return [
+        {
+            "id": l.id,
+            "username": l.username,
+            "action": l.action,
+            "ip_address": l.ip_address,
+            "user_agent": l.user_agent,
+            "created_at": l.created_at.isoformat(),
+        }
+        for l in logs
+    ]
 
 
 @router.post("/admin/setup")

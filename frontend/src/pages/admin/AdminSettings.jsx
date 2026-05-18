@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../../components/shared/AdminLayout'
-import { KeyRound, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { KeyRound, Eye, EyeOff, ShieldCheck, ClipboardList, CheckCircle, XCircle, Monitor } from 'lucide-react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
@@ -32,12 +32,32 @@ function PasswordField({ label, value, onChange, show, onToggle }) {
   )
 }
 
+function formatUA(ua = '') {
+  if (!ua) return 'Unknown device'
+  if (/iPhone|iPad/i.test(ua)) return 'iPhone / iPad'
+  if (/Android/i.test(ua)) return 'Android Phone'
+  if (/Windows/i.test(ua)) return 'Windows PC'
+  if (/Mac/i.test(ua)) return 'Mac'
+  if (/Linux/i.test(ua)) return 'Linux'
+  return 'Unknown device'
+}
+
 export default function AdminSettings() {
   const [form, setForm]       = useState({ current_password: '', new_password: '', confirm_password: '' })
   const [saving, setSaving]   = useState(false)
   const [showCur, setShowCur] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showCon, setShowCon] = useState(false)
+  const [logs, setLogs]       = useState([])
+  const [logsLoading, setLogsLoading] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token')
+    axios.get('/api/admin/login-logs', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => setLogs(r.data))
+      .catch(() => {})
+      .finally(() => setLogsLoading(false))
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -66,7 +86,7 @@ export default function AdminSettings() {
 
   return (
     <AdminLayout>
-      <div className="p-6 max-w-lg">
+      <div className="p-6 max-w-2xl">
         <h1 className="text-2xl font-bold text-kcc-dark mb-1">Settings</h1>
         <p className="text-gray-500 text-sm mb-6">Manage your admin account</p>
 
@@ -126,6 +146,68 @@ export default function AdminSettings() {
             </button>
           </form>
         </div>
+
+        {/* ── Login Audit Log ── */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+              <ClipboardList size={17} className="text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-kcc-dark text-sm">Login Audit Log</h2>
+              <p className="text-xs text-gray-400">Last 50 login attempts — successful and failed</p>
+            </div>
+          </div>
+
+          {logsLoading ? (
+            <div className="space-y-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : logs.length === 0 ? (
+            <p className="text-gray-400 text-sm text-center py-6">No login activity yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {logs.map(log => (
+                <div
+                  key={log.id}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-sm ${
+                    log.action === 'success'
+                      ? 'bg-green-50 border-green-100'
+                      : 'bg-red-50 border-red-100'
+                  }`}
+                >
+                  {log.action === 'success'
+                    ? <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+                    : <XCircle size={16} className="text-red-400 flex-shrink-0" />
+                  }
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        log.action === 'success'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {log.action === 'success' ? 'Login Success' : 'Login Failed'}
+                      </span>
+                      <span className="text-gray-600 text-xs font-medium">{log.username}</span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <Monitor size={11} />
+                        {formatUA(log.user_agent)}
+                      </span>
+                      <span>IP: {log.ip_address || 'unknown'}</span>
+                      <span>{new Date(log.created_at).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </AdminLayout>
   )

@@ -98,6 +98,16 @@ class AdminAILog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class AdminLoginLog(Base):
+    __tablename__ = "admin_login_logs"
+    id         = Column(Integer, primary_key=True, index=True)
+    username   = Column(String(100), nullable=False)
+    action     = Column(String(20), nullable=False)   # "success" | "failed"
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class Concern(Base):
     __tablename__ = "concerns"
     id               = Column(Integer, primary_key=True, index=True)
