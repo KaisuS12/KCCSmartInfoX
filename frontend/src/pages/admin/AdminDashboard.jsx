@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const [data, setData]               = useState(null)
   const [loading, setLoading]         = useState(true)
   const [pendingConcerns, setPending] = useState(0)
+  const [backendOnline, setBackendOnline] = useState(null)
   const navigate                      = useNavigate()
 
   function fetchData() {
@@ -35,7 +36,9 @@ export default function AdminDashboard() {
     const headers = { Authorization: `Bearer ${token}` }
     setLoading(true)
     axios.get('/api/admin/analytics', { headers })
-      .then(res => setData(res.data)).catch(() => {}).finally(() => setLoading(false))
+      .then(res => { setData(res.data); setBackendOnline(true) })
+      .catch(() => setBackendOnline(false))
+      .finally(() => setLoading(false))
     axios.get('/api/admin/concerns', { headers })
       .then(res => setPending(res.data.filter(c => c.status === 'pending').length)).catch(() => {})
   }
@@ -83,10 +86,22 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-bold text-kcc-dark">Dashboard</h1>
             <p className="text-gray-500 text-sm">Overview of KCCSmartInfoX activity</p>
           </div>
-          <button onClick={fetchData} disabled={loading} className="flex items-center gap-2 text-sm text-gray-400 hover:text-kcc-blue transition">
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            {backendOnline !== null && (
+              <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                backendOnline
+                  ? 'bg-green-50 border-green-200 text-green-600'
+                  : 'bg-red-50 border-red-200 text-red-500'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${backendOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                {backendOnline ? 'Backend Online' : 'Backend Offline'}
+              </div>
+            )}
+            <button onClick={fetchData} disabled={loading} className="flex items-center gap-2 text-sm text-gray-400 hover:text-kcc-blue transition">
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
