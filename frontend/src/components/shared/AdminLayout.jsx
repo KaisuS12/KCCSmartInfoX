@@ -6,7 +6,6 @@ import {
   BarChart2, Users, LogOut, Sun, Moon, Info, QrCode, Building2, MessageSquare, Settings, AlertTriangle
 } from 'lucide-react'
 import kccLogo from '../../assets/kcc-logo.png'
-import AdminAIAssistant from '../admin/AdminAIAssistant'
 
 const navItems = [
   { to: '/admin/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
@@ -106,10 +105,7 @@ export default function AdminLayout({ children }) {
         {children}
       </main>
 
-      {/* AI Assistant — floats over all admin pages (outside flex flow) */}
-      <div className="contents">
-        <AdminAIAssistant />
-      </div>
+
     </div>
   )
 }
