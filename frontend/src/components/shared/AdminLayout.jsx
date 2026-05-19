@@ -32,11 +32,20 @@ export default function AdminLayout({ children }) {
     localStorage.setItem('admin_theme', dark ? 'dark' : 'light')
   }, [dark])
 
+  function logLogout(action) {
+    const token = localStorage.getItem('admin_token')
+    if (!token) return
+    axios.post('/api/admin/logout-log', { action }, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).catch(() => {})
+  }
+
   // Auto-logout on inactivity
   useEffect(() => {
     function resetTimer() {
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
+        logLogout('timeout')
         localStorage.removeItem('admin_token')
         navigate('/admin/login')
       }, INACTIVITY_MS)
@@ -65,6 +74,7 @@ export default function AdminLayout({ children }) {
   }, [navigate])
 
   function handleLogout() {
+    logLogout('logout')
     localStorage.removeItem('admin_token')
     navigate('/admin/login')
   }

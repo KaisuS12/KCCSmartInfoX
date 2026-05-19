@@ -40,6 +40,9 @@ class PasswordChange(BaseModel):
     current_password: str
     new_password: str
 
+class LogoutAction(BaseModel):
+    action: str = "logout"  # "logout" | "timeout"
+
 
 class TextIngestion(BaseModel):
     source: str = "manual"
@@ -82,6 +85,16 @@ async def get_login_logs(db: Session = Depends(get_db), admin=Depends(get_curren
         }
         for l in logs
     ]
+
+
+@router.post("/admin/logout-log")
+async def logout_log(data: LogoutAction, request: Request, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    ip = request.client.host if request.client else "unknown"
+    ua = request.headers.get("user-agent", "")[:255]
+    username = admin.get("sub", "admin") if isinstance(admin, dict) else str(admin)
+    db.add(AdminLoginLog(username=username, action=data.action, ip_address=ip, user_agent=ua))
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/admin/setup")

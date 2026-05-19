@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import AdminLayout from '../../components/shared/AdminLayout'
-import { KeyRound, Eye, EyeOff, ShieldCheck, ClipboardList, CheckCircle, XCircle, Monitor } from 'lucide-react'
+import { KeyRound, Eye, EyeOff, ShieldCheck, ClipboardList, CheckCircle, XCircle, Monitor, LogOut, Clock } from 'lucide-react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
@@ -154,8 +154,8 @@ export default function AdminSettings() {
               <ClipboardList size={17} className="text-indigo-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-kcc-dark text-sm">Login Audit Log</h2>
-              <p className="text-xs text-gray-400">Last 50 login attempts — successful and failed</p>
+              <h2 className="font-semibold text-kcc-dark text-sm">Admin Audit Log</h2>
+              <p className="text-xs text-gray-400">Last 50 admin session events — login, logout, timeout</p>
             </div>
           </div>
 
@@ -169,41 +169,33 @@ export default function AdminSettings() {
             <p className="text-gray-400 text-sm text-center py-6">No login activity yet.</p>
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {logs.map(log => (
-                <div
-                  key={log.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl border text-sm ${
-                    log.action === 'success'
-                      ? 'bg-green-50 border-green-100'
-                      : 'bg-red-50 border-red-100'
-                  }`}
-                >
-                  {log.action === 'success'
-                    ? <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
-                    : <XCircle size={16} className="text-red-400 flex-shrink-0" />
-                  }
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        log.action === 'success'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {log.action === 'success' ? 'Login Success' : 'Login Failed'}
-                      </span>
-                      <span className="text-gray-600 text-xs font-medium">{log.username}</span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <Monitor size={11} />
-                        {formatUA(log.user_agent)}
-                      </span>
-                      <span>IP: {log.ip_address || 'unknown'}</span>
-                      <span>{new Date(log.created_at).toLocaleString()}</span>
+              {logs.map(log => {
+                const cfg = {
+                  success: { bg: 'bg-green-50 border-green-100', icon: <CheckCircle size={16} className="text-green-500 flex-shrink-0" />, badge: 'bg-green-100 text-green-700', label: 'Login Success' },
+                  failed:  { bg: 'bg-red-50 border-red-100',     icon: <XCircle size={16} className="text-red-400 flex-shrink-0" />,     badge: 'bg-red-100 text-red-700',   label: 'Login Failed' },
+                  logout:  { bg: 'bg-gray-50 border-gray-200',   icon: <LogOut size={16} className="text-gray-400 flex-shrink-0" />,     badge: 'bg-gray-100 text-gray-600', label: 'Logged Out' },
+                  timeout: { bg: 'bg-orange-50 border-orange-100', icon: <Clock size={16} className="text-orange-400 flex-shrink-0" />,  badge: 'bg-orange-100 text-orange-700', label: 'Session Timeout' },
+                }[log.action] || { bg: 'bg-gray-50 border-gray-200', icon: <Monitor size={16} className="text-gray-400 flex-shrink-0" />, badge: 'bg-gray-100 text-gray-600', label: log.action }
+
+                return (
+                  <div key={log.id} className={`flex items-center gap-3 p-3 rounded-xl border text-sm ${cfg.bg}`}>
+                    {cfg.icon}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                          {cfg.label}
+                        </span>
+                        <span className="text-gray-600 text-xs font-medium">{log.username}</span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400 flex-wrap">
+                        <span className="flex items-center gap-1"><Monitor size={11} />{formatUA(log.user_agent)}</span>
+                        <span>IP: {log.ip_address || 'unknown'}</span>
+                        <span>{new Date(log.created_at).toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
