@@ -47,38 +47,53 @@ export default function AdminChatLogs() {
         <h1 className="text-2xl font-bold text-kcc-dark mb-1">Chat Logs</h1>
         <p className="text-gray-500 text-sm mb-6">All questions asked by users — latest 200</p>
 
-        {/* Summary cards */}
+        {/* Summary cards — all 3 are clickable filters */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <MessageSquare size={18} className="text-kcc-blue" />
+          <button
+            onClick={() => setFilter('all')}
+            className={`rounded-2xl shadow-sm border p-4 flex items-center gap-3 text-left transition-all ${
+              filter === 'all' ? 'bg-kcc-blue border-kcc-blue' : 'bg-white border-gray-100 hover:bg-gray-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${filter === 'all' ? 'bg-white/20' : 'bg-blue-100'}`}>
+              <MessageSquare size={18} className={filter === 'all' ? 'text-white' : 'text-kcc-blue'} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-kcc-dark">{logs.length}</p>
-              <p className="text-xs text-gray-500">Total Questions</p>
+              <p className={`text-2xl font-bold ${filter === 'all' ? 'text-white' : 'text-kcc-dark'}`}>{logs.length}</p>
+              <p className={`text-xs ${filter === 'all' ? 'text-blue-100' : 'text-gray-500'}`}>Total Questions</p>
             </div>
-          </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <CheckCircle size={18} className="text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-kcc-dark">{answeredCount}</p>
-              <p className="text-xs text-gray-500">Answered</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-              <XCircle size={18} className="text-amber-600" />
+          </button>
+          <button
+            onClick={() => setFilter('answered')}
+            className={`rounded-2xl shadow-sm border p-4 flex items-center gap-3 text-left transition-all ${
+              filter === 'answered' ? 'bg-green-600 border-green-600' : 'bg-white border-gray-100 hover:bg-green-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${filter === 'answered' ? 'bg-white/20' : 'bg-green-100'}`}>
+              <CheckCircle size={18} className={filter === 'answered' ? 'text-white' : 'text-green-600'} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-kcc-dark">{unansweredCount}</p>
-              <p className="text-xs text-gray-500">Unanswered</p>
+              <p className={`text-2xl font-bold ${filter === 'answered' ? 'text-white' : 'text-kcc-dark'}`}>{answeredCount}</p>
+              <p className={`text-xs ${filter === 'answered' ? 'text-green-100' : 'text-gray-500'}`}>Answered</p>
             </div>
-          </div>
+          </button>
+          <button
+            onClick={() => setFilter('unanswered')}
+            className={`rounded-2xl shadow-sm border p-4 flex items-center gap-3 text-left transition-all ${
+              filter === 'unanswered' ? 'bg-amber-500 border-amber-500' : 'bg-white border-gray-100 hover:bg-amber-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${filter === 'unanswered' ? 'bg-white/20' : 'bg-amber-100'}`}>
+              <XCircle size={18} className={filter === 'unanswered' ? 'text-white' : 'text-amber-600'} />
+            </div>
+            <div>
+              <p className={`text-2xl font-bold ${filter === 'unanswered' ? 'text-white' : 'text-kcc-dark'}`}>{unansweredCount}</p>
+              <p className={`text-xs ${filter === 'unanswered' ? 'text-amber-100' : 'text-gray-500'}`}>Unanswered</p>
+            </div>
+          </button>
         </div>
 
-        {/* Controls */}
+        {/* Controls — search + export only */}
         <div className="flex flex-wrap gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -88,21 +103,6 @@ export default function AdminChatLogs() {
               placeholder="Search questions..."
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-kcc-blue text-gray-800"
             />
-          </div>
-          <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1">
-            {[['all', 'All'], ['answered', 'Answered'], ['unanswered', 'Unanswered']].map(([val, label]) => (
-              <button
-                key={val}
-                onClick={() => setFilter(val)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  filter === val
-                    ? 'bg-kcc-blue text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
           </div>
           <button
             onClick={handleExport}
