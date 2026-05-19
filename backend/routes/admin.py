@@ -54,9 +54,9 @@ class TextUpdate(BaseModel):
 
 @router.post("/admin/login")
 @limiter.limit("5/minute")
-async def login(data: LoginRequest, req: Request, db: Session = Depends(get_db)):
-    ip = req.client.host if req.client else "unknown"
-    ua = req.headers.get("user-agent", "")[:255]
+async def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+    ua = request.headers.get("user-agent", "")[:255]
     admin = db.query(AdminUser).filter(AdminUser.username == data.username).first()
     if not admin or not verify_password(data.password, admin.password_hash):
         db.add(AdminLoginLog(username=data.username, action="failed", ip_address=ip, user_agent=ua))
