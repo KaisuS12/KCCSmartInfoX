@@ -80,16 +80,23 @@ export default function AdminConcerns() {
         </h1>
         <p className="text-gray-500 text-sm mb-6">View and reply to concerns submitted by students</p>
 
-        {/* Summary cards — Pending and Resolved are clickable filters */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            {loading ? <SkeleSummaryCard /> : <>
-              <p className="text-2xl font-bold text-kcc-dark">{concerns.length}</p>
-              <p className="text-xs text-gray-400 mt-1">Total Concerns</p>
-            </>}
-          </div>
+        {/* Summary cards — all 3 are clickable filters */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <button
-            onClick={() => setFilter(f => f === 'pending' ? 'all' : 'pending')}
+            onClick={() => setFilter('all')}
+            className={`rounded-2xl p-4 border shadow-sm text-left transition-all ${
+              filter === 'all'
+                ? 'bg-kcc-blue border-kcc-blue'
+                : 'bg-white border-gray-100 hover:bg-gray-50'
+            }`}
+          >
+            {loading ? <SkeleSummaryCard /> : <>
+              <p className={`text-2xl font-bold ${filter === 'all' ? 'text-white' : 'text-kcc-dark'}`}>{concerns.length}</p>
+              <p className={`text-xs mt-1 ${filter === 'all' ? 'text-blue-100' : 'text-gray-400'}`}>All Concerns</p>
+            </>}
+          </button>
+          <button
+            onClick={() => setFilter('pending')}
             className={`rounded-2xl p-4 border shadow-sm text-left transition-all ${
               filter === 'pending'
                 ? 'bg-orange-500 border-orange-500'
@@ -100,7 +107,7 @@ export default function AdminConcerns() {
             <p className={`text-xs mt-1 ${filter === 'pending' ? 'text-orange-100' : 'text-orange-400'}`}>Pending</p>
           </button>
           <button
-            onClick={() => setFilter(f => f === 'resolved' ? 'all' : 'resolved')}
+            onClick={() => setFilter('resolved')}
             className={`rounded-2xl p-4 border shadow-sm text-left transition-all ${
               filter === 'resolved'
                 ? 'bg-green-600 border-green-600'
@@ -109,20 +116,6 @@ export default function AdminConcerns() {
           >
             <p className={`text-2xl font-bold ${filter === 'resolved' ? 'text-white' : 'text-green-600'}`}>{resolved}</p>
             <p className={`text-xs mt-1 ${filter === 'resolved' ? 'text-green-100' : 'text-green-400'}`}>Resolved</p>
-          </button>
-        </div>
-
-        {/* Filter — All button only */}
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-1.5 rounded-xl text-sm font-medium transition ${
-              filter === 'all'
-                ? 'bg-kcc-blue text-white'
-                : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
-            }`}
-          >
-            All
           </button>
         </div>
 
