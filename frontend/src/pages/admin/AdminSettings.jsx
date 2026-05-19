@@ -86,10 +86,13 @@ export default function AdminSettings() {
 
   return (
     <AdminLayout>
-      <div className="p-6 max-w-2xl">
+      <div className="p-6 max-w-6xl">
         <h1 className="text-2xl font-bold text-kcc-dark mb-1">Settings</h1>
         <p className="text-gray-500 text-sm mb-6">Manage your admin account</p>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        {/* ── Left: Change Password ── */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-9 h-9 bg-kcc-blue/10 rounded-xl flex items-center justify-center">
@@ -147,8 +150,8 @@ export default function AdminSettings() {
           </form>
         </div>
 
-        {/* ── Login Audit Log ── */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+        {/* ── Right: Audit Log ── */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
               <ClipboardList size={17} className="text-indigo-600" />
@@ -200,6 +203,7 @@ export default function AdminSettings() {
           )}
         </div>
 
+        </div> {/* end grid */}
       </div>
     </AdminLayout>
   )
