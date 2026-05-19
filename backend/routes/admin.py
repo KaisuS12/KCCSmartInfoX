@@ -78,7 +78,7 @@ async def get_login_logs(db: Session = Depends(get_db), admin=Depends(get_curren
             "action": l.action,
             "ip_address": l.ip_address,
             "user_agent": l.user_agent,
-            "created_at": l.created_at.isoformat(),
+            "created_at": l.created_at.isoformat() + "Z",
         }
         for l in logs
     ]
