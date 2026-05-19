@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
@@ -21,13 +21,34 @@ const navItems = [
   { to: '/admin/settings',      icon: Settings,        label: 'Settings' },
 ]
 
+const INACTIVITY_MS = 30 * 60 * 1000 // 30 minutes
+
 export default function AdminLayout({ children }) {
   const navigate = useNavigate()
   const [dark, setDark] = useState(() => localStorage.getItem('admin_theme') === 'dark')
+  const timerRef = useRef(null)
 
   useEffect(() => {
     localStorage.setItem('admin_theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  // Auto-logout on inactivity
+  useEffect(() => {
+    function resetTimer() {
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => {
+        localStorage.removeItem('admin_token')
+        navigate('/admin/login')
+      }, INACTIVITY_MS)
+    }
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll']
+    events.forEach(e => window.addEventListener(e, resetTimer))
+    resetTimer()
+    return () => {
+      clearTimeout(timerRef.current)
+      events.forEach(e => window.removeEventListener(e, resetTimer))
+    }
+  }, [navigate])
 
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(

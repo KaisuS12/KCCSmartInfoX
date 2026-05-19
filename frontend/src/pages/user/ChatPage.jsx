@@ -501,9 +501,22 @@ export default function ChatPage() {
             <Send size={15} />
           </button>
         </div>
-        <p className={`text-center text-[11px] mt-2 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
-          Answers are based on official KCC information only.
-        </p>
+        <div className="flex items-center justify-between mt-2 px-1">
+          <p className={`text-[11px] ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+            Answers are based on official KCC information only.
+          </p>
+          {input.length > 0 && (
+            <span className={`text-[11px] flex-shrink-0 ml-2 ${
+              input.length >= 450
+                ? 'text-red-400 font-semibold'
+                : input.length >= 350
+                ? 'text-yellow-500'
+                : darkMode ? 'text-gray-600' : 'text-gray-400'
+            }`}>
+              {input.length}/500
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ── Mobile Bottom Nav ── */}
