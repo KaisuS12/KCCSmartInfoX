@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle } from 'lucide-react'
+import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle, RefreshCw } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
@@ -131,6 +131,7 @@ export default function ChatPage() {
           ? "You're sending messages too fast. Please wait a moment."
           : "Sorry, I'm having trouble connecting right now. Please try again.",
         error: true,
+        retryText: question,
       }])
     } finally {
       setLoading(false)
@@ -381,6 +382,21 @@ export default function ChatPage() {
               </div>
             )}
 
+            {/* Retry button on error */}
+            {msg.role === 'ai' && msg.error && msg.retryText && (
+              <div className="ml-9 mt-1.5">
+                <button
+                  onClick={() => {
+                    setMessages(prev => prev.filter((_, idx) => idx !== i))
+                    sendMessage(msg.retryText)
+                  }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition border border-red-500/20"
+                >
+                  <RefreshCw size={11} /> Retry
+                </button>
+              </div>
+            )}
+
             {/* Actions: copy + feedback */}
             {msg.role === 'ai' && !msg.error && (
               <div className="flex items-center gap-2 ml-9 mt-1">
@@ -460,6 +476,7 @@ export default function ChatPage() {
             onKeyDown={handleKey}
             placeholder={lang === 'fil' ? 'Magtanong tungkol sa KCC...' : 'Ask anything about KCC...'}
             rows={1}
+            maxLength={500}
             className={`flex-1 bg-transparent text-sm resize-none outline-none max-h-28 py-0.5 ${
               darkMode ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'
             }`}

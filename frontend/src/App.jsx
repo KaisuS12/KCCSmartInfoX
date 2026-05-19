@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import NotFound from './pages/NotFound'
 import LandingPage from './pages/LandingPage'
 import ChatPage from './pages/user/ChatPage'
 import AdminLogin from './pages/admin/AdminLogin'
@@ -44,8 +45,8 @@ export default function App() {
           <Route path="concerns"         element={<AdminConcerns />} />
         </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

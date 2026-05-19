@@ -53,6 +53,7 @@ class TextUpdate(BaseModel):
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 @router.post("/admin/login")
+@limiter.limit("5/minute")
 async def login(data: LoginRequest, req: Request, db: Session = Depends(get_db)):
     ip = req.client.host if req.client else "unknown"
     ua = req.headers.get("user-agent", "")[:255]
@@ -270,14 +271,18 @@ async def upload_document(
     admin=Depends(get_current_admin),
 ):
     os.makedirs(DOCS_DIR, exist_ok=True)
-    filepath = os.path.join(DOCS_DIR, file.filename)
 
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in (".pdf", ".docx", ".txt"):
         raise HTTPException(status_code=400, detail="Only PDF, DOCX, and TXT files are supported.")
 
+    content = await file.read()
+    if len(content) > 20 * 1024 * 1024:  # 20 MB limit
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 20 MB.")
+
+    filepath = os.path.join(DOCS_DIR, file.filename)
     with open(filepath, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+        f.write(content)
 
     doc = KnowledgeDoc(filename=file.filename, filepath=filepath)
     db.add(doc)
@@ -316,9 +321,14 @@ async def upload_bulk(
             results.append({"filename": file.filename, "status": "skipped", "message": "Unsupported type"})
             continue
 
+        content = await file.read()
+        if len(content) > 20 * 1024 * 1024:
+            results.append({"filename": file.filename, "status": "skipped", "message": "File too large (max 20 MB)"})
+            continue
+
         filepath = os.path.join(DOCS_DIR, file.filename)
         with open(filepath, "wb") as f:
-            shutil.copyfileobj(file.file, f)
+            f.write(content)
 
         doc = KnowledgeDoc(filename=file.filename, filepath=filepath)
         db.add(doc)
