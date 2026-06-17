@@ -3,401 +3,219 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KCCSmartInfoX — System Features</title>
+  <title>KCCSmartInfoX — Features and Functions</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #1a1a1a; font-size: 12pt; line-height: 1.9; }
 
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fb;
-      color: #1a1a2e;
-      font-size: 13px;
-    }
+    .cover { background: #003087; color: white; padding: 60px 72px 52px; }
+    .cover .school { font-size: 11pt; color: #a8c0e8; margin-bottom: 6px; }
+    .cover h1 { font-size: 26pt; font-weight: bold; color: #c9a84c; margin-bottom: 4px; }
+    .cover .doc-title { font-size: 15pt; font-weight: bold; color: white; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 18px; margin-top: 18px; margin-bottom: 6px; }
+    .cover .doc-sub { font-size: 11pt; color: #7a9fd4; }
 
-    /* ── Cover Header ── */
-    .cover {
-      background: linear-gradient(135deg, #003087 0%, #00214f 100%);
-      color: white;
-      padding: 48px 56px 40px;
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
+    .body { max-width: 740px; margin: 0 auto; padding: 48px 72px 64px; }
 
-    .logo-circle {
-      width: 80px;
-      height: 80px;
-      min-width: 80px;
-      background: #c9a84c;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      font-weight: 900;
-      color: #003087;
-      letter-spacing: -1px;
-    }
+    .chapter { font-size: 14pt; font-weight: bold; color: #003087; text-transform: uppercase; letter-spacing: 1px; margin: 44px 0 8px; padding-bottom: 6px; border-bottom: 2px solid #003087; page-break-before: always; }
+    .chapter:first-of-type { page-break-before: avoid; }
+    .section { font-size: 12pt; font-weight: bold; color: #1a1a1a; margin: 28px 0 6px; }
 
-    .cover-text h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
+    p { text-align: justify; text-indent: 36px; margin-bottom: 10px; font-size: 12pt; }
+    p.no-indent { text-indent: 0; }
 
-    .cover-text p {
-      color: #a8c0e8;
-      font-size: 13px;
-      margin-top: 4px;
-    }
+    .feature-num { color: #003087; font-weight: bold; }
 
-    .cover-text .subtitle {
-      color: #c9a84c;
-      font-size: 15px;
-      font-weight: 600;
-      margin-top: 8px;
-    }
+    .stats-row { display: flex; gap: 12px; margin: 20px 0 28px; }
+    .stat-box { flex: 1; background: #f0f4ff; border: 1.5px solid #c7d5f8; border-radius: 10px; padding: 14px 16px; text-align: center; }
+    .stat-box .num { font-size: 26pt; font-weight: bold; color: #003087; }
+    .stat-box .label { font-size: 10pt; color: #4b5563; margin-top: 2px; }
 
-    /* ── Body ── */
-    .body {
-      padding: 36px 56px 48px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+    .footer { background: #003087; color: #a8c0e8; text-align: center; padding: 14px; font-family: Arial, sans-serif; font-size: 10pt; }
 
-    /* ── Section Header ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 32px 0 16px;
-    }
-
-    .section-badge {
-      background: #003087;
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 20px;
-    }
-
-    .section-badge.gold {
-      background: #c9a84c;
-      color: #1a1a2e;
-    }
-
-    .section-line {
-      flex: 1;
-      height: 1px;
-      background: #e0e4ef;
-    }
-
-    /* ── Feature Group ── */
-    .group {
-      margin-bottom: 20px;
-    }
-
-    .group-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #003087;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-      padding-left: 2px;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .feature-grid.one-col {
-      grid-template-columns: 1fr;
-    }
-
-    .feature-item {
-      background: white;
-      border: 1px solid #e8eaf0;
-      border-radius: 8px;
-      padding: 8px 12px;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      line-height: 1.5;
-    }
-
-    .feature-item .dot {
-      width: 6px;
-      height: 6px;
-      min-width: 6px;
-      border-radius: 50%;
-      background: #c9a84c;
-      margin-top: 5px;
-    }
-
-    .feature-item .dot.blue {
-      background: #003087;
-    }
-
-    .feature-item span {
-      color: #374151;
-      font-size: 12.5px;
-    }
-
-    /* ── Stats row ── */
-    .stats-row {
-      display: flex;
-      gap: 12px;
-      margin: 20px 0 28px;
-    }
-
-    .stat-box {
-      flex: 1;
-      background: white;
-      border: 1px solid #e8eaf0;
-      border-radius: 10px;
-      padding: 14px 16px;
-      text-align: center;
-    }
-
-    .stat-box .num {
-      font-size: 22px;
-      font-weight: 800;
-      color: #003087;
-    }
-
-    .stat-box .label {
-      font-size: 11px;
-      color: #9098a9;
-      margin-top: 2px;
-    }
-
-    /* ── Footer ── */
-    .footer {
-      background: #003087;
-      color: #a8c0e8;
-      text-align: center;
-      padding: 16px;
-      font-size: 11px;
-    }
-
-    /* ── Print ── */
     @media print {
-      body { background: white; font-size: 12px; }
+      body { background: white; }
       .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .section-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .logo-circle { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .group { page-break-inside: avoid; }
-      .body { padding: 28px 48px; }
+      .stat-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .chapter { page-break-before: always; }
+      .chapter:first-of-type { page-break-before: avoid; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Cover -->
-  <div class="cover">
-    <div class="logo-circle">KCC</div>
-    <div class="cover-text">
-      <h1>KCCSmartInfoX</h1>
-      <p>Kabankalan Catholic College, Inc.</p>
-      <p class="subtitle">System Features Documentation</p>
-      <p style="color:#7a9fd4;font-size:11px;margin-top:6px;">AI-Powered Information Assistant &nbsp;·&nbsp; Admin Management System</p>
-    </div>
+<div class="cover">
+  <div class="school">Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Capstone Project 2025–2026</div>
+  <h1>KCCSmartInfoX</h1>
+  <div class="doc-title">System Features and Functions — Manuscript Reference</div>
+  <div class="doc-sub">Complete description of all features for inclusion in the capstone manuscript</div>
+</div>
+
+<div class="body">
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="num">19</div><div class="label">Student Features</div></div>
+    <div class="stat-box"><div class="num">24</div><div class="label">Admin Features</div></div>
+    <div class="stat-box"><div class="num">13</div><div class="label">AI Pipeline Steps</div></div>
+    <div class="stat-box"><div class="num">10</div><div class="label">Database Tables</div></div>
   </div>
 
-  <div class="body">
+  <!-- ══ CHAPTER 1: STUDENT ══ -->
+  <div class="chapter">Part 1 &nbsp;·&nbsp; Student-Facing Features</div>
 
-    <!-- Stats summary -->
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="num">16</div>
-        <div class="label">User Features</div>
-      </div>
-      <div class="stat-box">
-        <div class="num">45+</div>
-        <div class="label">Admin Features</div>
-      </div>
-      <div class="stat-box">
-        <div class="num">11</div>
-        <div class="label">Admin Pages</div>
-      </div>
-      <div class="stat-box">
-        <div class="num">3</div>
-        <div class="label">AI Capabilities</div>
-      </div>
-    </div>
+  <p class="no-indent">The student-facing side of KCCSmartInfoX is designed for accessibility, speed, and ease of use on any device. The following features are available to all students without requiring an account or login.</p>
 
-    <!-- ══ USER FEATURES ══ -->
-    <div class="section-header">
-      <span class="section-badge gold">User Features</span>
-      <div class="section-line"></div>
-    </div>
+  <div class="section">Feature 1 &nbsp;— &nbsp;AI-Powered Question Answering</div>
+  <p>The core feature of KCCSmartInfoX is its artificial intelligence chatbot that answers student questions about Kabankalan Catholic College. Students type their question in the chat interface and receive a generated response within seconds. The system uses Retrieval-Augmented Generation (RAG) — a technique that first searches official KCC documents for relevant information before generating an answer, ensuring that all responses are grounded in actual school policies and records rather than fabricated content. If the system is unable to find a relevant answer in the knowledge base, it honestly informs the student and flags the question for administrator review.</p>
 
-    <div class="group">
-      <div class="group-title">Landing Page</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot"></div><span>Announcement carousel (latest active announcements)</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Office process cards (loaded dynamically from database)</span></div>
-        <div class="feature-item"><div class="dot"></div><span>About Us section with school information</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Quick navigation button to open the chatbot</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 2 &nbsp;— &nbsp;Suggested Starter Questions</div>
+  <p>Upon opening the chat interface, students are presented with four suggested starter questions displayed as clickable cards below the KCC logo. These suggestions cover the most commonly asked topics — enrollment procedures, Transcript of Records, Discipline Office policies, and office hours — and allow students to begin asking questions with a single tap, eliminating hesitation for first-time users. Clicking any suggestion card immediately submits the question to the AI.</p>
 
-    <div class="group">
-      <div class="group-title">Chat Interface</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot"></div><span>AI-powered chatbot — answers KCC questions using official documents</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Suggested starter questions shown on load</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Context-aware follow-up question suggestions after each answer</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Voice input — speak your question (Chrome required)</span></div>
-        <div class="feature-item"><div class="dot"></div><span>EN / Filipino language toggle — AI responds in chosen language</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Typing indicator while the AI is generating a response</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Source citation — shows which KCC document the answer came from</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Thumbs up / thumbs down feedback per AI answer</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Copy answer to clipboard button</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Announcements side panel — slides in to show all active announcements</span></div>
-        <div class="feature-item"><div class="dot"></div><span>School Info side panel — slides in with contact info and office hours</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Dark / light mode toggle</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 3 &nbsp;— &nbsp;Follow-Up Question Suggestions</div>
+  <p>After the AI generates a response, the system analyzes the topic of the answer and displays up to three related follow-up questions below the response. These suggestions are dynamically generated based on keywords in the AI's answer, such as enrollment, tuition, scholarship, or transcript. This feature encourages students to continue exploring related topics without having to think of what to ask next, improving the depth of information they receive in a single session.</p>
 
-    <div class="group">
-      <div class="group-title">Concern Form</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot"></div><span>Submit a Concern button appears when AI cannot answer a question</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Modal form: student fills name, email, and message</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Unanswered question is pre-filled automatically</span></div>
-        <div class="feature-item"><div class="dot"></div><span>Admin receives email notification of the new concern</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 4 &nbsp;— &nbsp;English and Filipino Language Toggle</div>
+  <p>KCCSmartInfoX supports two language modes: English and Filipino. Students can switch between these modes using the language toggle button in the chat header. When Filipino mode is selected, the AI responds in Filipino or Taglish, making the system more inclusive and accessible to students who are more comfortable communicating in their native language. The system also understands Bisaya and Taglish input regardless of which mode is active. The selected language preference is saved in the browser's local storage so it persists across sessions without requiring the student to switch again.</p>
 
-    <div class="group">
-      <div class="group-title">Subscriptions &amp; Accessibility</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot"></div><span>Subscribe to announcements — receive new announcements via email</span></div>
-        <div class="feature-item"><div class="dot"></div><span>PWA support — installable on mobile phone like a native app</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 5 &nbsp;— &nbsp;Voice Input</div>
+  <p>Students who prefer speaking over typing may use the microphone button in the chat input area to submit questions through voice. When activated, the system uses the browser's built-in Web Speech API to transcribe the student's spoken words into text in real time. The transcribed text is then placed in the input field, which the student can review and edit before submitting. This feature is currently supported on Google Chrome and makes the system more accessible to students with difficulty typing.</p>
 
-    <!-- ══ ADMIN FEATURES ══ -->
-    <div class="section-header">
-      <span class="section-badge">Admin Features</span>
-      <div class="section-line"></div>
-    </div>
+  <div class="section">Feature 6 &nbsp;— &nbsp;Thank-You Detection and Instant Reply</div>
+  <p>The system recognizes when a student expresses gratitude — through messages such as "thank you," "thanks," "salamat," "maraming salamat," "daghan salamat," "ty," or similar expressions — and responds immediately with a warm, randomized reply without performing any document search. Five different reply templates are available in both English and Filipino, ensuring that the response feels natural and varied rather than repetitive. This detection runs before any other processing step, making it the fastest type of response in the system.</p>
 
-    <div class="group">
-      <div class="group-title">Dashboard</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>Stats overview: total questions, answered, unanswered, answer rate</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Stats: total subscribers, uploaded documents, helpful votes, pending concerns</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Recent unanswered questions list with link to fix knowledge gaps</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Quick action buttons: Add Knowledge, View Analytics, Post Announcement, View Concerns</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Auto-refreshes every 10 seconds</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Pending concerns badge — shows count when concerns are waiting</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 7 &nbsp;— &nbsp;Greeting Recognition</div>
+  <p>When a student opens a conversation with a casual greeting — such as "hello," "hi," "kumusta," "good morning," "magandang umaga," or similar expressions — the system detects this through pattern matching and responds with a warm, conversational welcome message without performing a document search. The greeting response is generated by the Groq language model with a conversational prompt, making it feel friendly and natural. This detection prevents the system from unnecessarily searching the knowledge base for messages that are not genuine information queries.</p>
 
-    <div class="group">
-      <div class="group-title">Knowledge Base</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>Upload PDF, DOCX, or TXT files — auto-indexed into the AI</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Bulk upload multiple files at once</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Add text entries manually without a file</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Inline edit text entries and re-index automatically</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Delete documents — removes from both the database and AI index</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 8 &nbsp;— &nbsp;Source Citation</div>
+  <p>When the AI generates an answer using content from uploaded KCC documents, the filenames of the source documents are displayed below the response. This allows students to see exactly which official document was used to generate the answer — for example, "KCC College Handbook 2025-2026 Final.pdf" — building trust in the accuracy of the information and allowing students to verify the source if needed. No sources are shown for greeting and thank-you responses since no documents are used in those cases.</p>
 
-    <div class="group">
-      <div class="group-title">Announcements</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>Post announcements instantly or schedule for a future date and time</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Set expiry date — announcement hides automatically when expired</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Attach images to announcements</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Email all subscribers automatically when an announcement is published</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Edit existing announcements</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Delete announcements</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 9 &nbsp;— &nbsp;Thumbs Up and Thumbs Down Feedback</div>
+  <p>Below each AI-generated answer, students are provided with thumbs-up and thumbs-down feedback buttons. Clicking thumbs-up indicates that the answer was helpful, while thumbs-down indicates that it was not. This feedback is recorded in the database and displayed in the administrator's Analytics page, where it helps identify which answers need improvement and which topics the system is handling well. Each feedback entry is linked to the specific chat log record it rates.</p>
 
-    <div class="group">
-      <div class="group-title">Analytics</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>Questions per day bar chart — last 7 days</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Top 10 most asked questions</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Full unanswered questions list</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Thumbs-down answers list — identifies poor AI responses</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Export unanswered questions as CSV file</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>FAQ Auto-Generator — AI suggests knowledge base entries from unanswered questions</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 10 &nbsp;— &nbsp;Retry Button on Error</div>
+  <p>If the AI returns an error — due to a temporary network issue or Groq API unavailability — the error message displayed in the chat includes a Retry button. Clicking this button automatically resubmits the student's original question without requiring them to retype it. This ensures a smooth experience even when brief connectivity issues occur.</p>
 
-    <div class="group">
-      <div class="group-title">Student Concerns</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>View all concerns submitted by students from the chatbot</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Filter concerns: All / Pending / Resolved</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Reply to student — reply is sent to their email automatically</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Mark as resolved (without sending a reply)</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Delete concerns</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Summary cards: Total / Pending / Resolved count</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 11 &nbsp;— &nbsp;Character Counter and 500-Character Limit</div>
+  <p>The chat input field enforces a maximum length of 500 characters per message. A live character counter displayed below the input field shows the current character count in relation to the limit. The counter text turns yellow when the student approaches 350 characters and turns red when they reach 450 characters, providing a clear visual warning before the limit is reached. This limit prevents excessively long inputs that could affect AI response quality.</p>
 
-    <div class="group">
-      <div class="group-title">Chat Logs</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>View all chat history (up to 2,000 entries)</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Search logs by keyword</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Filter: All / Answered / Unanswered</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Expand each entry to see the full AI answer</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Export unanswered questions as CSV</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 12 &nbsp;— &nbsp;Copy Answer to Clipboard</div>
+  <p>Each AI-generated answer includes a copy button that allows the student to copy the full answer text to their clipboard with a single click. A visual checkmark confirmation appears briefly after copying. This feature is useful for students who wish to save an answer for reference or share it with a classmate.</p>
 
-    <div class="group">
-      <div class="group-title">Other Admin Pages</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span><strong>Subscribers</strong> — view all email subscribers, delete individual entries</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span><strong>School Info</strong> — edit all school information sections shown in chat sidebar</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span><strong>Office Processes</strong> — add, edit, delete processes; auto-syncs to AI on every change</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span><strong>QR Code Generator</strong> — auto-detects network IP, generate and download QR code as PNG</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span><strong>Settings</strong> — change admin password with current password verification</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 13 &nbsp;— &nbsp;Submit a Concern</div>
+  <p>When the AI cannot answer a student's question, a contact card appears below the response with a "Submit a Concern" button. Clicking this button opens a modal form within the chat interface. The form automatically pre-fills the student's unanswered question in the message field. The student provides their name and email address and may expand or edit the message before submitting. Upon submission, the concern is saved to the database with a status of "Pending" and an automated email notification is sent to the administrator. The student receives a confirmation message that their concern has been submitted and that a reply will be sent to their email address.</p>
 
-    <div class="group">
-      <div class="group-title">Admin AI Assistant</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>Floating AI bot available on every admin page</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Can add/delete knowledge, post announcements, view stats via chat</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Can manage office processes through natural language commands</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Conversation history tab — keeps context across messages</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 14 &nbsp;— &nbsp;Announcements Side Panel</div>
+  <p>Students can open an Announcements panel from the chat header by clicking the Announcements button. The panel slides in and displays all currently active school announcements fetched from the database, showing each announcement's title, content, image (if any), and publication date. Students can browse announcements without leaving the chat interface. The panel can be closed with an X button, returning the student to their conversation.</p>
 
-    <div class="group">
-      <div class="group-title">Security &amp; General</div>
-      <div class="feature-grid">
-        <div class="feature-item"><div class="dot blue"></div><span>JWT-secured admin login with 24-hour session token</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Auto-logout and redirect to login when session expires</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Rate limiting on chat endpoint (20 requests per minute)</span></div>
-        <div class="feature-item"><div class="dot blue"></div><span>Dark / light mode toggle in the admin sidebar</span></div>
-      </div>
-    </div>
+  <div class="section">Feature 15 &nbsp;— &nbsp;Subscribe to Announcements</div>
+  <p>Students may subscribe to the KCCSmartInfoX announcement system by entering their email address in the subscription field available in the chat interface. Once subscribed, their email address is stored in the database. Whenever the administrator posts a new announcement, all subscribed students automatically receive the full announcement content via email, ensuring they stay informed about important school news even when they are not actively using the system.</p>
 
-  </div><!-- /body -->
+  <div class="section">Feature 16 &nbsp;— &nbsp;Dark Mode and Light Mode</div>
+  <p>The chat interface supports both dark and light color themes. Dark mode is enabled by default, featuring a deep navy background that reduces eye strain during extended nighttime use. Students can toggle to light mode using the sun/moon icon button in the chat header. The selected theme preference is saved in the browser's local storage so it is remembered between sessions.</p>
 
-  <div class="footer">
-    KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Capstone Project
-  </div>
+  <div class="section">Feature 17 &nbsp;— &nbsp;Landing Page with Announcement Carousel</div>
+  <p>The system's landing page serves as the entry point for students before they open the chatbot. It features a navigation bar with the KCC logo, a hero section with a prominent call-to-action button to open the chatbot, an announcement carousel displaying the latest active school announcements fetched from the database, and a grid of office process cards. The landing page provides students with an immediate overview of current school news and common office procedures upon arrival.</p>
+
+  <div class="section">Feature 18 &nbsp;— &nbsp;Office Process Cards on Landing Page</div>
+  <p>The landing page displays a grid of office process cards representing the different school offices — such as the Registrar, Cashier, Guidance Office, and Library. Each card is managed by the administrator through the admin panel and shows the office name and a short description of its processes. Clicking a card on the landing page can guide the student to ask the chatbot about that specific office. All office process data is fetched dynamically from the backend and is always current.</p>
+
+  <div class="section">Feature 19 &nbsp;— &nbsp;Progressive Web App (PWA) — Installable on Mobile</div>
+  <p>KCCSmartInfoX is configured as a Progressive Web App (PWA), which means students can install it directly on the home screen of their smartphone or tablet without going through an app store. On Android devices, the browser prompts users to add the app to their home screen; on iOS devices, this can be done through the Safari Share menu. Once installed, the app launches in full-screen mode with the KCC logo as the app icon, providing a native app-like experience. This makes the system significantly more accessible for daily student use.</p>
+
+
+  <!-- ══ CHAPTER 2: ADMIN ══ -->
+  <div class="chapter">Part 2 &nbsp;·&nbsp; Administrator Features</div>
+
+  <p class="no-indent">The administrator panel is a secured management dashboard accessible only through JWT-authenticated login. It provides the school administrator with complete control over the system's knowledge base, announcements, and monitoring tools.</p>
+
+  <div class="section">Feature 20 &nbsp;— &nbsp;Secure Admin Login with Rate Limiting</div>
+  <p>The administrator accesses the admin panel through a dedicated login page that requires a username and password. Passwords are stored in the database using bcrypt hashing — a one-way cryptographic algorithm that ensures the original password is never stored or exposed. Upon successful login, the server generates a JSON Web Token (JWT) with a 24-hour expiration period that is automatically included in all subsequent admin requests. The login endpoint is rate-limited to five attempts per minute per IP address using the slowapi library, preventing brute-force password attacks. Both successful and failed login attempts are recorded in the audit log.</p>
+
+  <div class="section">Feature 21 &nbsp;— &nbsp;Auto-Logout on Inactivity</div>
+  <p>The admin panel automatically signs out the administrator after thirty consecutive minutes of inactivity. The system tracks five types of user activity — mouse movement, keystrokes, mouse clicks, touch events, and scrolling. Each detected activity resets the inactivity timer. When the timer expires without any activity, the session is terminated, a "Session Timeout" event is recorded in the audit log with a timestamp and device details, and the administrator is redirected to the login page. This feature protects the admin panel from unauthorized access in cases where the administrator forgets to log out.</p>
+
+  <div class="section">Feature 22 &nbsp;— &nbsp;Admin Dashboard with Real-Time Statistics</div>
+  <p>The Dashboard is the first page the administrator sees after logging in. It displays eight key metrics: total number of questions asked, number of answered questions, number of unanswered questions, overall answer rate expressed as a percentage, total number of email subscribers, total number of uploaded knowledge documents, number of positive feedback votes, and number of pending student concerns. All statistics are fetched from the backend every ten seconds automatically, ensuring the administrator always sees the most current data. The Dashboard also displays a Backend Online/Offline status indicator and a list of recent unanswered questions for quick reference.</p>
+
+  <div class="section">Feature 23 &nbsp;— &nbsp;Knowledge Base Management</div>
+  <p>The Knowledge Base page is where the administrator manages all the documents and text entries that the AI uses to answer student questions. The administrator may upload individual files in PDF, DOCX, or TXT format, or upload multiple files at once using the bulk upload feature. Each file is subject to a 20-megabyte size limit. After uploading, the system automatically extracts the text content, splits it into chunks of approximately 400 words with 50-word overlaps, generates 384-dimensional semantic embeddings for each chunk, and stores them in the ChromaDB vector database — a process called indexing. The administrator may also add text entries directly without uploading a file, which is useful for short policy updates or schedule changes. Text entries can be edited inline, and both file uploads and text entries can be deleted, which simultaneously removes the record from the database and the corresponding embeddings from ChromaDB.</p>
+
+  <div class="section">Feature 24 &nbsp;— &nbsp;Announcement Management with Scheduling</div>
+  <p>The Announcements page allows the administrator to create, edit, and delete school announcements. When creating an announcement, the administrator provides a title and content body, and may optionally attach an image. An optional publish date and time can be set for future announcements, and an expiry date can be set after which the announcement is automatically hidden from the student-facing pages without any manual action. When an announcement is published, the system automatically sends the full announcement to all subscribed students via email as a background task, ensuring the API responds immediately without waiting for the email delivery to complete. Existing announcements can be edited through a pencil icon that opens a pre-filled edit modal.</p>
+
+  <div class="section">Feature 25 &nbsp;— &nbsp;Analytics Dashboard</div>
+  <p>The Analytics page provides the administrator with a detailed view of system usage. It displays a bar chart showing the number of questions asked per day over the last seven days, a ranked list of the ten most frequently asked questions, a complete list of all unanswered questions, and a list of answers that students rated as not helpful using the thumbs-down button. All of these views are organized under tabs that fade in smoothly when switched. The administrator can export the chat logs — filtered by all, answered, or unanswered — as a CSV file containing the question, answer, status, and timestamp of each entry.</p>
+
+  <div class="section">Feature 26 &nbsp;— &nbsp;FAQ Auto-Generator</div>
+  <p>The Analytics page includes an FAQ Auto-Generator feature that uses artificial intelligence to help the administrator fill knowledge gaps in the system. When the administrator clicks the Generate button, the system sends the most recent unanswered student questions to the Groq language model, which analyzes them and suggests knowledge base entries that would answer those questions. The suggested content is displayed as draft text that the administrator can review, edit, and add directly to the knowledge base with a single click. This feature significantly reduces the time and effort required to identify and address gaps in the AI's knowledge.</p>
+
+  <div class="section">Feature 27 &nbsp;— &nbsp;Student Concerns Management</div>
+  <p>The Concerns page displays all concerns submitted by students through the chat interface. The three summary cards at the top of the page — showing total, pending, and resolved concern counts — function as clickable filter buttons that instantly filter the list below. Each concern card shows the student's name, email, message, related unanswered question, submission date, and current status. The administrator may expand a concern card to read the full message, type a reply in a provided text area, and send the reply to the student's email with a single click. The reply is sent as a background task so the interface remains responsive. Concerns may also be marked as resolved without a reply, or deleted entirely.</p>
+
+  <div class="section">Feature 28 &nbsp;— &nbsp;Chat Logs Viewer with Smart Export</div>
+  <p>The Chat Logs page gives the administrator full visibility into every question asked through the chat interface, showing the most recent 200 entries. The three summary cards at the top — Total Questions, Answered, and Unanswered — function as clickable filter buttons that filter the list instantly. The administrator can also search by keyword to find specific questions. Each log entry can be expanded to view the AI's full response. The Export button is context-aware: when the "Total Questions" filter is active it exports all logs, when "Answered" is active it exports only answered logs, and when "Unanswered" is active it exports only unanswered logs. The exported CSV file includes the question, answer, status, and timestamp of each entry.</p>
+
+  <div class="section">Feature 29 &nbsp;— &nbsp;Office Processes Management with Auto-Sync</div>
+  <p>The Office Processes page allows the administrator to add, edit, and delete the office process entries displayed on the landing page. Each entry includes an office name, tagline, icon, color theme, and detailed process sections stored as structured JSON data. Every time an office process is created, updated, or deleted, the system automatically re-synchronizes all office process content into the ChromaDB vector database, ensuring the AI can immediately answer student questions about office procedures based on the most current information without requiring a manual document re-upload. This synchronization also runs once automatically when the backend server starts.</p>
+
+  <div class="section">Feature 30 &nbsp;— &nbsp;Subscriber Management</div>
+  <p>The Subscribers page lists all students who have subscribed to the announcement email system, showing each subscriber's email address and the date they subscribed. The administrator can remove individual subscribers by clicking the trash icon next to their entry. This allows the administrator to maintain a clean and accurate subscriber list.</p>
+
+  <div class="section">Feature 31 &nbsp;— &nbsp;QR Code Generator with Auto-Detection</div>
+  <p>The QR Code page generates a scannable QR code that students can use to open the KCCSmartInfoX chatbot on their phone. The system automatically detects the local network IP address of the server and the current browser port from the operating system, so the generated QR code always points to the correct network address without requiring manual configuration. The administrator can download the QR code as a PNG image for printing or display in classrooms, or copy the chatbot URL to the clipboard. Quick preset buttons allow switching between the local network URL for in-campus use and the localhost URL for development testing.</p>
+
+  <div class="section">Feature 32 &nbsp;— &nbsp;Password Change with Verification</div>
+  <p>The Settings page allows the administrator to update their account password. The password change form requires the administrator to enter their current password for verification, ensuring that only someone who knows the existing password can change it. The new password must be at least six characters long. A real-time visual indicator below the confirm password field shows whether the new password and confirmation match. Passwords are hashed using bcrypt before being stored in the database.</p>
+
+  <div class="section">Feature 33 &nbsp;— &nbsp;Admin Audit Log</div>
+  <p>The Settings page includes an Admin Audit Log section that displays the last fifty administrator session events in chronological order. Each event is color-coded by type: Login Success events are shown in green, Login Failed events in red, Logged Out events in gray, and Session Timeout events in orange. Each log entry shows the event type, the administrator's username, the device type derived from the user agent string (such as Windows PC, iPhone, or Android), the IP address of the request, and the exact date and time. This audit log provides complete visibility into all admin account activity and helps detect unauthorized access attempts.</div>
+
+
+  <!-- ══ CHAPTER 3: AI ══ -->
+  <div class="chapter">Part 3 &nbsp;·&nbsp; AI and System Intelligence Features</div>
+
+  <div class="section">Feature 34 &nbsp;— &nbsp;Retrieval-Augmented Generation (RAG) Pipeline</div>
+  <p>The RAG Pipeline is the core AI mechanism of KCCSmartInfoX. Unlike standard chatbots that generate answers purely from their training data — which may be outdated or hallucinated — the RAG approach first retrieves relevant factual content from official KCC documents before generating a response. This grounding in verified source documents ensures that the AI cannot fabricate school information such as tuition fees, deadlines, or office names. The pipeline consists of thirteen sequential steps: thanks detection, greeting detection, spell correction, LLM query rewriting, semantic embedding, ChromaDB vector search, distance threshold evaluation, context trimming, LLM prompt assembly, Groq API answer generation, bullet formatting cleanup, answered status evaluation, and database logging.</p>
+
+  <div class="section">Feature 35 &nbsp;— &nbsp;Semantic Embedding and Vector Search</div>
+  <p>When a student submits a question, it is converted into a 384-dimensional numerical vector using the all-MiniLM-L6-v2 sentence-transformers model running locally on the server. This vector represents the semantic meaning of the question rather than just its keywords. The question vector is then compared against all document chunk vectors stored in the ChromaDB vector database using cosine similarity — a mathematical measure of directional similarity between vectors. The three most similar chunks are retrieved. If the closest match has a distance score greater than 1.3, the system determines that no relevant information exists in the knowledge base and marks the question as unanswered.</p>
+
+  <div class="section">Feature 36 &nbsp;— &nbsp;Multilingual Query Understanding</div>
+  <p>The system is designed to understand student questions written in English, Filipino, Taglish, Bisaya, or any combination thereof. After spell correction, the question is sent to the Groq language model with a specialized rewriting prompt that instructs it to interpret the student's intent and convert the input into a clean, precise English question for vector search. For example, the input "pano kumuha ng tor sa rejistrar" is rewritten as "How do I get a Transcript of Records from the registrar?" — a form that produces significantly more accurate search results against the document embeddings.</p>
+
+  <div class="section">Feature 37 &nbsp;— &nbsp;Conversation History Context</div>
+  <p>The system maintains context across multiple messages within the same session. The last four messages of the student's conversation history are included in every prompt sent to the Groq language model, allowing the AI to understand follow-up questions that reference previous answers. For example, if a student asks "How do I enroll?" and then asks "What documents do I need?", the AI understands that the second question refers to enrollment documents because the conversation history is included. This context window of four messages balances coherence with token efficiency.</p>
+
+  <div class="section">Feature 38 &nbsp;— &nbsp;Groq API Fallback Error Handling</div>
+  <p>All calls to the Groq API — both for query rewriting and for answer generation — are wrapped in error handling blocks. If the Groq API is temporarily unavailable, returns a timeout, or encounters any error, the system catches the exception and returns a user-friendly message informing the student that the AI service is temporarily unavailable and asking them to try again in a moment. The retry button displayed alongside the error message allows the student to resubmit their question without retyping. This ensures the system degrades gracefully without exposing raw server errors to the student.</p>
+
+
+  <!-- ══ CHAPTER 4: SECURITY ══ -->
+  <div class="chapter">Part 4 &nbsp;·&nbsp; Security and Technical Features</div>
+
+  <div class="section">Feature 39 &nbsp;— &nbsp;JWT Authentication with 401 Interceptor</div>
+  <p>All administrator API endpoints are protected using JSON Web Token (JWT) authentication implemented with the python-jose library. The admin frontend automatically includes the JWT token in the Authorization header of every API request. A global Axios response interceptor monitors all API responses: if any request returns an HTTP 401 Unauthorized status — indicating an expired or invalid token — the interceptor immediately clears the stored token from local storage and redirects the administrator to the login page. This ensures that no sensitive admin data is accessible after a session expires.</p>
+
+  <div class="section">Feature 40 &nbsp;— &nbsp;CORS Security Policy</div>
+  <p>The backend server enforces a strict Cross-Origin Resource Sharing (CORS) policy that limits which origins are permitted to make requests to the API. Only the frontend development server origins — localhost:5173 and localhost:4173, along with their 127.0.0.1 equivalents — are allowed. This prevents unauthorized web applications from making API calls to the backend from different origins, protecting student data and admin functionality from cross-origin attacks.</p>
+
+  <div class="section">Feature 41 &nbsp;— &nbsp;File Upload Size Limit</div>
+  <p>The knowledge base document upload endpoints enforce a maximum file size of 20 megabytes per file, applied to both single and bulk uploads. Files that exceed this limit are rejected before being saved to the server's filesystem, and an HTTP 413 error response is returned with an appropriate message. This prevents large files from consuming excessive server storage and ensures the document processing pipeline operates within acceptable performance bounds.</p>
+
+  <div class="section">Feature 42 &nbsp;— &nbsp;Chat Endpoint Rate Limiting</div>
+  <p>The public chat endpoint is rate-limited to twenty requests per minute per IP address using the slowapi library. This prevents automated bots or scripts from flooding the system with queries and consuming Groq API credits. Users who exceed the rate limit receive an HTTP 429 Too Many Requests response. The rate limit is applied per IP address, so it does not affect other legitimate users on the network.</p>
+
+  <div class="section">Feature 43 &nbsp;— &nbsp;404 Not Found Page</div>
+  <p>Any URL that does not match a valid route in the system is handled by a custom 404 Not Found page rather than the browser's default error display. The page shows the KCC logo, a clear "Page not found" message, and two navigation buttons: one to return to the Landing Page and one to open the Chatbot. This ensures that students who navigate to an incorrect URL are guided back to the correct section of the system without confusion.</p>
+
+  <div class="section">Feature 44 &nbsp;— &nbsp;ChromaDB Singleton Client</div>
+  <p>The ChromaDB vector database client is instantiated as a shared singleton throughout the entire backend application. This design prevents database lock conflicts that would occur if multiple parts of the application — such as the document upload endpoint and the chat endpoint — attempted to open the database simultaneously. The singleton ensures that all read and write operations share the same database connection, eliminating the SQLite lock errors that caused intermittent failures in earlier implementations.</p>
+
+</div><!-- /body -->
+
+<div class="footer">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Features and Functions &nbsp;·&nbsp; Capstone Manuscript Reference &nbsp;·&nbsp; 2026
+</div>
 
 </body>
 </html>

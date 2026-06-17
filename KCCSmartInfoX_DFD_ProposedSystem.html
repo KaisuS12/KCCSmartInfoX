@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KCCSmartInfoX — DFD Proposed System (Gane & Sarson)</title>
+<style>
+  body { margin: 0; padding: 30px; background: #eef2f7; font-family: Arial, sans-serif; }
+  h2 { text-align: center; color: #1a3a6b; font-size: 20px; margin-bottom: 4px; }
+  p.sub { text-align: center; color: #666; font-size: 13px; margin: 0 0 20px; }
+  svg { display: block; margin: auto; background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,0.13); }
+</style>
+</head>
+<body>
+<h2>KCCSmartInfoX &mdash; Data Flow Diagram: Proposed System</h2>
+<p class="sub">Gane &amp; Sarson Notation &nbsp;|&nbsp; Level 1 DFD</p>
+
+<svg width="1100" height="1020" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+    <polygon points="0 0, 9 3.5, 0 7" fill="#333"/>
+  </marker>
+  <clipPath id="cp1"><rect x="215" y="68" width="165" height="76" rx="8"/></clipPath>
+  <clipPath id="cp2"><rect x="462" y="68" width="182" height="76" rx="8"/></clipPath>
+  <clipPath id="cp3"><rect x="462" y="228" width="182" height="76" rx="8"/></clipPath>
+  <clipPath id="cp4"><rect x="215" y="428" width="165" height="76" rx="8"/></clipPath>
+  <clipPath id="cp5"><rect x="215" y="618" width="165" height="76" rx="8"/></clipPath>
+  <clipPath id="cp6"><rect x="462" y="798" width="182" height="76" rx="8"/></clipPath>
+</defs>
+
+<!-- ── Section backgrounds ── -->
+<rect x="18" y="52" width="1068" height="272" rx="6" fill="#f6faff" stroke="#ccddf5" stroke-width="1" stroke-dasharray="5,3"/>
+<text x="26" y="46" font-size="10" fill="#99b" font-style="italic">Chat Flow</text>
+
+<rect x="18" y="412" width="1068" height="116" rx="6" fill="#fffaf4" stroke="#e8d5b0" stroke-width="1" stroke-dasharray="5,3"/>
+<text x="26" y="406" font-size="10" fill="#a98" font-style="italic">Concern Submission</text>
+
+<rect x="18" y="600" width="1068" height="390" rx="6" fill="#f5fff5" stroke="#b8dfb8" stroke-width="1" stroke-dasharray="5,3"/>
+<text x="26" y="594" font-size="10" fill="#7a9" font-style="italic">Admin Management</text>
+
+<!-- ══════════ EXTERNAL ENTITIES ══════════ -->
+<rect x="28" y="296" width="112" height="56" rx="2" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<text x="84" y="329" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">Student</text>
+
+<rect x="28" y="688" width="112" height="56" rx="2" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<text x="84" y="721" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">Admin</text>
+
+<!-- ══════════ PROCESSES (Gane & Sarson: rounded rect + top header line) ══════════ -->
+
+<!-- P1: 1.0 Process Student Query -->
+<rect x="215" y="68" width="165" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="215" y="68" width="165" height="27" fill="#a8c4e0" clip-path="url(#cp1)"/>
+<line x1="215" y1="95" x2="380" y2="95" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="297" y="87" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">1.0</text>
+<text x="297" y="114" text-anchor="middle" font-size="11" fill="#111">Process Student</text>
+<text x="297" y="129" text-anchor="middle" font-size="11" fill="#111">Query</text>
+
+<!-- P2: 2.0 Semantic Search -->
+<rect x="462" y="68" width="182" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="462" y="68" width="182" height="27" fill="#a8c4e0" clip-path="url(#cp2)"/>
+<line x1="462" y1="95" x2="644" y2="95" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="553" y="87" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">2.0</text>
+<text x="553" y="114" text-anchor="middle" font-size="11" fill="#111">Semantic Search on</text>
+<text x="553" y="129" text-anchor="middle" font-size="11" fill="#111">Knowledge Base</text>
+
+<!-- P3: 3.0 Generate AI Response -->
+<rect x="462" y="228" width="182" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="462" y="228" width="182" height="27" fill="#a8c4e0" clip-path="url(#cp3)"/>
+<line x1="462" y1="255" x2="644" y2="255" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="553" y="247" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">3.0</text>
+<text x="553" y="273" text-anchor="middle" font-size="11" fill="#111">Generate AI</text>
+<text x="553" y="288" text-anchor="middle" font-size="11" fill="#111">Response</text>
+
+<!-- P4: 4.0 Submit Concern -->
+<rect x="215" y="428" width="165" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="215" y="428" width="165" height="27" fill="#a8c4e0" clip-path="url(#cp4)"/>
+<line x1="215" y1="455" x2="380" y2="455" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="297" y="447" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">4.0</text>
+<text x="297" y="473" text-anchor="middle" font-size="11" fill="#111">Submit</text>
+<text x="297" y="488" text-anchor="middle" font-size="11" fill="#111">Concern</text>
+
+<!-- P5: 5.0 Manage Knowledge Base -->
+<rect x="215" y="618" width="165" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="215" y="618" width="165" height="27" fill="#a8c4e0" clip-path="url(#cp5)"/>
+<line x1="215" y1="645" x2="380" y2="645" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="297" y="637" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">5.0</text>
+<text x="297" y="663" text-anchor="middle" font-size="11" fill="#111">Manage</text>
+<text x="297" y="678" text-anchor="middle" font-size="11" fill="#111">Knowledge Base</text>
+
+<!-- P6: 6.0 Manage Announcements -->
+<rect x="462" y="798" width="182" height="76" rx="8" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<rect x="462" y="798" width="182" height="27" fill="#a8c4e0" clip-path="url(#cp6)"/>
+<line x1="462" y1="825" x2="644" y2="825" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="553" y="817" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">6.0</text>
+<text x="553" y="843" text-anchor="middle" font-size="11" fill="#111">Manage</text>
+<text x="553" y="858" text-anchor="middle" font-size="11" fill="#111">Announcements</text>
+
+<!-- ══════════ DATA STORES (Gane & Sarson: open right, labeled cell on left) ══════════ -->
+
+<!-- D1: Knowledge Base  y=78 -->
+<rect x="738" y="78" width="42" height="50" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="78"  x2="1058" y2="78"  stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="128" x2="1058" y2="128" stroke="#2d5a9e" stroke-width="2"/>
+<text x="759" y="108" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">D1</text>
+<text x="919" y="108" text-anchor="middle" font-size="12" fill="#111">Knowledge Base</text>
+
+<!-- D2: Chat Logs  y=242 -->
+<rect x="738" y="242" width="42" height="50" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="242" x2="1058" y2="242" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="292" x2="1058" y2="292" stroke="#2d5a9e" stroke-width="2"/>
+<text x="759" y="272" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">D2</text>
+<text x="919" y="272" text-anchor="middle" font-size="12" fill="#111">Chat Logs</text>
+
+<!-- D3: Concerns  y=443 -->
+<rect x="738" y="443" width="42" height="50" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="443" x2="1058" y2="443" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="493" x2="1058" y2="493" stroke="#2d5a9e" stroke-width="2"/>
+<text x="759" y="473" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">D3</text>
+<text x="919" y="473" text-anchor="middle" font-size="12" fill="#111">Concerns</text>
+
+<!-- D5: Announcements  y=808 -->
+<rect x="738" y="808" width="42" height="50" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="808" x2="1058" y2="808" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="858" x2="1058" y2="858" stroke="#2d5a9e" stroke-width="2"/>
+<text x="759" y="838" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">D5</text>
+<text x="919" y="838" text-anchor="middle" font-size="12" fill="#111">Announcements</text>
+
+<!-- D4: Subscribers  y=918 -->
+<rect x="738" y="918" width="42" height="50" fill="#dce8f8" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="918" x2="1058" y2="918" stroke="#2d5a9e" stroke-width="2"/>
+<line x1="780" y1="968" x2="1058" y2="968" stroke="#2d5a9e" stroke-width="2"/>
+<text x="759" y="948" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a3a6b">D4</text>
+<text x="919" y="948" text-anchor="middle" font-size="12" fill="#111">Subscribers</text>
+
+<!-- ══════════ DATA FLOWS ══════════ -->
+
+<!-- 1. Student → P1: Question via Text or Voice -->
+<path d="M 140,308 C 182,308 200,106 213,106" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+<text x="148" y="205" font-size="9" fill="#444">Question</text>
+<text x="148" y="216" font-size="9" fill="#444">(Text/Voice)</text>
+
+<!-- 2. P1 → P2: Embedded Query -->
+<line x1="380" y1="106" x2="460" y2="106" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="384" y="100" font-size="9" fill="#444">Embedded Query</text>
+
+<!-- 3. P2 → D1: Search Request -->
+<line x1="644" y1="97" x2="736" y2="97" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="648" y="91" font-size="9" fill="#444">Search Request</text>
+
+<!-- 4. D1 → P2: Relevant Chunks -->
+<line x1="736" y1="112" x2="644" y2="112" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="652" y="126" font-size="9" fill="#444">Relevant Chunks</text>
+
+<!-- 5. P2 → P3: Context -->
+<line x1="553" y1="144" x2="553" y2="226" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="558" y="191" font-size="9" fill="#444">Context</text>
+
+<!-- 6. P3 → Student: Answer + Sources -->
+<path d="M 462,266 C 340,266 200,330 142,328" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+<text x="248" y="299" font-size="9" fill="#444">Answer + Sources</text>
+
+<!-- 7. P3 → D2: Log Q&A -->
+<line x1="644" y1="266" x2="736" y2="266" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="648" y="260" font-size="9" fill="#444">Log Q&amp;A</text>
+
+<!-- 8. Student → P4: Concern Form -->
+<path d="M 140,340 C 164,400 194,466 213,466" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+<text x="136" y="420" font-size="9" fill="#444">Concern</text>
+<text x="136" y="431" font-size="9" fill="#444">Form</text>
+
+<!-- 9. P4 → D3: Save Concern -->
+<line x1="380" y1="466" x2="736" y2="466" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="450" y="459" font-size="9" fill="#444">Save Concern</text>
+
+<!-- 10. D3 → Admin: View & Reply -->
+<path d="M 738,478 C 580,540 200,698 142,710" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+<text x="382" y="572" font-size="9" fill="#444">View &amp; Reply</text>
+
+<!-- 11. Admin → P5: Upload Documents -->
+<line x1="140" y1="706" x2="213" y2="668" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="140" y="695" font-size="9" fill="#444">Upload Docs</text>
+
+<!-- 12. P5 → D1: Update Knowledge Base (routed right then up) -->
+<path d="M 380,648 L 718,648 L 718,103 L 736,103" stroke="#333" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arr)"/>
+<text x="436" y="641" font-size="9" fill="#444">Update KB</text>
+
+<!-- 13. Admin → P6: Create Announcement -->
+<path d="M 140,726 C 280,790 400,836 460,836" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+<text x="218" y="800" font-size="9" fill="#444">Create Announcement</text>
+
+<!-- 14. P6 → D5: Save Announcement -->
+<line x1="644" y1="836" x2="736" y2="836" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="648" y="830" font-size="9" fill="#444">Save</text>
+
+<!-- 15. D5 → D4: Email Notification -->
+<line x1="898" y1="858" x2="898" y2="916" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="903" y="893" font-size="9" fill="#444">Email Notif.</text>
+
+<!-- ══════════ LEGEND ══════════ -->
+<line x1="18" y1="985" x2="1086" y2="985" stroke="#ccc" stroke-width="1"/>
+<text x="26" y="1004" font-size="11" font-weight="bold" fill="#333">Legend:</text>
+<!-- Entity -->
+<rect x="90" y="992" width="18" height="14" rx="1" fill="#dce8f8" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="114" y="1004" font-size="10" fill="#333">External Entity</text>
+<!-- Process -->
+<rect x="228" y="992" width="18" height="14" rx="4" fill="#a8c4e0" stroke="#2d5a9e" stroke-width="1.5"/>
+<line x1="228" y1="999" x2="246" y2="999" stroke="#2d5a9e" stroke-width="1"/>
+<text x="252" y="1004" font-size="10" fill="#333">Process</text>
+<!-- Data Store -->
+<rect x="320" y="992" width="18" height="14" fill="#dce8f8" stroke="#2d5a9e" stroke-width="1.5"/>
+<line x1="338" y1="992" x2="380" y2="992" stroke="#2d5a9e" stroke-width="1.5"/>
+<line x1="338" y1="1006" x2="380" y2="1006" stroke="#2d5a9e" stroke-width="1.5"/>
+<text x="386" y="1004" font-size="10" fill="#333">Data Store (open right)</text>
+<!-- Arrow -->
+<line x1="530" y1="999" x2="562" y2="999" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="568" y="1004" font-size="10" fill="#333">Data Flow</text>
+<!-- Dashed -->
+<line x1="648" y1="999" x2="680" y2="999" stroke="#333" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+<text x="686" y="1004" font-size="10" fill="#333">Update Flow</text>
+
+</svg>
+</body>
+</html>

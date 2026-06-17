@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import axios from 'axios'
 import kccLogo from '../assets/kcc-logo.png'
+import AnnouncementsPanel from '../components/user/AnnouncementsPanel'
 
 // Map icon name string → lucide component
 const ICON_MAP = {
@@ -195,6 +196,7 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const [announcements, setAnnouncements] = useState([])
   const [offices, setOffices] = useState([])
+  const [showAnnouncements, setShowAnnouncements] = useState(false)
 
   useEffect(() => {
     axios.get('/api/announcements').then(res => setAnnouncements(res.data.slice(0, 5))).catch(() => {})
@@ -231,16 +233,36 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="relative px-6 py-12 lg:py-16">
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div className="order-2 lg:order-1">
-            {announcements.length > 0
-              ? <AnnouncementCarousel announcements={announcements} />
-              : (
-                <div className="flex flex-col items-center justify-center min-h-[240px] border border-white/10 rounded-2xl bg-white/5 text-gray-600 text-sm gap-2">
-                  <Megaphone size={26} className="opacity-30" />
-                  <span>No announcements yet.</span>
-                </div>
-              )
-            }
+          <div className="order-2 lg:order-1 flex flex-col gap-3">
+            <div
+              className="cursor-pointer group"
+              onClick={() => setShowAnnouncements(true)}
+              title="View all announcements"
+            >
+              {announcements.length > 0
+                ? (
+                  <div className="relative">
+                    <AnnouncementCarousel announcements={announcements} />
+                    <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-kcc-gold/40 transition-all duration-200 pointer-events-none" />
+                  </div>
+                )
+                : (
+                  <div className="flex flex-col items-center justify-center min-h-[240px] border border-white/10 rounded-2xl bg-white/5 text-gray-600 text-sm gap-2 hover:border-kcc-gold/30 transition-colors">
+                    <Megaphone size={26} className="opacity-30" />
+                    <span>No announcements yet.</span>
+                  </div>
+                )
+              }
+            </div>
+            {announcements.length > 0 && (
+              <button
+                onClick={() => setShowAnnouncements(true)}
+                className="flex items-center gap-1.5 text-xs text-kcc-gold hover:underline self-end"
+              >
+                <Megaphone size={11} />
+                View all announcements →
+              </button>
+            )}
           </div>
 
           <div className="order-1 lg:order-2 flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -258,7 +280,6 @@ export default function LandingPage() {
             </h2>
             <p className="text-gray-400 text-sm max-w-sm mb-8 leading-relaxed animate-fadeIn" style={{ animationDelay: '0.1s' }}>
               Your 24/7 AI assistant for Kabankalan Catholic College.
-              Instant answers about enrollment, courses, policies, and more.
             </p>
             <button
               onClick={() => navigate('/chat')}
@@ -328,6 +349,10 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 px-6 py-5 text-center">
         <p className="text-gray-700 text-xs">© {new Date().getFullYear()} KCCSmartInfoX · Kabankalan Catholic College · All rights reserved</p>
       </footer>
+
+      {showAnnouncements && (
+        <AnnouncementsPanel onClose={() => setShowAnnouncements(false)} />
+      )}
     </div>
   )
 }

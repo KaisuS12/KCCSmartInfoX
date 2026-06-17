@@ -12,7 +12,7 @@ from groq import Groq
 from dotenv import load_dotenv
 
 from models.database import (
-    get_db, AdminAILog, ChatLog, KnowledgeDoc,
+    get_db, ChatLog, KnowledgeDoc,
     Subscriber, Feedback, Announcement, OfficeProcess
 )
 from utils.auth import get_current_admin
@@ -282,33 +282,4 @@ async def ai_chat(
         status = "error"
         action_details = f"Failed {intent}: {str(e)[:80]}"
 
-    # 3. Log action (skip pure general queries)
-    if intent not in ("general",) or status == "error":
-        if action_details:
-            db.add(AdminAILog(action=intent, details=action_details, status=status))
-            db.commit()
-
     return {"reply": reply, "intent": intent}
-
-
-@router.get("/admin/ai/history")
-async def ai_history(
-    db: Session = Depends(get_db),
-    admin=Depends(get_current_admin),
-):
-    logs = (
-        db.query(AdminAILog)
-        .order_by(AdminAILog.created_at.desc())
-        .limit(50)
-        .all()
-    )
-    return [
-        {
-            "id": l.id,
-            "action": l.action,
-            "details": l.details,
-            "status": l.status,
-            "created_at": str(l.created_at),
-        }
-        for l in logs
-    ]

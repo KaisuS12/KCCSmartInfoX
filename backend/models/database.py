@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Da
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 import os
+import uuid
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -89,15 +90,6 @@ class OfficeProcess(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class AdminAILog(Base):
-    __tablename__ = "admin_ai_logs"
-    id         = Column(Integer, primary_key=True, index=True)
-    action     = Column(String(100))
-    details    = Column(Text)
-    status     = Column(String(20), default="success")
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-
 class AdminLoginLog(Base):
     __tablename__ = "admin_login_logs"
     id         = Column(Integer, primary_key=True, index=True)
@@ -119,6 +111,38 @@ class Concern(Base):
     admin_reply      = Column(Text, nullable=True)
     created_at       = Column(DateTime, default=datetime.utcnow)
     replied_at       = Column(DateTime, nullable=True)
+
+
+class UserAccount(Base):
+    __tablename__ = "user_accounts"
+    id            = Column(Integer, primary_key=True, index=True)
+    email         = Column(String(255), unique=True, nullable=False)
+    name          = Column(String(255), nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    created_at    = Column(DateTime, default=datetime.utcnow)
+
+
+class LiveChat(Base):
+    __tablename__ = "live_chats"
+    id               = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id          = Column(Integer, ForeignKey("user_accounts.id"), nullable=True)
+    user_name        = Column(String(255), nullable=False)
+    user_email       = Column(String(255), nullable=True)
+    related_question = Column(Text, nullable=True)
+    status           = Column(String(20), default="active")   # "active" | "closed"
+    device_type      = Column(String(20), nullable=True)       # "Mobile" | "Tablet" | "Desktop"
+    last_seen        = Column(DateTime, nullable=True)         # updated by heartbeat
+    created_at       = Column(DateTime, default=datetime.utcnow)
+    closed_at        = Column(DateTime, nullable=True)
+
+
+class LiveMessage(Base):
+    __tablename__ = "live_messages"
+    id      = Column(Integer, primary_key=True, index=True)
+    chat_id = Column(String(36), ForeignKey("live_chats.id"), nullable=False, index=True)
+    sender  = Column(String(10), nullable=False)   # "user" | "admin"
+    content = Column(Text, nullable=False)
+    sent_at = Column(DateTime, default=datetime.utcnow)
 
 
 def get_db():

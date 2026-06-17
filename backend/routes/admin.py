@@ -199,22 +199,39 @@ async def analytics(db: Session = Depends(get_db), admin=Depends(get_current_adm
 
 
 @router.get("/admin/analytics/unanswered/export")
-async def export_unanswered(db: Session = Depends(get_db), admin=Depends(get_current_admin)):
-    rows = (
-        db.query(ChatLog)
-        .filter(ChatLog.is_answered == False)
-        .order_by(ChatLog.created_at.desc())
-        .all()
-    )
+async def export_chatlogs(token: str = None, filter: str = "unanswered", db: Session = Depends(get_db)):
+    from jose import JWTError, jwt as _jwt
+    import os as _os
+    _key = _os.getenv("SECRET_KEY", "kccsmartinfox-change-this-in-production")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        _jwt.decode(token, _key, algorithms=["HS256"])
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    query = db.query(ChatLog)
+    if filter == "answered":
+        query = query.filter(ChatLog.is_answered == True)
+    elif filter == "unanswered":
+        query = query.filter(ChatLog.is_answered == False)
+    rows = query.order_by(ChatLog.created_at.desc()).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["ID", "Question", "Date"])
+    writer.writerow(["ID", "Question", "Answer", "Status", "Date"])
     for q in rows:
-        writer.writerow([q.id, q.question, str(q.created_at)])
+        writer.writerow([
+            q.id,
+            q.question,
+            q.answer or "",
+            "Answered" if q.is_answered else "Unanswered",
+            str(q.created_at)
+        ])
 
     output.seek(0)
-    filename = f"unanswered_questions_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+    label = filter if filter in ("answered", "unanswered") else "all"
+    filename = f"chatlogs_{label}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",

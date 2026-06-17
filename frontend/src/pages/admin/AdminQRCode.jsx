@@ -10,17 +10,18 @@ export default function AdminQRCode() {
   const [loadingIp, setLoadingIp] = useState(true)
   const [copied, setCopied] = useState(false)
   const qrRef = useRef(null)
-  const currentPort = window.location.port || '5173'
+  const currentPort     = window.location.port || '5173'
+  const currentProtocol = window.location.protocol  // 'https:' or 'http:'
 
   useEffect(() => {
     axios.get('/api/local-ip')
       .then(r => {
         const ip = r.data.ip
         setNetworkIp(ip)
-        setUrl(`http://${ip}:${currentPort}/chat`)
+        setUrl(`${currentProtocol}//${ip}:${currentPort}/chat`)
       })
       .catch(() => {
-        setUrl(`http://localhost:${currentPort}/chat`)
+        setUrl(`${currentProtocol}//localhost:${currentPort}/chat`)
       })
       .finally(() => setLoadingIp(false))
   }, [])
@@ -119,7 +120,7 @@ export default function AdminQRCode() {
               style={{ padding: 20, border: '4px solid #C9A84C', display: 'inline-block' }}
             >
               <QRCode
-                value={url || `http://localhost:${currentPort}/chat`}
+                value={url || `${currentProtocol}//localhost:${currentPort}/chat`}
                 size={220}
                 bgColor="#ffffff"
                 fgColor="#000000"
@@ -164,7 +165,7 @@ export default function AdminQRCode() {
                   value={url}
                   onChange={e => setUrl(e.target.value)}
                   className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 outline-none focus:border-kcc-blue"
-                  placeholder="http://192.168.0.109:5173/chat"
+                  placeholder="https://192.168.0.109:5173/chat"
                 />
                 <button
                   onClick={handleCopy}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCCSmartInfoX — Panel Presentation Guide</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #1a1a1a; font-size: 12pt; line-height: 1.9; }
+
+    /* Cover */
+    .cover { background: #003087; color: white; padding: 60px 72px 52px; }
+    .cover .school { font-size: 11pt; color: #a8c0e8; margin-bottom: 6px; }
+    .cover h1 { font-size: 26pt; font-weight: bold; color: #c9a84c; margin-bottom: 4px; }
+    .cover .doc-title { font-size: 15pt; font-weight: bold; color: white; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 18px; margin-top: 18px; margin-bottom: 6px; }
+    .cover .doc-sub { font-size: 11pt; color: #7a9fd4; }
+
+    .body { max-width: 740px; margin: 0 auto; padding: 48px 72px 64px; }
+
+    /* Figure block */
+    .figure-block {
+      margin-bottom: 56px;
+      page-break-inside: avoid;
+    }
+
+    .figure-number {
+      font-size: 10pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #c9a84c;
+      margin-bottom: 4px;
+    }
+
+    .figure-title {
+      font-size: 17pt;
+      font-weight: bold;
+      color: #003087;
+      margin-bottom: 6px;
+      border-bottom: 2px solid #003087;
+      padding-bottom: 8px;
+    }
+
+    .figure-link {
+      font-size: 10pt;
+      color: #1d4ed8;
+      margin-bottom: 18px;
+      display: block;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* What it shows */
+    .what-box {
+      background: #f0f4ff;
+      border-left: 4px solid #003087;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      border-radius: 0 8px 8px 0;
+    }
+    .what-box .what-label {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #003087;
+      margin-bottom: 4px;
+    }
+    .what-box p { text-indent: 0; margin: 0; font-size: 11.5pt; }
+
+    /* Script box */
+    .script-box {
+      background: #fffbeb;
+      border: 1.5px solid #c9a84c;
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 14px;
+    }
+    .script-label {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #92400e;
+      margin-bottom: 10px;
+    }
+    .script-text {
+      font-size: 12pt;
+      color: #1c1917;
+      line-height: 2;
+      font-style: italic;
+      text-indent: 0;
+    }
+
+    /* Key points */
+    .key-points {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+    }
+    .key-label {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #15803d;
+      margin-bottom: 8px;
+    }
+    .key-points ul { padding-left: 20px; }
+    .key-points li { font-size: 11.5pt; margin-bottom: 4px; }
+
+    /* Panel Q&A */
+    .qa-box {
+      background: #fff1f2;
+      border: 1.5px solid #fca5a5;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .qa-label {
+      font-size: 9.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #991b1b;
+      margin-bottom: 10px;
+    }
+    .qa-item { margin-bottom: 12px; }
+    .qa-q { font-size: 11.5pt; font-weight: bold; color: #7f1d1d; }
+    .qa-a { font-size: 11.5pt; color: #1c1917; text-indent: 0; margin-top: 3px; }
+
+    p { text-align: justify; text-indent: 36px; margin-bottom: 10px; }
+
+    .divider { border: none; border-top: 1.5px solid #e5e7eb; margin: 40px 0; }
+
+    .footer { background: #003087; color: #a8c0e8; text-align: center; padding: 14px; font-family: Arial, sans-serif; font-size: 10pt; }
+
+    @media print {
+      body { background: white; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .figure-block { page-break-before: always; }
+      .figure-block:first-of-type { page-break-before: avoid; }
+      .what-box, .script-box, .key-points, .qa-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="school">Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Capstone Project 2025–2026</div>
+  <h1>KCCSmartInfoX</h1>
+  <div class="doc-title">Panel Presentation Guide — How to Explain Each Diagram</div>
+  <div class="doc-sub">Use this during your defense. The yellow boxes are your speaking script. The red boxes are possible panelist questions with ready answers.</div>
+</div>
+
+<div class="body">
+
+<!-- ══ FIGURE 1 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 1</div>
+  <div class="figure-title">Conceptual Framework — IPO Model</div>
+  <a class="figure-link" href="https://www.figma.com/board/wJaK19VPcmv5sXY8bNHZ3o">https://www.figma.com/board/wJaK19VPcmv5sXY8bNHZ3o</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>The overall Input–Process–Output model of the entire KCCSmartInfoX system. It shows what data goes in, what the system does with it, and what comes out.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our Conceptual Framework using the IPO model — Input, Process, and Output. On the INPUT side, we have the student's question, their chosen language which is English or Filipino, voice input, and feedback. On the admin side, the inputs are the uploaded documents, announcements, and office processes. These inputs go into our PROCESS layer where the system performs authentication, spell correction, AI query rewriting, semantic embedding, vector search, and LLM answer generation. The OUTPUT is the AI-generated answer with source citations for the student, and analytics reports, chat logs, and audit logs for the administrator. This framework guided the entire design of our system."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>IPO means Input → Process → Output</li>
+      <li>Two types of users feed inputs: Student and Admin</li>
+      <li>The Process is where the AI happens (RAG pipeline)</li>
+      <li>Outputs go back to both users in different forms</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why did you use the IPO model as your framework?</div>
+      <div class="qa-a">A: "The IPO model is the most appropriate framework for information systems because our system is fundamentally about receiving data, processing it through AI, and returning useful output. It clearly shows the flow of information from both the student and administrator perspectives."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What is the most important part of your process?</div>
+      <div class="qa-a">A: "The RAG Pipeline — Retrieval-Augmented Generation. It is what makes our AI answer accurately based only on official KCC documents, rather than generating unreliable information."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 2 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 2</div>
+  <div class="figure-title">System Architecture Diagram</div>
+  <a class="figure-link" href="https://www.figma.com/board/zQ3maIg3vfvfAXopGnlpbi">https://www.figma.com/board/zQ3maIg3vfvfAXopGnlpbi</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>The three-tier architecture of the system — how the browser/phone, the backend server, and the databases are connected and communicate with each other.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our System Architecture Diagram. Our system follows a three-tier architecture. The first tier is the Client Layer — this is what the student or admin sees in their browser or phone, built using React 18 and Vite. The second tier is the Backend Layer — this is the FastAPI server running in Python that handles all requests, manages security through JWT authentication, and coordinates the AI pipeline. The third tier is the Data Layer — this includes the SQLite relational database for structured data like chat logs and announcements, the ChromaDB vector database for storing document embeddings, and the external Groq API for AI answer generation. The client communicates with the backend through HTTP REST API calls, and the backend connects to the data layer to retrieve and store information."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>Three tiers: Client → Backend → Data</li>
+      <li>Frontend: React 18 + Vite + TailwindCSS</li>
+      <li>Backend: FastAPI + Python + Uvicorn</li>
+      <li>Two databases: SQLite (structured data) + ChromaDB (AI embeddings)</li>
+      <li>One external AI service: Groq API</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why did you use two databases?</div>
+      <div class="qa-a">A: "We needed two different types of storage. SQLite is a relational database — good for structured records like user accounts, chat logs, and announcements. ChromaDB is a vector database — it stores mathematical representations of text called embeddings, which are needed for the AI to find relevant documents by meaning, not just keywords."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why FastAPI and not Django or Node.js?</div>
+      <div class="qa-a">A: "FastAPI is the best choice for AI applications because it is asynchronous by design, which means it can handle multiple users at the same time. It also has automatic API documentation and is written in Python — the same language as our AI libraries like sentence-transformers and ChromaDB."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 3 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 3</div>
+  <div class="figure-title">Use Case Diagram</div>
+  <a class="figure-link" href="https://www.figma.com/board/cc9sdDS34gVw0DwyIqMyiV">https://www.figma.com/board/cc9sdDS34gVw0DwyIqMyiV</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>All the actions that each type of user — Student and Administrator — can perform in the system. It defines the roles and boundaries of who can do what.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our Use Case Diagram. It shows the two actors in our system — the Student and the Administrator — and what each one can do. On the student side, the main use cases are: asking a question and receiving an AI answer, submitting a concern when the AI cannot help, giving feedback through thumbs up or thumbs down, viewing announcements, subscribing to announcements via email, using voice input, switching between English and Filipino, and installing the system as a mobile app through PWA. On the administrator side, the use cases include logging in securely, managing the knowledge base by uploading and editing documents, posting and scheduling announcements, viewing analytics and generating FAQ suggestions, replying to student concerns, viewing chat logs, managing office processes, generating a QR code, changing the password, and viewing the audit log."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>Two actors: Student (9 use cases) and Administrator (12 use cases)</li>
+      <li>Students interact with the AI chatbot side</li>
+      <li>Admins manage and monitor the system</li>
+      <li>Both actors are connected to the same system boundary</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Can a student access the admin panel?</div>
+      <div class="qa-a">A: "No. The admin panel is protected by JWT authentication. A student cannot access any admin route without a valid login token. All admin API endpoints return HTTP 401 Unauthorized if accessed without proper credentials."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What happens if a student submits a concern?</div>
+      <div class="qa-a">A: "The concern is saved to the database with a status of Pending. The administrator receives a notification and can reply directly through the admin panel. The reply is automatically sent to the student's email address."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 4 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 4</div>
+  <div class="figure-title">Data Flow Diagram — Level 0 (Context Diagram)</div>
+  <a class="figure-link" href="https://www.figma.com/board/h8G0p2A5VA5kj7ql1TWFYc">https://www.figma.com/board/h8G0p2A5VA5kj7ql1TWFYc</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>The highest-level view of the system. The entire KCCSmartInfoX system is shown as one single process in the center, with the four external entities that interact with it around the outside.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our Data Flow Diagram Level 0, also called the Context Diagram. At this level, we treat the entire KCCSmartInfoX system as one single process in the center. Around it are four external entities that interact with the system. First, the Student — who sends questions and feedback to the system, and receives AI answers and announcements back. Second, the Administrator — who sends documents and settings to the system, and receives analytics and reports back. Third, the Groq API — our system sends AI prompts to Groq and receives generated answers in return. Fourth, Gmail SMTP — our system sends email content to Gmail and receives delivery confirmation. This diagram shows all the major data flows at the highest level without going into internal details."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>Level 0 = the whole system as one black box</li>
+      <li>4 external entities: Student, Administrator, Groq API, Gmail SMTP</li>
+      <li>Arrows show what data flows in and out</li>
+      <li>No internal details — that is shown in Level 1</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why is Groq API an external entity?</div>
+      <div class="qa-a">A: "Because Groq is a third-party cloud service that our system depends on but does not control. Our system sends a prompt to Groq's servers and receives a generated text response. It is external because it exists outside our system boundary."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What if Groq API is unavailable?</div>
+      <div class="qa-a">A: "Our system has error handling for this. If Groq is unreachable, the student sees a friendly message asking them to try again in a moment instead of a raw error. The system does not crash."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 5 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 5</div>
+  <div class="figure-title">Data Flow Diagram — Level 1</div>
+  <a class="figure-link" href="https://www.figma.com/board/Rn8DQWBoNNPqcDguBcGhNr">https://www.figma.com/board/Rn8DQWBoNNPqcDguBcGhNr</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>The system broken down into its six main internal processes, showing how data flows between each process, the databases, and the external entities.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our DFD Level 1. Here we open up the system and show the six main internal processes. Process 1 is Authentication — the administrator logs in, the system verifies credentials against the SQLite database and returns a JWT token. Process 2 is Chat Processing, which is our RAG Pipeline — the student sends a question, the system searches ChromaDB for relevant documents, sends a prompt to the Groq API, and returns the AI answer. All questions and answers are stored in SQLite. Process 3 is Knowledge Base Management — the admin uploads documents, the system extracts text, creates embeddings, and stores them in both SQLite and ChromaDB. Process 4 is Announcement Management — the admin creates announcements stored in SQLite, and the system sends emails to subscribers through Gmail SMTP. Process 5 is Analytics and Reporting — the admin requests reports, the system reads from SQLite and returns statistics and CSV exports. Process 6 is Concern Management — students submit concerns stored in SQLite, admins reply, and the reply is sent to the student via Gmail SMTP."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>6 main processes: Auth, Chat/RAG, Knowledge Base, Announcements, Analytics, Concerns</li>
+      <li>Two data stores: SQLite (structured) and ChromaDB (vectors)</li>
+      <li>Process 2 (Chat/RAG) is the core and most complex process</li>
+      <li>Gmail SMTP is used by both Announcements (Process 4) and Concerns (Process 6)</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why does Process 3 write to both databases?</div>
+      <div class="qa-a">A: "SQLite stores the document metadata — the filename, file path, and upload date — so the admin can see what documents are in the system. ChromaDB stores the actual text embeddings of the document chunks, which are needed for the AI to search by meaning. Both are needed for the knowledge base to work completely."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 6 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 6</div>
+  <div class="figure-title">RAG Pipeline Flowchart — AI Query Processing</div>
+  <a class="figure-link" href="https://www.figma.com/board/U2vTNfVxLyPvXX4dMLwUs7">https://www.figma.com/board/U2vTNfVxLyPvXX4dMLwUs7</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>The complete step-by-step process of how the AI handles a student's question — from the moment they press send to the moment the answer appears on screen. This is the heart of the system.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This flowchart shows how our AI processes every student question — this is called our RAG Pipeline, or Retrieval-Augmented Generation Pipeline. When a student sends a message, the system first checks if it is a thank-you — like salamat or thanks — and if so, it replies instantly without calling any AI. Next it checks if it is a greeting like hello or kumusta, and if so, it sends a simple conversational response. If it is a real question, the system first corrects any spelling mistakes using a local spell checker that knows Filipino and KCC-specific words. Then it sends the corrected question to the Groq AI to rewrite it into clean English — this helps the AI understand Taglish and abbreviations. The clean question is then converted into a mathematical vector using our local embedding model. This vector is compared against all the document vectors stored in ChromaDB. If the closest match is too far away in meaning, the question is marked as unanswered. If relevant documents are found, they are used as context and sent together with the question to the Groq AI which generates the final answer. The answer is cleaned, checked, logged to the database, and returned to the student."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>13 steps total from question to answer</li>
+      <li>Thanks and greetings are handled without any document search</li>
+      <li>Spell fix is local — no internet needed for this step</li>
+      <li>Query rewriting converts Taglish/Bisaya to clean English</li>
+      <li>Distance threshold 1.3 — if score is higher, question is unanswered</li>
+      <li>Groq API is called only twice: for query rewriting and for answer generation</li>
+      <li>All questions logged to database regardless of answered status</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What is RAG and why did you use it?</div>
+      <div class="qa-a">A: "RAG stands for Retrieval-Augmented Generation. Instead of letting the AI generate answers from its training data — which can be outdated or hallucinated — RAG first retrieves relevant information from our trusted KCC documents and uses that as context for the AI to answer from. This ensures our AI only answers based on official KCC information and cannot make up fees, dates, or policies that don't exist."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: How does the system understand Filipino questions?</div>
+      <div class="qa-a">A: "Through two steps. First, the spell checker is trained to preserve Filipino and Bisaya words so they are never incorrectly changed. Second, the query rewriting step uses the Groq AI to understand the intent of a Taglish or Bisaya message and convert it into a clean English question. For example, 'pano kumuha ng tor sa rejistrar' becomes 'How do I get a Transcript of Records from the registrar?' — which then searches the documents much more accurately."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What happens when the AI cannot answer?</div>
+      <div class="qa-a">A: "Two things happen. First, the student is shown the AI's honest response saying it does not have that information yet. Second, the question is logged to the database as unanswered and visible to the admin in the Analytics page and Dashboard. The admin can then add the missing information to the knowledge base. The system also shows a contact card so the student can submit a formal concern."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ FIGURE 7 ══ -->
+<div class="figure-block">
+  <div class="figure-number">Figure 7</div>
+  <div class="figure-title">Entity Relationship Diagram (ERD)</div>
+  <a class="figure-link" href="https://www.figma.com/board/wN2r1Rgjj1vwVef2T4Jc64">https://www.figma.com/board/wN2r1Rgjj1vwVef2T4Jc64</a>
+
+  <div class="what-box">
+    <div class="what-label">What this diagram shows</div>
+    <p>All 10 database tables used by KCCSmartInfoX, the columns inside each table, and the relationships between related tables.</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"This is our Entity Relationship Diagram, or ERD. It shows the structure of our SQLite database. We have 10 tables in total. The admin_users table stores the administrator's login credentials with bcrypt-hashed passwords. The chat_logs table records every question and answer including whether it was answered or not. The feedback table stores the thumbs-up and thumbs-down ratings from students, linked to a specific chat log through a foreign key. The subscribers table stores student email addresses for announcement notifications. The announcements table holds all announcement content with scheduling and expiry dates. The knowledge_docs table keeps track of all uploaded documents and manual text entries. The office_processes table stores the office process cards shown on the landing page and synced to the AI. The concerns table stores student concerns and admin replies. The admin_login_logs table records every login, logout, and session timeout event for the audit log. And finally the admin_ai_logs table records Admin AI Assistant actions. The main relationships are: feedback is linked to chat_logs, and concerns may be related to a chat log entry."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>10 tables total in SQLite</li>
+      <li>Passwords are never stored in plain text — always bcrypt hashed</li>
+      <li>feedback references chat_logs via foreign key (chat_log_id)</li>
+      <li>concerns has a status column: "pending" or "resolved"</li>
+      <li>admin_login_logs tracks: success, failed, logout, timeout</li>
+      <li>office_processes sections stored as JSON inside a single column</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why SQLite and not MySQL or PostgreSQL?</div>
+      <div class="qa-a">A: "SQLite is ideal for our system's current scope because it is file-based, requires no separate database server, and is easy to deploy on any machine. For a school-level system with hundreds of users, SQLite is more than capable. If the system needs to scale to thousands of concurrent users in the future, migration to PostgreSQL is straightforward because we use SQLAlchemy as our ORM, which supports multiple database backends."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: How is the password security handled?</div>
+      <div class="qa-a">A: "Administrator passwords are hashed using bcrypt before being stored in the database. Bcrypt is an industry-standard one-way hashing algorithm — meaning the original password can never be recovered from the hash. During login, the submitted password is compared against the hash using passlib's verify function."</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══ UI MOCKUPS ══ -->
+<div class="figure-block">
+  <div class="figure-number">UI Documentation</div>
+  <div class="figure-title">UI Mockups — All System Screens</div>
+  <a class="figure-link" href="https://www.figma.com/design/G9ACkQ3v5Q9ETbqloO5PZz">https://www.figma.com/design/G9ACkQ3v5Q9ETbqloO5PZz</a>
+
+  <div class="what-box">
+    <div class="what-label">What this shows</div>
+    <p>Visual mockups of all major screens: Landing Page, Chat Page (empty and with AI answer), Admin Login, and Admin Dashboard — built using KCC brand colors (blue #003087, gold #C9A84C).</p>
+  </div>
+
+  <div class="script-box">
+    <div class="script-label">🎤 How to explain to the panel</div>
+    <p class="script-text">"These are the UI mockups of our system. The first screen is the Landing Page, which is the first thing students see — it has the KCC branding, a hero section with a button to open the chatbot, an announcement carousel, and office process cards. The second screen is the Chat Page in its empty state, showing the suggested questions and the input area. The third screen shows the Chat Page after an AI answer is generated — you can see the student's message on the right, the AI's formatted answer on the left with source citation below, and the feedback buttons. On the admin side, the Login page uses a clean card design with the KCC logo. The Dashboard shows all the key statistics at a glance including the Backend Online indicator, and the recent unanswered questions list. All screens follow the KCC brand colors — blue and gold — and support both light and dark modes."</p>
+  </div>
+
+  <div class="key-points">
+    <div class="key-label">✅ Key points to remember</div>
+    <ul>
+      <li>User Screens: Landing Page, Chat (empty), Chat (with AI answer)</li>
+      <li>Admin Screens: Login, Dashboard with 8 stat cards</li>
+      <li>Brand colors: KCC Blue (#003087) and Gold (#C9A84C)</li>
+      <li>Dark mode supported on chat page and admin panel</li>
+      <li>Responsive design — works on desktop and mobile</li>
+      <li>PWA — installable on phone home screen</li>
+    </ul>
+  </div>
+
+  <div class="qa-box">
+    <div class="qa-label">❓ Possible panelist questions</div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why did you choose dark mode for the chat interface?</div>
+      <div class="qa-a">A: "The dark mode is the default for the chat interface because it reduces eye strain during extended use, especially for students using the system at night. Students can toggle to light mode using the button in the header. The admin panel defaults to light mode since it is used for data-heavy tasks where readability is more important."</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Is this mobile-friendly?</div>
+      <div class="qa-a">A: "Yes. The chat interface is fully responsive and adapts to mobile screen sizes. It also supports PWA installation — students can add KCCSmartInfoX to their phone's home screen and use it like a native app without going to the app store. This was an important design decision since most students use their phones to access school information."</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /body -->
+
+<div class="footer">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Panel Presentation Guide &nbsp;·&nbsp; Capstone Defense 2026
+</div>
+
+</body>
+</html>

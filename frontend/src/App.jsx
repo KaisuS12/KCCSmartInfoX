@@ -8,12 +8,12 @@ import AdminKnowledge from './pages/admin/AdminKnowledge'
 import AdminAnnouncements from './pages/admin/AdminAnnouncements'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
 import AdminSubscribers from './pages/admin/AdminSubscribers'
-import AdminSchoolInfo from './pages/admin/AdminSchoolInfo'
 import AdminQRCode from './pages/admin/AdminQRCode'
 import AdminOfficeProcesses from './pages/admin/AdminOfficeProcesses'
 import AdminChatLogs from './pages/admin/AdminChatLogs'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminConcerns from './pages/admin/AdminConcerns'
+import AdminLiveChats from './pages/admin/AdminLiveChats'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 
 export default function App() {
@@ -37,12 +37,12 @@ export default function App() {
           <Route path="announcements" element={<AdminAnnouncements />} />
           <Route path="analytics"     element={<AdminAnalytics />} />
           <Route path="subscribers"   element={<AdminSubscribers />} />
-          <Route path="school-info"   element={<AdminSchoolInfo />} />
           <Route path="qrcode"           element={<AdminQRCode />} />
           <Route path="office-processes" element={<AdminOfficeProcesses />} />
           <Route path="chatlogs"         element={<AdminChatLogs />} />
           <Route path="settings"         element={<AdminSettings />} />
           <Route path="concerns"         element={<AdminConcerns />} />
+          <Route path="live-chats"       element={<AdminLiveChats />} />
         </Route>
 
         {/* 404 */}

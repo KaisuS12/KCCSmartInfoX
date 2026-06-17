@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCCSmartInfoX — What's New</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      font-size: 13px;
+    }
+
+    .cover {
+      background: linear-gradient(135deg, #003087 0%, #00214f 100%);
+      color: white;
+      padding: 48px 56px 40px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .logo-circle {
+      width: 80px; height: 80px; min-width: 80px;
+      background: #c9a84c;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900;
+      color: #003087;
+    }
+    .cover-text h1 { font-size: 28px; font-weight: 800; }
+    .cover-text p  { color: #a8c0e8; font-size: 13px; margin-top: 4px; }
+    .cover-text .subtitle { color: #c9a84c; font-size: 15px; font-weight: 600; margin-top: 8px; }
+
+    .body {
+      padding: 36px 56px 48px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Section header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 16px;
+    }
+    .section-badge {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 20px;
+      white-space: nowrap;
+    }
+    .badge-blue  { background: #003087; color: white; }
+    .badge-gold  { background: #c9a84c; color: #1a1a2e; }
+    .badge-green { background: #15803d; color: white; }
+    .badge-red   { background: #b91c1c; color: white; }
+    .section-line { flex: 1; height: 1px; background: #e0e4ef; }
+
+    /* Feature cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card-grid.one-col { grid-template-columns: 1fr; }
+
+    .card {
+      background: white;
+      border: 1.5px solid #e8eaf0;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700;
+      color: #003087; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .tag {
+      font-size: 9.5px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tag-ai     { background: #f3e8ff; color: #6b21a8; }
+    .tag-admin  { background: #dbeafe; color: #1e40af; }
+    .tag-user   { background: #dcfce7; color: #15803d; }
+    .tag-sec    { background: #fee2e2; color: #991b1b; }
+    .tag-fix    { background: #fef9c3; color: #854d0e; }
+    .tag-ux     { background: #f0fdf4; color: #166534; }
+
+    .card-desc {
+      font-size: 12px; color: #4b5563; line-height: 1.6;
+    }
+    .card-desc ul { padding-left: 16px; margin-top: 4px; }
+    .card-desc li { margin-bottom: 2px; }
+
+    /* Summary stats row */
+    .stats-row {
+      display: flex; gap: 12px; margin: 20px 0 28px;
+    }
+    .stat-box {
+      flex: 1; background: white; border: 1px solid #e8eaf0;
+      border-radius: 10px; padding: 14px 16px; text-align: center;
+    }
+    .stat-box .num { font-size: 26px; font-weight: 800; color: #003087; }
+    .stat-box .label { font-size: 11px; color: #9098a9; margin-top: 2px; }
+
+    .footer {
+      background: #003087; color: #a8c0e8;
+      text-align: center; padding: 16px; font-size: 11px;
+    }
+
+    @media print {
+      body { background: white; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .logo-circle   { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .tag-ai, .tag-admin, .tag-user, .tag-sec, .tag-fix, .tag-ux {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card { break-inside: avoid; }
+      .body { padding: 28px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo-circle">KCC</div>
+  <div class="cover-text">
+    <h1>KCCSmartInfoX</h1>
+    <p>Kabankalan Catholic College, Inc.</p>
+    <p class="subtitle">What's New — Latest Updates &amp; Additions</p>
+    <p style="color:#7a9fd4;font-size:11px;margin-top:6px;">Pre-Oral Defense Build &nbsp;·&nbsp; May 2026</p>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="num">5</div>
+      <div class="label">New AI Improvements</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">6</div>
+      <div class="label">New Admin Features</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">5</div>
+      <div class="label">Security Upgrades</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">6</div>
+      <div class="label">UX &amp; Bug Fixes</div>
+    </div>
+  </div>
+
+  <!-- AI IMPROVEMENTS -->
+  <div class="section-header">
+    <span class="section-badge badge-gold">AI Improvements</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-title">
+        Thank-You Instant Reply
+        <span class="tag tag-ai">AI</span>
+      </div>
+      <div class="card-desc">
+        The AI now detects gratitude messages before any other processing. When a student says "thank you," "thanks," "salamat," "maraming salamat," or similar expressions, the system responds immediately with a warm, randomized reply — no document search needed.
+        <ul>
+          <li>Supports both English and Filipino/Bisaya variants</li>
+          <li>Detected before the greeting check for natural feel</li>
+          <li>5 different reply templates to avoid repetition</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Groq API Fallback / Error Handling
+        <span class="tag tag-ai">AI</span>
+      </div>
+      <div class="card-desc">
+        All Groq LLM calls are now wrapped in try/except blocks. If the Groq API is temporarily unavailable or returns an error, the student sees a friendly message asking them to try again — instead of a raw server error. Greeting responses also have their own fallback.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        FAQ Auto-Generator
+        <span class="tag tag-ai">AI</span>
+      </div>
+      <div class="card-desc">
+        The Analytics page can generate suggested knowledge base entries from unanswered student questions using the Groq AI. The admin clicks Generate, reviews the AI-suggested content, and can add it to the knowledge base in one click — directly closing the knowledge gap.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Office Processes Auto-Sync to AI
+        <span class="tag tag-ai">AI</span>
+      </div>
+      <div class="card-desc">
+        Every time an office process is added, edited, or deleted in the admin panel, the change is automatically re-synced to the ChromaDB vector store. The AI can immediately answer student questions about office procedures without requiring a manual document re-upload.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Export Unanswered Questions CSV — Fixed
+        <span class="tag tag-fix">Fix</span>
+      </div>
+      <div class="card-desc">
+        The Export button in Chat Logs and Analytics now correctly downloads a CSV file. Previously, the browser's window.open() could not attach an Authorization header, causing a "Not authenticated" error. Fixed by accepting the JWT token as a query parameter instead.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NEW ADMIN FEATURES -->
+  <div class="section-header">
+    <span class="section-badge badge-blue">New Admin Features</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-title">
+        Admin Login Audit Log
+        <span class="tag tag-admin">Admin</span>
+      </div>
+      <div class="card-desc">
+        Every admin session event is now recorded automatically:
+        <ul>
+          <li><strong>Login Success</strong> — successful login</li>
+          <li><strong>Login Failed</strong> — wrong password attempt</li>
+          <li><strong>Logged Out</strong> — admin clicked Logout</li>
+          <li><strong>Session Timeout</strong> — auto-logged out after inactivity</li>
+        </ul>
+        Each entry shows the device type (Windows PC, iPhone, Android, etc.) and IP address. Visible in the Settings page under Admin Audit Log. Last 50 events are stored.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Backend Online / Offline Indicator
+        <span class="tag tag-admin">Admin</span>
+      </div>
+      <div class="card-desc">
+        The Dashboard header now shows a real-time status pill indicating whether the FastAPI backend is reachable. A green pulsing dot means Online; a red dot means Offline. Useful for local WiFi demo setups where multiple devices share one backend server.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Clickable Filter Cards — Concerns
+        <span class="tag tag-ux">UX</span>
+      </div>
+      <div class="card-desc">
+        The three summary cards on the Student Concerns page (All Concerns, Pending, Resolved) are now clickable filter buttons. Clicking a card instantly filters the list below. The selected card highlights in color. The separate "All" filter button was removed for a cleaner layout.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Clickable Filter Cards — Chat Logs
+        <span class="tag tag-ux">UX</span>
+      </div>
+      <div class="card-desc">
+        Same UX improvement for the Chat Logs page. The Total Questions, Answered, and Unanswered summary cards at the top now act as filter buttons. Clicking Answered filters the list to only answered logs, clicking Unanswered shows only unanswered ones, and clicking Total Questions resets to all. Replaces the old filter pill row.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Edit Announcements
+        <span class="tag tag-admin">Admin</span>
+      </div>
+      <div class="card-desc">
+        Admin can now edit existing announcements via a pencil icon. A modal prefilled with the current title, body, image, and schedule dates opens. Changes are saved with a PUT request and the list refreshes immediately.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Inline Edit Knowledge Base Entries
+        <span class="tag tag-admin">Admin</span>
+      </div>
+      <div class="card-desc">
+        Text entries in the Knowledge Base can be edited directly on the page. When saved, the old indexed content is removed from ChromaDB and replaced with the new content automatically — no re-upload required.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECURITY -->
+  <div class="section-header">
+    <span class="section-badge badge-red">Security Upgrades</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-title">
+        Auto-Logout on Inactivity (30 min)
+        <span class="tag tag-sec">Security</span>
+      </div>
+      <div class="card-desc">
+        The admin panel now automatically logs out the administrator after 30 minutes of inactivity. Activity is tracked via mouse movement, keystrokes, clicks, scroll, and touch events. Each activity event resets the timer. When the timer fires, a "timeout" event is logged in the audit log and the admin is redirected to the login page.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Rate Limiting on Admin Login
+        <span class="tag tag-sec">Security</span>
+      </div>
+      <div class="card-desc">
+        The admin login endpoint is now rate-limited to 5 requests per minute per IP address using the slowapi library. This prevents brute-force password attacks. Exceeding the limit returns HTTP 429 Too Many Requests.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        CORS Restricted to Localhost Origins
+        <span class="tag tag-sec">Security</span>
+      </div>
+      <div class="card-desc">
+        The backend CORS policy was tightened from <code>allow_origins=["*"]</code> (any origin) to only:
+        <ul>
+          <li>http://localhost:5173</li>
+          <li>http://localhost:4173</li>
+          <li>http://127.0.0.1:5173</li>
+          <li>http://127.0.0.1:4173</li>
+        </ul>
+        This prevents unauthorized cross-origin access to the API.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        File Upload Size Limit (20 MB)
+        <span class="tag tag-sec">Security</span>
+      </div>
+      <div class="card-desc">
+        Single and bulk knowledge base file uploads now enforce a 20 MB per-file size limit. Files larger than 20 MB are rejected with an HTTP 413 error before being saved, preventing large files from filling up the server's storage.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Rate Limiting on Chat Endpoint
+        <span class="tag tag-sec">Security</span>
+      </div>
+      <div class="card-desc">
+        The public /api/chat endpoint is rate-limited to 20 requests per minute per IP address. This prevents automated bots from flooding the system with queries and consuming Groq API credits.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- UX IMPROVEMENTS & FIXES -->
+  <div class="section-header">
+    <span class="section-badge badge-green">UX Improvements &amp; Bug Fixes</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="card">
+      <div class="card-title">
+        Character Counter on Chat Input
+        <span class="tag tag-user">User</span>
+      </div>
+      <div class="card-desc">
+        The chat input now shows a live character counter below the text field. It displays the current count out of the 500-character maximum. The counter turns yellow at 350 characters and red at 450 to warn the student before they reach the limit.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Retry Button on Chat Error
+        <span class="tag tag-user">User</span>
+      </div>
+      <div class="card-desc">
+        If the AI returns an error (network issue or Groq timeout), the error message now includes a Retry button. Clicking it automatically resends the same question without the student having to retype it.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        404 Not Found Page
+        <span class="tag tag-ux">UX</span>
+      </div>
+      <div class="card-desc">
+        A custom 404 page is now shown for any unrecognized URL instead of a blank page or redirect. It displays the KCC logo, a "Page not found" message, and two navigation buttons: Go to Home and Open Chatbot.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Skeleton Loaders &amp; Animations
+        <span class="tag tag-ux">UX</span>
+      </div>
+      <div class="card-desc">
+        Loading skeleton placeholders are shown on Dashboard, Concerns, and other pages while data is being fetched — replacing the empty blank flash. Smooth animations added: KCC logo floats in chat, announcements panel slides in, concern modal fades in, stat cards lift on hover.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        QR Code Port Auto-Detection
+        <span class="tag tag-fix">Fix</span>
+      </div>
+      <div class="card-desc">
+        The QR Code Generator now reads the current browser port from window.location.port instead of hardcoding 4173. This means the generated QR URL always matches the actual running server — port 5173 in development or 4173 in preview — so students who scan the code can always reach the chat.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        PWA — Installable on Mobile
+        <span class="tag tag-user">User</span>
+      </div>
+      <div class="card-desc">
+        KCCSmartInfoX is now configured as a Progressive Web App (PWA). Students can install the chatbot directly to their phone's home screen from the browser. Works on both Android and iOS (Safari). App icon and splash screen use the KCC logo.
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /body -->
+
+<div class="footer">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; What's New — Pre-Oral Defense Build &nbsp;·&nbsp; May 2026
+</div>
+
+</body>
+</html>

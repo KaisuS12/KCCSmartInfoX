@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, BookOpen, Megaphone,
-  BarChart2, Users, LogOut, Sun, Moon, Info, QrCode, Building2, MessageSquare, Settings, AlertTriangle
+  BarChart2, Users, LogOut, Sun, Moon, QrCode, Building2, MessageSquare, Settings, AlertTriangle, MessageCircle
 } from 'lucide-react'
 import kccLogo from '../../assets/kcc-logo.png'
 
@@ -13,10 +13,10 @@ const navItems = [
   { to: '/admin/announcements', icon: Megaphone,       label: 'Announcements' },
   { to: '/admin/analytics',     icon: BarChart2,       label: 'Analytics' },
   { to: '/admin/subscribers',   icon: Users,           label: 'Subscribers' },
-  { to: '/admin/school-info',   icon: Info,            label: 'School Info' },
   { to: '/admin/office-processes', icon: Building2,    label: 'Office Processes' },
   { to: '/admin/chatlogs',      icon: MessageSquare,   label: 'Chat Logs' },
   { to: '/admin/concerns',      icon: AlertTriangle,   label: 'Concerns' },
+  { to: '/admin/live-chats',    icon: MessageCircle,   label: 'Live Chats', badge: true },
   { to: '/admin/qrcode',        icon: QrCode,          label: 'QR Code' },
   { to: '/admin/settings',      icon: Settings,        label: 'Settings' },
 ]
@@ -26,11 +26,26 @@ const INACTIVITY_MS = 30 * 60 * 1000 // 30 minutes
 export default function AdminLayout({ children }) {
   const navigate = useNavigate()
   const [dark, setDark] = useState(() => localStorage.getItem('admin_theme') === 'dark')
+  const [liveChatCount, setLiveChatCount] = useState(0)
   const timerRef = useRef(null)
 
   useEffect(() => {
     localStorage.setItem('admin_theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  useEffect(() => {
+    async function fetchLiveChatCount() {
+      try {
+        const res = await axios.get('/api/admin/live-chats?status=active', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('admin_token')}` }
+        })
+        setLiveChatCount(res.data.filter(c => c.status === 'active').length)
+      } catch {}
+    }
+    fetchLiveChatCount()
+    const t = setInterval(fetchLiveChatCount, 15000)
+    return () => clearInterval(t)
+  }, [])
 
   function logLogout(action) {
     const token = localStorage.getItem('admin_token')
@@ -94,7 +109,7 @@ export default function AdminLayout({ children }) {
 
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {navItems.map(({ to, icon: Icon, label, badge }) => (
             <NavLink
               key={to}
               to={to}
@@ -108,6 +123,11 @@ export default function AdminLayout({ children }) {
             >
               <Icon size={18} />
               {label}
+              {badge && liveChatCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
+                  {liveChatCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

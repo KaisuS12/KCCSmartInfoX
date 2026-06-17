@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCCSmartInfoX — Full System Review</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #1a1a1a; font-size: 12pt; line-height: 1.8; }
+
+    .cover { background: #003087; color: white; padding: 60px 72px 52px; }
+    .cover h1 { font-size: 26pt; font-weight: bold; color: #c9a84c; margin-bottom: 6px; }
+    .cover .school { font-size: 12pt; color: #a8c0e8; margin-bottom: 20px; }
+    .cover .doc-title { font-size: 16pt; font-weight: bold; color: white; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 18px; margin-bottom: 6px; }
+    .cover .doc-sub { font-size: 11pt; color: #7a9fd4; }
+
+    .body { max-width: 740px; margin: 0 auto; padding: 48px 72px 64px; }
+
+    .chapter { font-size: 14pt; font-weight: bold; color: #003087; text-transform: uppercase; letter-spacing: 1px; margin: 44px 0 8px; padding-bottom: 6px; border-bottom: 2px solid #003087; page-break-before: always; }
+    .chapter:first-of-type { page-break-before: avoid; }
+    .section { font-size: 12pt; font-weight: bold; color: #1a1a1a; margin: 28px 0 8px; }
+    .subsection { font-size: 12pt; font-weight: bold; font-style: italic; color: #374151; margin: 18px 0 6px; }
+
+    p { text-align: justify; text-indent: 36px; margin-bottom: 10px; }
+    p.no-indent { text-indent: 0; }
+
+    /* Alignment check table */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 20px; font-size: 11pt; }
+    th { background: #003087; color: white; padding: 8px 12px; text-align: left; font-size: 10.5pt; }
+    td { padding: 7px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:nth-child(even) td { background: #f9fafb; }
+    .check { color: #15803d; font-weight: bold; }
+    .fix { color: #b45309; font-weight: bold; }
+
+    /* Code block */
+    .code-block { background: #1e293b; color: #a3e635; font-family: 'Courier New', monospace; font-size: 10pt; padding: 14px 18px; border-radius: 8px; margin: 12px 0; line-height: 1.6; white-space: pre-wrap; }
+    .code-block .comment { color: #64748b; }
+    .code-block .key { color: #60a5fa; }
+    .code-block .val { color: #f59e0b; }
+
+    /* Step list */
+    .step-list { margin: 10px 0 10px 36px; }
+    .step-list li { margin-bottom: 6px; }
+
+    /* Badge */
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 9.5pt; font-weight: bold; margin-right: 4px; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-gold { background: #fef9c3; color: #78350f; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+
+    /* Figma links box */
+    .figma-box { background: #f0f4ff; border: 1.5px solid #c7d5f8; border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 11pt; }
+    .figma-box .figma-title { font-weight: bold; color: #003087; margin-bottom: 6px; }
+    .figma-box a { color: #1d4ed8; word-break: break-all; }
+
+    .footer { background: #003087; color: #a8c0e8; text-align: center; padding: 14px; font-family: Arial, sans-serif; font-size: 10pt; }
+
+    @media print {
+      body { background: white; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .code-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .chapter { page-break-before: always; }
+      .chapter:first-of-type { page-break-before: avoid; }
+      table { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="school">Kabankalan Catholic College, Inc.</div>
+  <h1>KCCSmartInfoX</h1>
+  <div class="doc-title">Full System Review — Backend Processes, Database, UI &amp; Figma Diagrams</div>
+  <div class="doc-sub">Capstone Manuscript Reference &nbsp;·&nbsp; May 2026 &nbsp;·&nbsp; Verified Against Source Code</div>
+</div>
+
+<div class="body">
+
+<!-- ══ ALIGNMENT VERIFICATION ══ -->
+<div class="chapter">Section 1 &nbsp;·&nbsp; Diagram vs. System Alignment Check</div>
+
+<p>This section verifies that every diagram created in Figma and FigJam accurately reflects the actual source code of KCCSmartInfoX. Each diagram was cross-checked against the live backend files.</p>
+
+<div class="section">1.1 &nbsp; ERD Alignment Check</div>
+<p class="no-indent">The actual database contains <strong>11 tables</strong> (the ERD diagram shows 9 — two were omitted but exist in the system):</p>
+
+<table>
+  <tr><th>Table Name</th><th>In ERD Diagram</th><th>In Actual Code</th><th>Notes</th></tr>
+  <tr><td>admin_users</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>id, username, password_hash</td></tr>
+  <tr><td>chat_logs</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>id, question, answer, is_answered, created_at</td></tr>
+  <tr><td>feedback</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>Linked to chat_logs via chat_log_id FK</td></tr>
+  <tr><td>subscribers</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>id, email, created_at</td></tr>
+  <tr><td>announcements</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>Column is image_path (not image_filename)</td></tr>
+  <tr><td>knowledge_docs</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>Has both filename and filepath columns</td></tr>
+  <tr><td>office_processes</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>Includes sections (JSON), icon, color, order</td></tr>
+  <tr><td>concerns</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>Also has replied_at timestamp column</td></tr>
+  <tr><td>admin_login_logs</td><td class="check">✓ Included</td><td class="check">✓ Exists</td><td>action: success/failed/logout/timeout</td></tr>
+  <tr><td>school_info</td><td class="fix">⚠ Omitted</td><td class="check">✓ Exists</td><td>Still in DB though removed from UI</td></tr>
+  <tr><td>admin_ai_logs</td><td class="fix">⚠ Omitted</td><td class="check">✓ Exists</td><td>Logs Admin AI Assistant actions</td></tr>
+</table>
+
+<div class="section">1.2 &nbsp; RAG Pipeline Flowchart Alignment Check</div>
+<table>
+  <tr><th>Pipeline Step</th><th>In Flowchart</th><th>In Actual Code</th><th>Accuracy</th></tr>
+  <tr><td>Thanks detection (before greeting)</td><td class="check">✓</td><td class="check">✓ is_thanks() — regex pattern</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Greeting detection</td><td class="check">✓</td><td class="check">✓ is_greeting() — regex pattern</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Spell correction</td><td class="check">✓</td><td class="check">✓ quick_spell_fix() — pyspellchecker</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>LLM query rewrite</td><td class="check">✓</td><td class="check">✓ rewrite_query() — Groq, temp=0.0, max=80</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Embed question</td><td class="check">✓</td><td class="check">✓ embedding_model.encode() — all-MiniLM-L6-v2</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Empty KB check</td><td class="check">✓</td><td class="check">✓ collection.count() == 0</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>ChromaDB search — top 3</td><td class="check">✓</td><td class="check">✓ n_results=min(3, doc_count)</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Distance threshold ≤ 1.3</td><td class="check">✓</td><td class="check">✓ distances[0] &gt; 1.3 → unanswered</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Trim context to 150 words</td><td class="check">✓</td><td class="check">✓ trim() function — max_words=150</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Groq LLM — llama-3.1-8b-instant</td><td class="check">✓</td><td class="check">✓ temp=0.2, max_tokens=400</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>History: last 4 messages</td><td class="fix">⚠ Diagram says "last 4"</td><td class="check">✓ history[-4:] = last 4 messages</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>clean_bullets() post-process</td><td class="check">✓</td><td class="check">✓ Replaces •·●▪◆ with "- "</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>is_answered flag check</td><td class="check">✓</td><td class="check">✓ UNANSWERED_PHRASE not in answer</td><td class="check">✓ Accurate</td></tr>
+</table>
+
+<div class="section">1.3 &nbsp; System Architecture Alignment Check</div>
+<table>
+  <tr><th>Component</th><th>In Diagram</th><th>Actual</th><th>Status</th></tr>
+  <tr><td>Frontend — React 18 + Vite</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Backend — FastAPI + Python</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>JWT Authentication</td><td class="check">✓</td><td class="check">✓ python-jose</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Rate Limiter — slowapi</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>SQLite Database</td><td class="check">✓</td><td class="check">✓ SQLAlchemy ORM</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>ChromaDB Vector Store</td><td class="check">✓</td><td class="check">✓ PersistentClient singleton</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Groq API — LLM</td><td class="check">✓</td><td class="check">✓ llama-3.1-8b-instant</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>Gmail SMTP — Email</td><td class="check">✓</td><td class="check">✓ smtplib + BackgroundTasks</td><td class="check">✓ Accurate</td></tr>
+  <tr><td>PWA support</td><td class="fix">⚠ Not shown</td><td class="check">✓ vite-plugin-pwa</td><td class="fix">Minor omission</td></tr>
+</table>
+
+
+<!-- ══ BACKEND PROCESSES ══ -->
+<div class="chapter">Section 2 &nbsp;·&nbsp; Backend Processes — One by One</div>
+
+<div class="section">2.1 &nbsp; Process 1: Admin Authentication</div>
+<p><strong>File:</strong> <code>backend/routes/admin.py</code> &nbsp;·&nbsp; <strong>Endpoint:</strong> <code>POST /api/admin/login</code></p>
+<p>When the administrator submits their credentials, the system first checks the rate limiter — only 5 login attempts per minute per IP are allowed. If under the limit, the system fetches the AdminUser record from SQLite and verifies the submitted password against the stored bcrypt hash using passlib. On success, a JWT token is generated with a 24-hour expiration and returned to the frontend. Both successful and failed login attempts are recorded in the admin_login_logs table with the IP address, user agent, and timestamp.</p>
+<div class="code-block"><span class="comment"># Actual flow in admin.py:</span>
+<span class="key">@limiter.limit</span>(<span class="val">"5/minute"</span>)              <span class="comment"># Rate limiting</span>
+→ verify_password(plain, user.password_hash) <span class="comment"># bcrypt check</span>
+→ create_access_token({"sub": username})     <span class="comment"># JWT 24h</span>
+→ db.add(AdminLoginLog(action="success"))    <span class="comment"># Audit log</span></div>
+
+<div class="section">2.2 &nbsp; Process 2: RAG Chat Pipeline</div>
+<p><strong>File:</strong> <code>backend/rag/pipeline.py</code> &nbsp;·&nbsp; <strong>Endpoint:</strong> <code>POST /api/chat</code></p>
+
+<div class="subsection">Step 1 — Thanks Detection</div>
+<p>The <code>is_thanks()</code> function checks the student's message against a regex pattern covering English and Filipino gratitude expressions (thanks, salamat, maraming salamat, daghan salamat, ty, thx, etc.). If matched, one of five randomized warm reply messages is returned immediately — no API call needed.</p>
+
+<div class="subsection">Step 2 — Greeting Detection</div>
+<p>The <code>is_greeting()</code> function checks against casual messages (hi, hello, kumusta, good morning, bye, etc.). If matched, the message is sent directly to Groq with a conversational prompt (temperature=0.7, max_tokens=150). A try/except fallback returns a default message if Groq is unavailable.</p>
+
+<div class="subsection">Step 3 — Spell Correction</div>
+<p>The <code>quick_spell_fix()</code> function runs the student's question through pyspellchecker word by word. A custom preserve list prevents over-correction of Filipino/Bisaya words and KCC-specific terms (kcc, tor, bsit, salamat, po, ate, kuya, etc.).</p>
+
+<div class="subsection">Step 4 — LLM Query Rewriting</div>
+<p>The <code>rewrite_query()</code> function sends the spell-corrected question to Groq with a specialized rewriting prompt at temperature=0.0. The model converts Taglish, Bisaya, typos, and abbreviations into clean English. For example: "pano kumuha ng tor sa rejistrar" becomes "How do I get a transcript of records from the registrar?"</p>
+
+<div class="subsection">Step 5 — Semantic Embedding</div>
+<p>The rewritten clean question is encoded using the all-MiniLM-L6-v2 sentence-transformers model running locally on the server. The model outputs a 384-dimensional float vector representing the semantic meaning of the question.</p>
+
+<div class="subsection">Step 6 — ChromaDB Vector Search</div>
+<p>The question embedding is queried against all stored document chunk embeddings in ChromaDB using cosine similarity. The top 3 closest chunks are retrieved along with their distance scores and source metadata. If the closest distance exceeds 1.3, no relevant context exists and the question is flagged as unanswered.</p>
+
+<div class="subsection">Step 7 — Context Building</div>
+<p>Each retrieved chunk is trimmed to a maximum of 150 words to stay within Groq's token limits. The chunks are joined with separators and unique source filenames are extracted from the metadata for citation display.</p>
+
+<div class="subsection">Step 8 — Groq LLM Answer Generation</div>
+<p>A prompt is assembled from the system instructions, the last 4 messages of conversation history, the RAG context, and the student's question. This is sent to Groq's llama-3.1-8b-instant model at temperature=0.2 with a max of 400 output tokens. A try/except fallback returns a user-friendly error message if the Groq API fails.</p>
+
+<div class="subsection">Step 9 — Post-Processing and Logging</div>
+<p>The answer is passed through <code>clean_bullets()</code> which replaces Unicode bullet characters (•·●▪◆) with proper markdown "- " format. The system then checks whether the phrase "I don't have information about that yet" appears in the answer to set the is_answered flag. The question, answer, and flag are saved to the chat_logs table in SQLite.</p>
+
+<div class="section">2.3 &nbsp; Process 3: Document Ingestion</div>
+<p><strong>File:</strong> <code>backend/rag/ingestion.py</code> &nbsp;·&nbsp; <strong>Endpoints:</strong> <code>POST /api/admin/knowledge/upload</code>, <code>/bulk-upload</code>, <code>/add-text</code></p>
+<p>When the administrator uploads a document, the system first enforces a 20 MB file size limit. For PDF files, pdfplumber extracts text page by page. For DOCX files, python-docx reads each paragraph. For TXT files, the content is read directly. The extracted text is then split into overlapping chunks of approximately 400 words with a 50-word overlap to preserve context across boundaries. Each chunk is embedded using the all-MiniLM-L6-v2 model and stored in ChromaDB with the source filename as metadata. The document metadata is also saved to the knowledge_docs table in SQLite.</p>
+
+<div class="section">2.4 &nbsp; Process 4: Announcement Management</div>
+<p><strong>File:</strong> <code>backend/routes/announcements.py</code> &nbsp;·&nbsp; <strong>Endpoints:</strong> <code>POST/PUT/DELETE /api/admin/announcements</code></p>
+<p>When an announcement is created, the administrator can set an optional publish_at datetime for scheduled posting and an expires_at datetime for automatic expiry. If publish_at is null, the announcement is published immediately. A background asyncio task runs every 60 seconds to check for scheduled announcements whose publish time has passed and sends the email to all subscribers. Email is sent using Python's built-in smtplib library via Gmail SMTP SSL on port 465. The email is dispatched as a FastAPI BackgroundTask so the API responds immediately without waiting for the SMTP operation to complete. The email_sent flag is set to True after successful delivery.</p>
+
+<div class="section">2.5 &nbsp; Process 5: Office Processes Auto-Sync</div>
+<p><strong>File:</strong> <code>backend/routes/office_processes.py</code></p>
+<p>Every time an office process is created, updated, or deleted through the admin panel, the system automatically re-ingests all office processes into ChromaDB. This ensures the AI can always answer student questions about office procedures using the most current information without requiring a manual document upload. On application startup, this sync also runs once to ensure the vector store is consistent with the database from the very first request.</p>
+
+<div class="section">2.6 &nbsp; Process 6: Analytics and Reporting</div>
+<p><strong>File:</strong> <code>backend/routes/admin.py</code> &nbsp;·&nbsp; <strong>Endpoint:</strong> <code>GET /api/admin/analytics</code></p>
+<p>The analytics endpoint queries the SQLite database to compute: total question count, answered count, unanswered count, answer rate percentage, total subscriber count, total document count, thumbs-up count, and a list of recent unanswered questions. The FAQ Auto-Generator feature sends the top unanswered questions to Groq and receives suggested knowledge base entries that the administrator can add with one click. The chat log export endpoint accepts a filter parameter (all/answered/unanswered) and streams a CSV file with ID, question, answer, status, and timestamp columns.</p>
+
+<div class="section">2.7 &nbsp; Process 7: Concern Management</div>
+<p><strong>File:</strong> <code>backend/routes/admin.py</code> &nbsp;·&nbsp; <strong>Endpoints:</strong> <code>PUT /api/admin/concerns/{id}/reply</code>, <code>/resolve</code></p>
+<p>When a student submits a concern through the chat interface, it is saved to the concerns table with a status of "pending." An automated email is sent to the administrator notifying them of the new concern. When the administrator replies, the reply text is saved to the admin_reply column, the status is updated to "resolved," the replied_at timestamp is recorded, and the reply is sent to the student's email address using Gmail SMTP as a background task.</p>
+
+<div class="section">2.8 &nbsp; Process 8: Admin Session Management</div>
+<p><strong>File:</strong> <code>frontend/src/components/shared/AdminLayout.jsx</code></p>
+<p>JWT tokens expire after 24 hours. A global Axios response interceptor detects any 401 Unauthorized response and immediately redirects to the login page. Additionally, the admin panel tracks five user activity events — mousemove, keydown, mousedown, touchstart, and scroll. If no activity is detected for 30 consecutive minutes, the session is terminated, a "timeout" event is logged to admin_login_logs via the <code>POST /api/admin/logout-log</code> endpoint, and the administrator is redirected to the login page.</p>
+
+
+<!-- ══ DATABASE ══ -->
+<div class="chapter">Section 3 &nbsp;·&nbsp; Database — All 11 Tables</div>
+
+<table>
+  <tr><th>#</th><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+  <tr><td>1</td><td><strong>admin_users</strong></td><td>id, username, password_hash</td><td>Admin login credentials (bcrypt hashed)</td></tr>
+  <tr><td>2</td><td><strong>chat_logs</strong></td><td>id, question, answer, is_answered, created_at</td><td>Every student question and AI response</td></tr>
+  <tr><td>3</td><td><strong>feedback</strong></td><td>id, chat_log_id (FK), rating, created_at</td><td>Thumbs up/down per chat log entry</td></tr>
+  <tr><td>4</td><td><strong>subscribers</strong></td><td>id, email, created_at</td><td>Students subscribed to announcements</td></tr>
+  <tr><td>5</td><td><strong>announcements</strong></td><td>id, title, content, image_path, publish_at, expires_at, email_sent</td><td>School announcements with scheduling</td></tr>
+  <tr><td>6</td><td><strong>knowledge_docs</strong></td><td>id, filename, filepath, content, uploaded_at</td><td>Uploaded documents and text entries</td></tr>
+  <tr><td>7</td><td><strong>office_processes</strong></td><td>id, name, tagline, icon, color, sections (JSON), order</td><td>Office process cards shown on landing page and synced to AI</td></tr>
+  <tr><td>8</td><td><strong>concerns</strong></td><td>id, name, email, message, related_question, status, admin_reply, replied_at</td><td>Student concerns and admin replies</td></tr>
+  <tr><td>9</td><td><strong>admin_login_logs</strong></td><td>id, username, action, ip_address, user_agent, created_at</td><td>Admin audit log — login/logout/timeout events</td></tr>
+  <tr><td>10</td><td><strong>school_info</strong></td><td>id, title, content, order, updated_at</td><td>School info sections (in DB, removed from active UI)</td></tr>
+  <tr><td>11</td><td><strong>admin_ai_logs</strong></td><td>id, action, details, status, created_at</td><td>Admin AI Assistant command history</td></tr>
+</table>
+
+
+<!-- ══ UI REVIEW ══ -->
+<div class="chapter">Section 4 &nbsp;·&nbsp; UI Pages Review</div>
+
+<div class="section">4.1 &nbsp; User-Facing Pages</div>
+
+<div class="subsection">Landing Page</div>
+<p>The landing page is the first screen students see. It contains a navigation bar with the KCC logo, a hero section with a call-to-action button to open the chatbot, an announcement carousel showing active announcements from the database, a grid of office process cards, and a footer. All announcement and office process data is fetched dynamically from the backend API.</p>
+
+<div class="subsection">Chat Page</div>
+<p>The chat page is the core student interface. In its empty state it displays the KCC logo (with a floating animation), four suggested starter questions, and a text input with a microphone button. The header contains the language toggle (EN/FIL), an Announcements button, and navigation back to the landing page. A character counter below the input shows the remaining characters up to the 500-character limit. On mobile devices the page adapts to a full-screen chat layout.</p>
+
+<div class="subsection">Chat Page — AI Answer State</div>
+<p>After a student submits a question, a typing indicator appears while the AI processes the response. The AI's answer is rendered using ReactMarkdown, which formats bullet points, bold text, and numbered lists. Below the answer, source document filenames are displayed for citation. Thumbs-up and thumbs-down feedback buttons allow the student to rate the response. If the AI could not answer, a contact card appears with a Submit Concern button. If an error occurs, a retry button allows the student to resend the question automatically.</p>
+
+<div class="section">4.2 &nbsp; Admin Panel Pages</div>
+
+<div class="subsection">Admin Login</div>
+<p>A centered card with the KCC logo, username and password fields (with show/hide toggle), and a Login button. Rate-limited to 5 attempts per minute. All attempts logged in the audit log.</p>
+
+<div class="subsection">Dashboard</div>
+<p>Displays 8 stat cards (Total Questions, Answered, Unanswered, Answer Rate, Subscribers, Documents, Helpful, Pending Concerns), a Backend Online/Offline status pill, quick-action buttons, and a list of recent unanswered questions. Auto-refreshes every 10 seconds.</p>
+
+<div class="subsection">Knowledge Base</div>
+<p>Upload PDF/DOCX/TXT files individually or in bulk (up to 20 MB each). Add text entries directly. Inline edit existing text entries (old content removed from ChromaDB, new content indexed). Delete documents (removed from DB and ChromaDB simultaneously).</p>
+
+<div class="subsection">Announcements</div>
+<p>Create announcements with title, content, optional image, optional publish date/time, and optional expiry date. Edit existing announcements via pencil icon. Delete announcements. All active announcements visible to students on the landing page and chat panel.</p>
+
+<div class="subsection">Analytics</div>
+<p>Daily questions bar chart (last 7 days), top 10 most-asked questions, all unanswered questions list, negatively-rated answers. FAQ Auto-Generator button analyzes unanswered questions using Groq and suggests knowledge base content. Export CSV filtered by all/answered/unanswered.</p>
+
+<div class="subsection">Chat Logs</div>
+<p>Three clickable filter stat cards (Total Questions / Answered / Unanswered). Search by keyword. Expand each log to view full AI answer. Export button dynamically labeled based on active filter (Export All / Export Answered / Export Unanswered).</p>
+
+<div class="subsection">Student Concerns</div>
+<p>Three clickable filter stat cards (All Concerns / Pending / Resolved). Expand concern cards to view full message, type a reply, send reply via email, or mark as resolved without reply. Delete concerns. Reply is sent to student email as a background task.</p>
+
+<div class="subsection">Settings</div>
+<p>Two-column layout: Change Password form (left) with current password verification and match indicator; Admin Audit Log (right) showing last 50 session events with color-coded event types (Login Success / Login Failed / Logged Out / Session Timeout), device type, IP address, and timestamp.</p>
+
+<div class="subsection">QR Code</div>
+<p>Auto-detects the local network IP and current browser port using <code>window.location</code>. Generates a scannable QR code pointing to the chat URL. Download as PNG or copy URL to clipboard. Quick preset buttons for network and localhost access.</p>
+
+
+<!-- ══ FIGMA DIAGRAMS ══ -->
+<div class="chapter">Section 5 &nbsp;·&nbsp; Figma Diagrams — Complete Index</div>
+
+<p>All diagrams were generated directly into Figma/FigJam and are verified against the actual system code. Open each link, select all (Ctrl+A), then export as PNG at 2x for manuscript use.</p>
+
+<div class="figma-box">
+  <div class="figma-title">UI Mockups — Design File (Figma)</div>
+  Contains: Landing Page, Chat Page (Empty + AI Answer), Admin Login, Admin Dashboard<br/>
+  <a href="https://www.figma.com/design/G9ACkQ3v5Q9ETbqloO5PZz">https://www.figma.com/design/G9ACkQ3v5Q9ETbqloO5PZz</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 1 — Conceptual Framework (IPO Model)</div>
+  Input → Process → Output of the entire KCCSmartInfoX system<br/>
+  <a href="https://www.figma.com/board/wJaK19VPcmv5sXY8bNHZ3o">https://www.figma.com/board/wJaK19VPcmv5sXY8bNHZ3o</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 2 — System Architecture Diagram</div>
+  Three-tier architecture: Client → FastAPI Backend → Data Layer<br/>
+  <a href="https://www.figma.com/board/zQ3maIg3vfvfAXopGnlpbi">https://www.figma.com/board/zQ3maIg3vfvfAXopGnlpbi</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 3 — Use Case Diagram</div>
+  Student and Administrator actors with all system use cases<br/>
+  <a href="https://www.figma.com/board/cc9sdDS34gVw0DwyIqMyiV">https://www.figma.com/board/cc9sdDS34gVw0DwyIqMyiV</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 4 — DFD Level 0 (Context Diagram)</div>
+  System as single process with external entities: Student, Admin, Groq API, Gmail SMTP<br/>
+  <a href="https://www.figma.com/board/h8G0p2A5VA5kj7ql1TWFYc">https://www.figma.com/board/h8G0p2A5VA5kj7ql1TWFYc</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 5 — DFD Level 1</div>
+  Six main processes: Authentication, Chat/RAG, Knowledge Base, Announcements, Analytics, Concerns<br/>
+  <a href="https://www.figma.com/board/Rn8DQWBoNNPqcDguBcGhNr">https://www.figma.com/board/Rn8DQWBoNNPqcDguBcGhNr</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 6 — RAG Pipeline Flowchart</div>
+  Step-by-step AI query processing: thanks → greeting → spell fix → rewrite → embed → search → generate → log<br/>
+  <a href="https://www.figma.com/board/U2vTNfVxLyPvXX4dMLwUs7">https://www.figma.com/board/U2vTNfVxLyPvXX4dMLwUs7</a>
+</div>
+
+<div class="figma-box">
+  <div class="figma-title">Figure 7 — Entity Relationship Diagram (ERD)</div>
+  All 9 main tables and their relationships (school_info and admin_ai_logs are additional tables)<br/>
+  <a href="https://www.figma.com/board/n7dq7OhduHdr3vNNgeGCAR">https://www.figma.com/board/n7dq7OhduHdr3vNNgeGCAR</a>
+</div>
+
+</div><!-- /body -->
+
+<div class="footer">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Full System Review &nbsp;·&nbsp; May 2026 &nbsp;·&nbsp; Verified Against Source Code
+</div>
+
+</body>
+</html>

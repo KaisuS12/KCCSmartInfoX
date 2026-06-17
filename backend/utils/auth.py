@@ -36,3 +36,13 @@ def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(securi
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("role") != "user":
+            raise HTTPException(status_code=401, detail="Not a user token")
+        return payload   # { "sub": "1", "email": "...", "name": "...", "role": "user" }
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")

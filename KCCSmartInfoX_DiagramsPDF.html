@@ -1,0 +1,226 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KCCSmartInfoX — All Diagrams</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', serif; background: #fff; color: #1a1a1a; font-size: 12pt; }
+
+    .cover {
+      background: #003087; color: white;
+      padding: 60px 72px 52px;
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .cover .school { font-size: 12pt; color: #a8c0e8; margin-bottom: 6px; }
+    .cover h1 { font-size: 28pt; font-weight: bold; color: #c9a84c; margin-bottom: 6px; }
+    .cover .doc-title { font-size: 16pt; font-weight: bold; color: white; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 18px; margin-top: 18px; margin-bottom: 8px; }
+    .cover .doc-sub { font-size: 11pt; color: #7a9fd4; }
+    .cover .toc { margin-top: 36px; }
+    .cover .toc-title { font-size: 11pt; font-weight: bold; color: #c9a84c; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .cover .toc-item { font-size: 11pt; color: #a8c0e8; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .cover .toc-item span { color: #c9a84c; margin-right: 12px; font-weight: bold; }
+
+    .diagram-page {
+      min-height: 100vh;
+      padding: 40px 64px;
+      display: flex; flex-direction: column;
+      page-break-before: always;
+    }
+
+    .fig-header {
+      display: flex; align-items: center; gap: 16px;
+      border-bottom: 2px solid #003087;
+      padding-bottom: 10px; margin-bottom: 20px;
+    }
+    .fig-num {
+      background: #003087; color: #c9a84c;
+      font-size: 11pt; font-weight: bold;
+      padding: 6px 16px; border-radius: 20px;
+      white-space: nowrap;
+    }
+    .fig-title { font-size: 17pt; font-weight: bold; color: #003087; }
+
+    .fig-desc {
+      background: #f0f4ff;
+      border-left: 4px solid #003087;
+      padding: 10px 18px;
+      margin-bottom: 20px;
+      font-size: 11pt;
+      line-height: 1.7;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .diagram-img-wrap {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      background: #f8f9fc;
+      border: 1.5px solid #e0e4ef;
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 400px;
+    }
+    .diagram-img-wrap img {
+      max-width: 100%;
+      max-height: 65vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .fig-link {
+      font-size: 9pt;
+      color: #1d4ed8;
+      font-family: 'Courier New', monospace;
+      text-align: right;
+      margin-top: 8px;
+    }
+
+    .footer-bar {
+      background: #003087; color: #a8c0e8;
+      text-align: center; padding: 10px;
+      font-size: 10pt; margin-top: 16px;
+    }
+
+    @media print {
+      body { background: white; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; min-height: auto; padding: 40px 56px; }
+      .diagram-page { page-break-before: always; padding: 28px 48px; min-height: auto; }
+      .fig-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .fig-desc { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .footer-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="school">Kabankalan Catholic College, Inc. &nbsp;·&nbsp; Capstone Project 2025–2026</div>
+  <h1>KCCSmartInfoX</h1>
+  <div class="doc-title">Complete System Diagrams</div>
+  <div class="doc-sub">For Capstone Manuscript Chapter 2 &nbsp;·&nbsp; Verified Against Source Code &nbsp;·&nbsp; May 2026</div>
+
+  <div class="toc">
+    <div class="toc-title">Table of Diagrams</div>
+    <div class="toc-item"><span>Figure 1</span> Conceptual Framework — IPO Model</div>
+    <div class="toc-item"><span>Figure 2</span> System Architecture Diagram</div>
+    <div class="toc-item"><span>Figure 3</span> Use Case Diagram</div>
+    <div class="toc-item"><span>Figure 4</span> Data Flow Diagram — Level 0 (Context Diagram)</div>
+    <div class="toc-item"><span>Figure 5</span> Data Flow Diagram — Level 1</div>
+    <div class="toc-item"><span>Figure 6</span> RAG Pipeline Flowchart — AI Query Processing</div>
+    <div class="toc-item"><span>Figure 7</span> Entity Relationship Diagram (ERD)</div>
+  </div>
+</div>
+
+<!-- FIGURE 1: IPO MODEL -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 1</div>
+    <div class="fig-title">Conceptual Framework — IPO Model</div>
+  </div>
+  <div class="fig-desc">
+    Shows the overall Input–Process–Output model of KCCSmartInfoX. Inputs come from both the Student (questions, feedback, concerns) and the Administrator (documents, announcements, credentials). The Process layer includes authentication, the RAG AI pipeline, document ingestion, email delivery, and analytics. Outputs include AI-generated answers with source citations, announcement emails, chat logs, and audit reports.
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/9bff26c3-c80c-44d2-a7ec-241313b6669f?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T141456Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=3f57991c00c4748c54900f84ac429ce607430a52ae5e02c504141cd5e99e5029" alt="Conceptual Framework IPO Model" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/wJaK19VPcmv5sXY8bNHZ3o</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/wJaK19VPcmv5sXY8bNHZ3o</div>
+</div>
+
+<!-- FIGURE 2: SYSTEM ARCHITECTURE -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 2</div>
+    <div class="fig-title">System Architecture Diagram</div>
+  </div>
+  <div class="fig-desc">
+    Shows the three-tier architecture of KCCSmartInfoX. The Client Layer (React 18 + Vite + TailwindCSS + PWA) communicates via HTTP REST API to the Backend Layer (FastAPI + JWT Auth + Rate Limiter + RAG Pipeline + Background Tasks), which connects to the Data Layer (SQLite, ChromaDB, Groq API, Gmail SMTP).
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/f9c8e264-fd50-452c-b1ae-62b31ffd8548?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T124638Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=80b654528e99e6091deb204c83dea63d401f8d0c92746b6ac262e85e9634b9d5" alt="System Architecture" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/zQ3maIg3vfvfAXopGnlpbi</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/zQ3maIg3vfvfAXopGnlpbi</div>
+</div>
+
+<!-- FIGURE 3: USE CASE -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 3</div>
+    <div class="fig-title">Use Case Diagram</div>
+  </div>
+  <div class="fig-desc">
+    Shows the two actors — Student and Administrator — and all use cases available to each. Students can ask questions, submit concerns, give feedback, subscribe, use voice input, switch languages, and install as PWA. Administrators can manage the knowledge base, post announcements, view analytics, generate FAQ suggestions, reply to concerns, view chat logs, manage office processes, generate QR codes, and manage account security.
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/583a6b80-cf0a-4cae-8653-38124af39de9?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T141511Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=24946ec64e6d1b0284be867a25d8653ddcb4306d39ab4e60c21cff696ed8a298" alt="Use Case Diagram" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/cc9sdDS34gVw0DwyIqMyiV</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/cc9sdDS34gVw0DwyIqMyiV</div>
+</div>
+
+<!-- FIGURE 4: DFD LEVEL 0 -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 4</div>
+    <div class="fig-title">Data Flow Diagram — Level 0 (Context Diagram)</div>
+  </div>
+  <div class="fig-desc">
+    The highest-level view of the system. KCCSmartInfoX is shown as a single process with four external entities: Student (sends questions and feedback; receives AI answers), Administrator (sends documents and settings; receives analytics), Groq API (receives AI prompts; returns generated answers), and Gmail SMTP (receives email content; delivers to subscribers and students).
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/39965073-6fbb-4c43-b8c2-c91191853283?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T142535Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=3ec472dc17a59f57d8d444b9c175fed75e7213b89ea89918a73651b5b50a844c" alt="DFD Level 0" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/h8G0p2A5VA5kj7ql1TWFYc</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/h8G0p2A5VA5kj7ql1TWFYc</div>
+</div>
+
+<!-- FIGURE 5: DFD LEVEL 1 -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 5</div>
+    <div class="fig-title">Data Flow Diagram — Level 1</div>
+  </div>
+  <div class="fig-desc">
+    Breaks the system into six main processes: (1) Authentication — JWT login and audit logging; (2) Chat/RAG Processing — AI pipeline with ChromaDB and Groq; (3) Knowledge Base Management — document ingestion into SQLite and ChromaDB; (4) Announcement Management — scheduled posts and email delivery; (5) Analytics and Reporting — statistics and CSV exports; (6) Concern Management — student submissions and admin email replies.
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/f10601d3-5158-439d-a75b-b5e2a0e45d30?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T141545Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=66d8fb1e56e59f9f29e9f5e17e0ef8daec5e02dd6b17ae2a9c5d46e7aac3cdb3" alt="DFD Level 1" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/Rn8DQWBoNNPqcDguBcGhNr</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/Rn8DQWBoNNPqcDguBcGhNr</div>
+</div>
+
+<!-- FIGURE 6: RAG PIPELINE -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 6</div>
+    <div class="fig-title">RAG Pipeline Flowchart — AI Query Processing</div>
+  </div>
+  <div class="fig-desc">
+    The step-by-step AI query processing flow: thanks detection → greeting detection → spell correction (pyspellchecker) → LLM query rewriting (Groq, temp=0.0) → semantic embedding (all-MiniLM-L6-v2, 384-dim) → ChromaDB vector search (top 3, cosine similarity) → distance check (≤1.3) → context trimming (150 words) → Groq LLM answer generation (llama-3.1-8b-instant, temp=0.2, max=400) → bullet cleanup → is_answered check → SQLite logging → return to student.
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/826bd179-88f5-4e47-b7fb-d11a14d14c54?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T124700Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=a24ba4eff7c63004e795e8b86224ca6d2ec26df14ae948bad66ae8b34273c0b3" alt="RAG Pipeline" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/U2vTNfVxLyPvXX4dMLwUs7</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/U2vTNfVxLyPvXX4dMLwUs7</div>
+</div>
+
+<!-- FIGURE 7: ERD -->
+<div class="diagram-page">
+  <div class="fig-header">
+    <div class="fig-num">Figure 7</div>
+    <div class="fig-title">Entity Relationship Diagram (ERD)</div>
+  </div>
+  <div class="fig-desc">
+    The database structure of KCCSmartInfoX with 10 tables: admin_users (bcrypt-hashed credentials), chat_logs (all Q&amp;A records), feedback (thumbs up/down linked to chat_logs), subscribers (email list), announcements (with scheduling), knowledge_docs (uploaded files), office_processes (JSON sections), concerns (student submissions with admin replies), admin_login_logs (audit trail), and admin_ai_logs (AI assistant history). Key relationships: feedback → chat_logs (FK), concerns ↔ chat_logs (related question).
+  </div>
+  <div class="diagram-img-wrap">
+    <img src="https://s3-alpha.figma.com/thumbnails/178afe53-adaa-4db9-9062-458f3211ca27?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWC5PYDOGN2%2F20260531%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20260531T150526Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=77a9a0e63534eec9d2fcd5439a4ffff72c32f3dcc0a9b552a5ad67a96c85a72d" alt="ERD" onerror="this.parentNode.innerHTML='<p style=\'color:#888;text-align:center\'>Open in Figma: https://www.figma.com/board/wN2r1Rgjj1vwVef2T4Jc64</p>'" />
+  </div>
+  <div class="fig-link">figma.com/board/wN2r1Rgjj1vwVef2T4Jc64</div>
+</div>
+
+<div class="footer-bar">
+  KCCSmartInfoX &nbsp;·&nbsp; Kabankalan Catholic College, Inc. &nbsp;·&nbsp; System Diagrams &nbsp;·&nbsp; Capstone 2025–2026
+</div>
+
+</body>
+</html>

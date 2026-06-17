@@ -8,9 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from models.database import init_db, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
+from models.database import init_db, engine, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
 from notifications.service import send_announcement_email
-from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns
+from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns, live_chat, user_auth
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,6 +45,8 @@ app.include_router(admin_ai.router,      prefix="/api")
 app.include_router(school_info.router,        prefix="/api")
 app.include_router(office_processes.router,   prefix="/api")
 app.include_router(concerns.router,           prefix="/api")
+app.include_router(live_chat.router,          prefix="/api")
+app.include_router(user_auth.router,          prefix="/api")
 
 
 async def scheduled_email_dispatcher():
@@ -115,6 +117,29 @@ You may also use this chatbot to ask specific questions!"""),
 @app.on_event("startup")
 async def startup():
     init_db()
+
+    # Column migrations for tables that may have been created before these columns were added
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN user_id INTEGER REFERENCES user_accounts(id)"))
+            conn.commit()
+            logger.info("Migration: added user_id column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN device_type VARCHAR(20)"))
+            conn.commit()
+            logger.info("Migration: added device_type column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN last_seen DATETIME"))
+            conn.commit()
+            logger.info("Migration: added last_seen column to live_chats")
+        except Exception:
+            pass  # column already exists
+
     img_dir = "./knowledge_base/announcement_images"
     os.makedirs(img_dir, exist_ok=True)
     app.mount("/api/announcement-images", StaticFiles(directory=img_dir), name="announcement-images")

@@ -1,35 +1,98 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, BookOpen, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle, RefreshCw } from 'lucide-react'
+import { Send, Megaphone, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle, RefreshCw, MessageCircle, LogOut, History, ChevronDown, ChevronUp } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
-import SchoolInfoPanel from '../../components/user/SchoolInfoPanel'
 import TypingIndicator from '../../components/user/TypingIndicator'
 import kccLogo from '../../assets/kcc-logo.png'
 
 const SUGGESTED = [
   'How to enroll?',
+  'What course is best for me? 🎯',
   'How to get my TOR?',
-  'What are the penalties in the DO?',
   'What are the office hours?',
 ]
 
-const FAQ_FOLLOWUPS = {
-  enroll:     ['What are the enrollment requirements?', 'When is the enrollment period?', 'How much is the tuition?'],
-  tuition:    ['Are there payment schemes?', 'What are the miscellaneous fees?', 'Are scholarships available?'],
-  scholarship:['What are the scholarship requirements?', 'How do I apply for a scholarship?'],
-  tor:        ['How long does it take to get TOR?', 'What are the requirements for TOR?'],
-  course:     ['What are the requirements for enrollment?', 'How much is the tuition?'],
-}
+function getFollowups(question, answer) {
+  const q = (question || '').toLowerCase()
+  const a = (answer   || '').toLowerCase()
 
-function getFollowups(answer) {
-  const lower = answer.toLowerCase()
-  if (lower.includes('enroll'))                         return FAQ_FOLLOWUPS.enroll
-  if (lower.includes('tuition') || lower.includes('fee')) return FAQ_FOLLOWUPS.tuition
-  if (lower.includes('scholarship'))                    return FAQ_FOLLOWUPS.scholarship
-  if (lower.includes('tor') || lower.includes('transcript')) return FAQ_FOLLOWUPS.tor
-  if (lower.includes('course') || lower.includes('program')) return FAQ_FOLLOWUPS.course
+  // AI gave a course recommendation — suggest relevant next steps
+  const isRecommendation = a.includes('recommend') || a.includes('best fit') ||
+    a.includes('would suit') || a.includes('sounds like') || a.includes('perfect for') ||
+    a.includes('angkop') || a.includes('maganda para sa') || a.includes('irerekomenda')
+  if (isRecommendation) {
+    const COURSE_NAMES = ['BSIT', 'BSBA', 'BSA', 'BSAIS', 'BSMA', 'BSTM', 'BEED', 'BSED', 'BSPsych', 'BSCrim']
+    const mentioned = COURSE_NAMES.find(c => answer.toUpperCase().includes(c))
+    if (mentioned) {
+      return [`Tell me more about ${mentioned}`, 'How to enroll?', 'Are scholarships available?']
+    }
+    return ['Tell me more about that course', 'How to enroll?', 'What are the requirements?']
+  }
+
+  // AI is asking which department to pick → show the 3 + "All 3" as quick-reply buttons
+  if (a.includes('which') && a.includes('department') &&
+      a.includes('ceas') && a.includes('cmat') && a.includes('coc')) {
+    return ['CEAS', 'CMAT', 'COC', 'All 3 departments']
+  }
+
+  // After listing courses (one or all departments)
+  const showedCourses = a.includes('bachelor of') || a.includes('bsit') ||
+                        a.includes('bsba') || a.includes('bscrim') ||
+                        a.includes('bsed') || a.includes('beed')
+  if (showedCourses) {
+    // Showed all 3 departments
+    const showedAll = a.includes('ceas') && a.includes('cmat') && a.includes('coc')
+    if (showedAll) return ['How to enroll?', 'How much is the tuition?', 'Are scholarships available?']
+    const dept = a.includes('ceas') || q.includes('ceas') ? 'CEAS'
+               : a.includes('cmat') || q.includes('cmat') ? 'CMAT'
+               : a.includes('coc')  || q.includes('coc')  ? 'COC'
+               : null
+    if (dept) return [`How to enroll in ${dept}?`, 'How much is the tuition?', 'Are scholarships available?']
+    return ['How to enroll?', 'How much is the tuition?', 'Are scholarships available?']
+  }
+
+  // Enrollment
+  if (q.includes('enroll') || a.includes('enrollment form') || a.includes('registrar')) {
+    return ['What are the enrollment requirements?', 'When is the enrollment period?', 'How much is the tuition?']
+  }
+
+  // Tuition / fees / payment
+  if (q.includes('tuition') || q.includes('fee') || a.includes('installment') || a.includes('cashier')) {
+    return ['Are there installment payment options?', 'What are the miscellaneous fees?', 'Are scholarships available?']
+  }
+
+  // Scholarship
+  if (q.includes('scholarship') || a.includes('scholarship')) {
+    return ['What are the scholarship requirements?', 'How do I apply for a scholarship?', 'What types of scholarships are available?']
+  }
+
+  // TOR / transcript / credentials
+  if (q.includes('tor') || q.includes('transcript') || a.includes('transcript')) {
+    return ['How long does it take to get my TOR?', 'What are the requirements for TOR?', 'What are the office hours?']
+  }
+
+  // Library
+  if (q.includes('library') || a.includes('library card') || a.includes('library')) {
+    return ['What are the library hours?', 'How do I get a library card?', 'What are the library rules?']
+  }
+
+  // Office hours / contacts
+  if (q.includes('office') || q.includes('contact') || a.includes('office hours')) {
+    return ['Where is the registrar office?', 'What are the library hours?', 'How to contact the accounting office?']
+  }
+
+  // Discipline / penalties / handbook
+  if (q.includes('penalt') || q.includes('disci') || q.includes('handbook') || a.includes('violation')) {
+    return ['What are the other school rules?', 'What are the attendance policies?', 'How many absences are allowed?']
+  }
+
+  // Absence / attendance
+  if (q.includes('absent') || q.includes('attendance') || a.includes('absent') || a.includes('consecutive')) {
+    return ['What are the grading policies?', 'What are the school rules?', 'How do I request a leave of absence?']
+  }
+
   return []
 }
 
@@ -41,13 +104,31 @@ export default function ChatPage() {
   const [input, setInput]                   = useState('')
   const [loading, setLoading]               = useState(false)
   const [showAnnouncements, setShowAnnouncements] = useState(false)
-  const [showInfo, setShowInfo]             = useState(false)
   const [darkMode, setDarkMode]             = useState(() => localStorage.getItem('theme') !== 'light')
   const [lang, setLang]                     = useState(() => localStorage.getItem('lang') || 'en')
   const [isListening, setIsListening]       = useState(false)
+  const [voiceInterim, setVoiceInterim]     = useState('')
   const [concernModal, setConcernModal]     = useState(null) // { question, msgIndex }
   const [concernForm, setConcernForm]       = useState({ name: '', email: '', message: '' })
+  const [liveChats, setLiveChats]           = useState({})
+  const liveChatRefs = useRef({})
+  // { [msgIndex]: { intervalId, lastMsgId, chatId } }
   const [concernSending, setConcernSending] = useState(false)
+  // ── User auth ──
+  const [user, setUser]             = useState(null)
+  const [userToken, setUserToken]   = useState(() => localStorage.getItem('user_token') || '')
+  const [loginModal, setLoginModal] = useState(false)
+  const [loginForm, setLoginForm]   = useState({ email: '', name: '', password: '', mode: 'login' })
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [showMyChats, setShowMyChats]   = useState(false)
+  const [myChats, setMyChats]           = useState([])
+  const [expandedChat, setExpandedChat] = useState(null)
+  const [chatMsgs, setChatMsgs]         = useState([])
+  const [myChatInput, setMyChatInput]   = useState('')
+  const [myChatSending, setMyChatSending] = useState(false)
+  const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
+  const myChatBottomRef = useRef(null)
+  const heartbeatRef = useRef({})   // { [chatId]: intervalId }
   const bottomRef  = useRef(null)
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
@@ -71,31 +152,96 @@ export default function ChatPage() {
     localStorage.setItem('lang', lang)
   }, [lang])
 
+  // Cleanup all polling on unmount
+  useEffect(() => () => {
+    Object.values(liveChatRefs.current).forEach(r => clearInterval(r?.intervalId))
+    Object.values(heartbeatRef.current).forEach(id => clearInterval(id))
+    stopMyChatPolling()
+  }, [])
+
+  // Stop My Chats polling when panel closes
+  useEffect(() => {
+    if (!showMyChats) {
+      stopMyChatPolling()
+      setExpandedChat(null)
+    }
+  }, [showMyChats])
+
+  // Auto-scroll My Chats messages when new ones arrive
+  useEffect(() => {
+    myChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMsgs])
+
+  // Validate stored user token on mount
+  useEffect(() => {
+    if (!userToken) return
+    axios.get('/api/user/me', { headers: { Authorization: `Bearer ${userToken}` } })
+      .then(res => setUser(res.data))
+      .catch(() => { localStorage.removeItem('user_token'); setUserToken('') })
+  }, [])
+
   function toggleVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('Voice input is not supported in this browser. Please use Chrome.'); return }
+    if (!SR) {
+      alert('Voice input is not supported in this browser. Please use Google Chrome.')
+      return
+    }
 
     if (isListening) {
       recognitionRef.current?.stop()
       setIsListening(false)
+      setVoiceInterim('')
       return
     }
 
     const recognition = new SR()
-    recognition.lang = lang === 'fil' ? 'fil-PH' : 'en-US'
-    recognition.interimResults = false
+    recognition.lang            = lang === 'fil' ? 'fil-PH' : 'en-US'
+    recognition.interimResults  = true   // show live transcript while speaking
+    recognition.continuous      = false
     recognition.maxAlternatives = 1
 
     recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript
-      setInput(prev => prev ? prev + ' ' + transcript : transcript)
+      let interim = ''
+      let final   = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final   += e.results[i][0].transcript
+        else                      interim += e.results[i][0].transcript
+      }
+      setVoiceInterim(interim)
+      if (final) {
+        setInput(prev => prev ? prev + ' ' + final.trim() : final.trim())
+        setVoiceInterim('')
+      }
     }
-    recognition.onend  = () => setIsListening(false)
-    recognition.onerror = () => setIsListening(false)
+
+    recognition.onend = () => {
+      setIsListening(false)
+      setVoiceInterim('')
+      textareaRef.current?.focus()
+    }
+
+    recognition.onerror = (e) => {
+      setIsListening(false)
+      setVoiceInterim('')
+      if (e.error === 'not-allowed') {
+        alert('Microphone access was denied. Please click the lock icon in your browser address bar and allow microphone access, then try again.')
+      } else if (e.error === 'no-speech') {
+        // silent — user just didn't say anything
+      } else if (e.error === 'network') {
+        alert('Voice input requires an internet connection. Please check your connection and try again.')
+      } else {
+        alert(`Voice input error: "${e.error}". Please try again.`)
+      }
+    }
 
     recognitionRef.current = recognition
-    recognition.start()
-    setIsListening(true)
+    try {
+      recognition.start()
+      setIsListening(true)
+    } catch (err) {
+      console.warn('Voice recognition start failed:', err)
+      setIsListening(false)
+    }
   }
 
   async function sendMessage(text) {
@@ -113,7 +259,7 @@ export default function ChatPage() {
 
     try {
       const res = await axios.post('/api/chat', { question, history, lang })
-      const followups = getFollowups(res.data.answer)
+      const followups = getFollowups(question, res.data.answer)
       setMessages(prev => [...prev, {
         role: 'ai',
         text: res.data.answer,
@@ -179,6 +325,208 @@ export default function ChatPage() {
     }
   }
 
+  // ── User Auth ─────────────────────────────────────────────────────────────────
+
+  function userAuthHeader() {
+    return { Authorization: `Bearer ${localStorage.getItem('user_token') || ''}` }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    setLoginLoading(true)
+    try {
+      const isLogin = loginForm.mode === 'login'
+      const path = isLogin ? '/api/user/login' : '/api/user/register'
+      const body = isLogin
+        ? { email: loginForm.email.trim(), password: loginForm.password }
+        : { email: loginForm.email.trim(), name: loginForm.name.trim(), password: loginForm.password }
+      const res = await axios.post(path, body)
+      const { token } = res.data
+      localStorage.setItem('user_token', token)
+      setUserToken(token)
+      const me = await axios.get('/api/user/me', { headers: { Authorization: `Bearer ${token}` } })
+      setUser(me.data)
+      setLoginModal(false)
+      setLoginForm({ email: '', name: '', password: '', mode: 'login' })
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Failed. Please try again.'
+      alert(msg)
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('user_token')
+    setUserToken('')
+    setUser(null)
+    setShowMyChats(false)
+    setLiveChats({})
+    Object.values(liveChatRefs.current).forEach(r => clearInterval(r?.intervalId))
+    liveChatRefs.current = {}
+    Object.values(heartbeatRef.current).forEach(id => clearInterval(id))
+    heartbeatRef.current = {}
+  }
+
+  async function loadMyChats() {
+    try {
+      const res = await axios.get('/api/user/live-chats', { headers: userAuthHeader() })
+      setMyChats(res.data)
+    } catch {}
+  }
+
+  function stopMyChatPolling() {
+    const chatId = myChatPollRef.current.chatId
+    clearInterval(myChatPollRef.current.intervalId)
+    myChatPollRef.current = { intervalId: null, lastMsgId: 0, chatId: null }
+    if (chatId) stopHeartbeat(chatId)
+  }
+
+  function startMyChatPolling(chatId, lastId) {
+    stopMyChatPolling()
+    myChatPollRef.current = { intervalId: null, lastMsgId: lastId, chatId }
+    const ivId = setInterval(async () => {
+      const ref = myChatPollRef.current
+      if (!ref.chatId) return
+      try {
+        const res = await axios.get(`/api/live-chat/${ref.chatId}/messages?offset=${ref.lastMsgId}`)
+        if (res.data.messages.length > 0) {
+          const lastMsg = res.data.messages[res.data.messages.length - 1]
+          myChatPollRef.current = { ...myChatPollRef.current, lastMsgId: lastMsg.id }
+          setChatMsgs(prev => [...prev, ...res.data.messages])
+        }
+        if (res.data.chat_status === 'closed') {
+          const closedId = ref.chatId
+          stopMyChatPolling()
+          stopHeartbeat(closedId)
+          setMyChats(prev => prev.map(c => c.id === closedId ? { ...c, status: 'closed' } : c))
+        }
+      } catch {}
+    }, 4000)
+    myChatPollRef.current.intervalId = ivId
+  }
+
+  async function loadChatMessages(chatId, chatStatus) {
+    if (expandedChat === chatId) {
+      setExpandedChat(null)
+      stopMyChatPolling()
+      return
+    }
+    try {
+      const res = await axios.get(`/api/user/live-chats/${chatId}/messages`, { headers: userAuthHeader() })
+      const msgs = res.data.messages
+      setChatMsgs(msgs)
+      setExpandedChat(chatId)
+      setMyChatInput('')
+      if (chatStatus === 'active') {
+        const lastId = msgs.length > 0 ? msgs[msgs.length - 1].id : 0
+        startMyChatPolling(chatId, lastId)
+        startHeartbeat(chatId)
+      }
+    } catch {}
+  }
+
+  async function sendReplyFromHistory(chatId) {
+    if (!myChatInput.trim() || myChatSending) return
+    setMyChatSending(true)
+    try {
+      const res = await axios.post(`/api/live-chat/${chatId}/message`, { content: myChatInput.trim() })
+      myChatPollRef.current = { ...myChatPollRef.current, lastMsgId: res.data.id }
+      setChatMsgs(prev => [...prev, res.data])
+      setMyChatInput('')
+    } catch {}
+    finally { setMyChatSending(false) }
+  }
+
+  // ── Live Chat ─────────────────────────────────────────────────────────────────
+
+  function startHeartbeat(chatId) {
+    if (heartbeatRef.current[chatId]) clearInterval(heartbeatRef.current[chatId])
+    heartbeatRef.current[chatId] = setInterval(() => {
+      axios.put(`/api/live-chat/${chatId}/heartbeat`).catch(() => {})
+    }, 20000)
+    // send one immediately on start
+    axios.put(`/api/live-chat/${chatId}/heartbeat`).catch(() => {})
+  }
+
+  function stopHeartbeat(chatId) {
+    if (heartbeatRef.current[chatId]) {
+      clearInterval(heartbeatRef.current[chatId])
+      delete heartbeatRef.current[chatId]
+    }
+  }
+
+  async function openLiveChat(msgIndex, relatedQuestion) {
+    if (!user) return
+    liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
+    setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false } }))
+    try {
+      const res = await axios.post('/api/live-chat/start',
+        { related_question: relatedQuestion || null },
+        { headers: userAuthHeader() }
+      )
+      const chatId = res.data.chat_id
+      liveChatRefs.current[msgIndex].chatId = chatId
+      // fetch initial messages (greeting)
+      const firstRes = await axios.get(`/api/live-chat/${chatId}/messages?offset=0`)
+      const initMsgs = firstRes.data.messages || []
+      if (initMsgs.length > 0) {
+        liveChatRefs.current[msgIndex].lastMsgId = initMsgs[initMsgs.length - 1].id
+      }
+      setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], phase: 'chat', chatId, messages: initMsgs } }))
+      // start polling + heartbeat
+      const intervalId = setInterval(() => pollLiveChat(msgIndex), 4000)
+      liveChatRefs.current[msgIndex].intervalId = intervalId
+      startHeartbeat(chatId)
+    } catch {
+      setLiveChats(p => { const n = { ...p }; delete n[msgIndex]; return n })
+      alert('Failed to start chat. Please try again.')
+    }
+  }
+
+  async function pollLiveChat(msgIndex) {
+    // Read chatId + lastMsgId from ref to avoid stale closure
+    const ref = liveChatRefs.current[msgIndex]
+    if (!ref?.chatId) return
+    try {
+      const res = await axios.get(`/api/live-chat/${ref.chatId}/messages?offset=${ref.lastMsgId}`)
+      if (res.data.messages.length > 0) {
+        const lastId = res.data.messages[res.data.messages.length - 1].id
+        liveChatRefs.current[msgIndex] = { ...ref, lastMsgId: lastId }
+        setLiveChats(p => ({
+          ...p,
+          [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages] }
+        }))
+      }
+      if (res.data.chat_status === 'closed') {
+        clearInterval(ref.intervalId)
+        stopHeartbeat(ref.chatId)
+        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], closed: true } }))
+      }
+    } catch { /* silent */ }
+  }
+
+  async function sendLiveChatMessage(msgIndex) {
+    const lc = liveChats[msgIndex]
+    if (!lc?.inputText?.trim() || lc.sending) return
+    const ref = liveChatRefs.current[msgIndex]
+    if (!ref?.chatId) return
+    setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], sending: true } }))
+    try {
+      const res = await axios.post(`/api/live-chat/${ref.chatId}/message`, { content: lc.inputText.trim() })
+      liveChatRefs.current[msgIndex] = { ...ref, lastMsgId: res.data.id }
+      setLiveChats(p => ({
+        ...p,
+        [msgIndex]: { ...p[msgIndex], inputText: '', sending: false,
+                      messages: [...(p[msgIndex]?.messages || []), res.data] }
+      }))
+    } catch {
+      setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], sending: false } }))
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+
   function handleKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -241,7 +589,7 @@ export default function ChatPage() {
           {/* Panels — desktop */}
           <div className="hidden sm:flex items-center gap-1.5">
             <button
-              onClick={() => { setShowAnnouncements(true); setShowInfo(false) }}
+              onClick={() => setShowAnnouncements(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 darkMode ? 'bg-white/8 hover:bg-white/15 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
@@ -249,16 +597,39 @@ export default function ChatPage() {
               <Megaphone size={13} />
               Announcements
             </button>
+          </div>
+
+          {/* User account pill */}
+          {user ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => { setShowMyChats(v => !v); if (!showMyChats) loadMyChats() }}
+                title="My Chats"
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  darkMode ? 'bg-white/8 hover:bg-white/15 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                }`}
+              >
+                <History size={12} />
+                <span className="hidden sm:inline max-w-[70px] truncate">{user.name}</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                title="Logout"
+                className={`p-1.5 rounded-lg transition-all ${darkMode ? 'hover:bg-white/10 text-gray-400 hover:text-red-400' : 'hover:bg-red-50 text-gray-400 hover:text-red-500'}`}
+              >
+                <LogOut size={13} />
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={() => { setShowInfo(true); setShowAnnouncements(false) }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                darkMode ? 'bg-white/8 hover:bg-white/15 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              onClick={() => setLoginModal(true)}
+              className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all ${
+                darkMode ? 'text-kcc-gold hover:bg-white/8' : 'text-kcc-blue hover:bg-blue-50'
               }`}
             >
-              <BookOpen size={13} />
-              School Info
+              Login
             </button>
-          </div>
+          )}
         </div>
       </header>
 
@@ -278,21 +649,6 @@ export default function ChatPage() {
             <p className={`text-sm mb-7 max-w-xs leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               Ask me anything about Kabankalan Catholic College — enrollment, policies, offices, and more.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-sm">
-              {SUGGESTED.map((q) => (
-                <button
-                  key={q}
-                  onClick={() => sendMessage(q)}
-                  className={`text-left px-4 py-3 rounded-xl text-sm transition-all border ${
-                    darkMode
-                      ? 'bg-white/6 border-white/10 text-gray-300 hover:bg-white/12 hover:border-kcc-gold/40 hover:text-white'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-kcc-gold/60 hover:text-gray-800 shadow-sm'
-                  }`}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
           </div>
         )}
 
@@ -368,18 +724,113 @@ export default function ChatPage() {
                       ✓ Concern submitted! We'll reply to your email.
                     </p>
                   ) : (
-                    <button
-                      onClick={() => {
-                        setConcernModal({ question: messages[i - 1]?.text || msg.text, msgIndex: i })
-                        setConcernForm({ name: '', email: '', message: messages[i - 1]?.text || '' })
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-kcc-blue text-white rounded-lg text-xs font-medium hover:bg-kcc-dark transition"
-                    >
-                      <AlertTriangle size={11} /> Submit a Concern
-                    </button>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-2 flex-wrap">
+                        {user && !liveChats[i] && (
+                          <button
+                            onClick={() => openLiveChat(i, messages[i - 1]?.text || '')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
+                          >
+                            <MessageCircle size={11} /> Chat with Admin
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setConcernModal({ question: messages[i - 1]?.text || msg.text, msgIndex: i })
+                            setConcernForm({ name: '', email: '', message: messages[i - 1]?.text || '' })
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-kcc-blue text-white rounded-lg text-xs font-medium hover:bg-kcc-dark transition"
+                        >
+                          <AlertTriangle size={11} /> Submit a Concern
+                        </button>
+                      </div>
+                      {!user && (
+                        <p className={`text-[11px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <button onClick={() => setLoginModal(true)} className="text-kcc-blue hover:underline">Login</button>
+                          {' '}to chat with admin in real-time
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
+            )}
+
+            {/* Inline live chat panel */}
+            {msg.role === 'ai' && msg.is_answered === false && liveChats[i] && (
+              <>
+                {liveChats[i].phase === 'connecting' && (
+                  <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border px-4 py-3 text-xs ${
+                    darkMode ? 'bg-white/5 border-white/10 text-gray-400' : 'bg-white border-gray-200 shadow-sm text-gray-500'
+                  }`}>
+                    <p className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+                      Connecting to admin...
+                    </p>
+                  </div>
+                )}
+
+                {liveChats[i].phase === 'chat' && (
+                  <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border flex flex-col overflow-hidden ${
+                    darkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'
+                  }`} style={{ height: '280px' }}>
+                    {/* Chat header */}
+                    <div className={`px-3 py-2 border-b flex items-center justify-between flex-shrink-0 ${
+                      darkMode ? 'border-white/10' : 'border-gray-100'
+                    }`}>
+                      <p className={`text-[11px] font-semibold flex items-center gap-1.5 ${darkMode ? 'text-gray-200' : 'text-kcc-dark'}`}>
+                        <MessageCircle size={11} className="text-green-500" />
+                        Live Chat
+                        {!liveChats[i].closed && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse ml-0.5" />
+                        )}
+                      </p>
+                      {liveChats[i].closed && (
+                        <span className="text-[10px] text-gray-400">Ended</span>
+                      )}
+                    </div>
+                    {/* Messages */}
+                    <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+                      {liveChats[i].messages.map(m => (
+                        <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <span className={`text-xs px-3 py-1.5 rounded-2xl max-w-[80%] leading-relaxed ${
+                            m.sender === 'user'
+                              ? 'bg-kcc-blue text-white rounded-br-sm'
+                              : darkMode ? 'bg-white/10 text-gray-200 rounded-bl-sm' : 'bg-gray-100 text-gray-700 rounded-bl-sm'
+                          }`}>{m.content}</span>
+                        </div>
+                      ))}
+                      {liveChats[i].closed && (
+                        <p className={`text-center text-[10px] mt-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                          Chat ended by admin.
+                        </p>
+                      )}
+                    </div>
+                    {/* Input */}
+                    {!liveChats[i].closed && (
+                      <div className={`border-t px-2 py-2 flex gap-2 flex-shrink-0 ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
+                        <input
+                          type="text"
+                          placeholder="Type a message..."
+                          value={liveChats[i].inputText}
+                          onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], inputText: e.target.value } }))}
+                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendLiveChatMessage(i) } }}
+                          className={`flex-1 text-xs rounded-lg px-2.5 py-1.5 outline-none border focus:border-green-500 ${
+                            darkMode ? 'bg-white/10 border-white/10 text-white placeholder-gray-500' : 'border-gray-200 text-gray-700'
+                          }`}
+                        />
+                        <button
+                          onClick={() => sendLiveChatMessage(i)}
+                          disabled={liveChats[i].sending || !liveChats[i].inputText?.trim()}
+                          className="px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs disabled:opacity-40 hover:bg-green-700 transition"
+                        >
+                          <Send size={11} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
             {/* Retry button on error */}
@@ -474,18 +925,28 @@ export default function ChatPage() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={lang === 'fil' ? 'Magtanong tungkol sa KCC...' : 'Ask anything about KCC...'}
+            disabled={loading}
+            placeholder={
+              loading
+                ? (lang === 'fil' ? 'Naghihintay ng sagot...' : 'Waiting for response...')
+                : isListening
+                  ? (voiceInterim || (lang === 'fil' ? '🎤 Nakikinig...' : '🎤 Listening...'))
+                  : (lang === 'fil' ? 'Magtanong tungkol sa KCC...' : 'Ask anything about KCC...')
+            }
             rows={1}
             maxLength={500}
-            className={`flex-1 bg-transparent text-sm resize-none outline-none max-h-28 py-0.5 ${
-              darkMode ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'
+            className={`flex-1 bg-transparent text-sm resize-none outline-none max-h-28 py-0.5 transition-opacity ${
+              loading
+                ? 'opacity-40 cursor-not-allowed'
+                : darkMode ? 'text-white placeholder-gray-500' : 'text-gray-800 placeholder-gray-400'
             }`}
             style={{ scrollbarWidth: 'none' }}
           />
           <button
             onClick={toggleVoice}
+            disabled={loading}
             title={isListening ? 'Stop listening' : 'Voice input'}
-            className={`p-1.5 rounded-xl transition-all flex-shrink-0 ${
+            className={`p-1.5 rounded-xl transition-all flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed ${
               isListening
                 ? 'bg-red-500 text-white animate-pulse'
                 : darkMode ? 'text-gray-500 hover:text-kcc-gold' : 'text-gray-400 hover:text-kcc-blue'
@@ -501,6 +962,17 @@ export default function ChatPage() {
             <Send size={15} />
           </button>
         </div>
+
+        {/* Live interim voice transcript */}
+        {isListening && voiceInterim && (
+          <div className={`mt-1.5 px-3 py-1 rounded-xl text-xs italic flex items-center gap-1.5 ${
+            darkMode ? 'text-gray-400 bg-white/5' : 'text-gray-500 bg-gray-100'
+          }`}>
+            <span className="text-red-400 animate-pulse">●</span>
+            {voiceInterim}
+          </div>
+        )}
+
         <div className="flex items-center justify-between mt-2 px-1">
           <p className={`text-[11px] ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
             Answers are based on official KCC information only.
@@ -535,18 +1007,10 @@ export default function ChatPage() {
           <Megaphone size={19} />
           <span className="text-[10px]">News</span>
         </button>
-        <button
-          onClick={() => setShowInfo(true)}
-          className={`flex-1 flex flex-col items-center py-3 gap-0.5 transition-all ${darkMode ? 'text-gray-500 hover:text-kcc-gold' : 'text-gray-400 hover:text-kcc-blue'}`}
-        >
-          <BookOpen size={19} />
-          <span className="text-[10px]">Info</span>
-        </button>
       </nav>
 
       {/* ── Panels ── */}
       {showAnnouncements && <div className="animate-slideDown"><AnnouncementsPanel onClose={() => setShowAnnouncements(false)} /></div>}
-      {showInfo          && <div className="animate-slideDown"><SchoolInfoPanel    onClose={() => setShowInfo(false)} /></div>}
 
       {/* ── Concern Modal ── */}
       {concernModal && (
@@ -618,6 +1082,196 @@ export default function ChatPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Login / Register Modal ── */}
+      {loginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className={`w-full max-w-sm rounded-2xl shadow-xl p-6 ${darkMode ? 'bg-[#1a2236]' : 'bg-white'}`}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <img src={kccLogo} alt="KCC" className="w-7 h-7 rounded-full object-cover" />
+                <div>
+                  <p className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-kcc-dark'}`}>KCCSmartInfoX</p>
+                  <p className="text-[11px] text-gray-400">Student Account</p>
+                </div>
+              </div>
+              <button onClick={() => setLoginModal(false)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}>
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className={`flex rounded-xl p-1 mb-5 ${darkMode ? 'bg-white/5' : 'bg-gray-100'}`}>
+              {['login', 'register'].map(m => (
+                <button
+                  key={m}
+                  onClick={() => setLoginForm(p => ({ ...p, mode: m }))}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
+                    loginForm.mode === m
+                      ? 'bg-kcc-blue text-white shadow-sm'
+                      : darkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-3">
+              <input
+                type="email"
+                required
+                placeholder="Email address"
+                value={loginForm.email}
+                onChange={e => setLoginForm(p => ({ ...p, email: e.target.value }))}
+                style={{ color: darkMode ? '#fff' : '#374151', backgroundColor: darkMode ? 'rgba(255,255,255,0.08)' : '#fff' }}
+                className="w-full text-sm border rounded-xl px-3.5 py-2.5 outline-none focus:border-kcc-blue transition border-gray-200"
+              />
+              {loginForm.mode === 'register' && (
+                <input
+                  type="text"
+                  required
+                  placeholder="Display name"
+                  value={loginForm.name}
+                  onChange={e => setLoginForm(p => ({ ...p, name: e.target.value }))}
+                  style={{ color: darkMode ? '#fff' : '#374151', backgroundColor: darkMode ? 'rgba(255,255,255,0.08)' : '#fff' }}
+                  className="w-full text-sm border rounded-xl px-3.5 py-2.5 outline-none focus:border-kcc-blue transition border-gray-200"
+                />
+              )}
+              <input
+                type="password"
+                required
+                placeholder="Password"
+                value={loginForm.password}
+                onChange={e => setLoginForm(p => ({ ...p, password: e.target.value }))}
+                style={{ color: darkMode ? '#fff' : '#374151', backgroundColor: darkMode ? 'rgba(255,255,255,0.08)' : '#fff' }}
+                className="w-full text-sm border rounded-xl px-3.5 py-2.5 outline-none focus:border-kcc-blue transition border-gray-200"
+              />
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full py-2.5 rounded-xl text-sm bg-kcc-blue text-white font-semibold hover:bg-kcc-dark disabled:opacity-50 transition"
+              >
+                {loginLoading ? (loginForm.mode === 'login' ? 'Logging in...' : 'Creating account...') : (loginForm.mode === 'login' ? 'Login' : 'Create Account')}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── My Chats Panel ── */}
+      {showMyChats && user && (
+        <div className={`fixed top-0 right-0 h-full w-80 z-40 shadow-2xl flex flex-col animate-slideDown ${darkMode ? 'bg-[#0d1426] border-l border-white/10' : 'bg-white border-l border-gray-200'}`}>
+          <div className={`flex items-center justify-between px-4 py-3 border-b ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
+            <p className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-kcc-dark'}`}>My Chats</p>
+            <button onClick={() => setShowMyChats(false)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}>
+              <X size={14} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {myChats.length === 0 ? (
+              <div className="text-center py-10">
+                <MessageCircle size={28} className="mx-auto mb-2 text-gray-300" />
+                <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>No conversations yet</p>
+              </div>
+            ) : (
+              myChats.map(c => {
+                const isActive   = c.status === 'active'
+                const isExpanded = expandedChat === c.id
+                return (
+                  <div key={c.id} className={`rounded-xl border overflow-hidden ${
+                    isActive
+                      ? darkMode ? 'bg-green-900/10 border-green-500/30' : 'bg-green-50 border-green-200'
+                      : darkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'
+                  }`}>
+                    {/* Header row */}
+                    <button
+                      onClick={() => loadChatMessages(c.id, c.status)}
+                      className="w-full px-3 py-2.5 text-left flex items-center justify-between"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-1 ${
+                            isActive
+                              ? 'bg-green-500/20 text-green-400'
+                              : darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
+                          }`}>
+                            {isActive && <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />}
+                            {c.status}
+                          </span>
+                          <span className={`text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                            {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        {c.related_question && (
+                          <p className={`text-xs mt-1 truncate ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {c.related_question}
+                          </p>
+                        )}
+                        <p className={`text-[10px] mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+                          {c.message_count} message{c.message_count !== 1 ? 's' : ''}
+                          {isActive && <span className="ml-1.5 text-green-400 font-medium">• tap to reply</span>}
+                        </p>
+                      </div>
+                      {isExpanded
+                        ? <ChevronUp size={12} className="text-gray-400 flex-shrink-0 ml-2" />
+                        : <ChevronDown size={12} className="text-gray-400 flex-shrink-0 ml-2" />}
+                    </button>
+
+                    {/* Expanded messages */}
+                    {isExpanded && (
+                      <div className={`border-t flex flex-col ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
+                        {/* Messages */}
+                        <div className="px-3 py-2 space-y-1.5 max-h-52 overflow-y-auto">
+                          {chatMsgs.map(m => (
+                            <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                              <span className={`text-[11px] px-2.5 py-1.5 rounded-xl max-w-[85%] leading-relaxed ${
+                                m.sender === 'user'
+                                  ? 'bg-kcc-blue text-white rounded-br-sm'
+                                  : darkMode ? 'bg-white/10 text-gray-200 rounded-bl-sm' : 'bg-white text-gray-700 border border-gray-100 rounded-bl-sm'
+                              }`}>{m.content}</span>
+                            </div>
+                          ))}
+                          {!isActive && (
+                            <p className={`text-center text-[10px] pt-1 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
+                              Chat ended by admin.
+                            </p>
+                          )}
+                          <div ref={myChatBottomRef} />
+                        </div>
+
+                        {/* Reply input — only for active chats */}
+                        {isActive && (
+                          <div className={`border-t px-2 py-2 flex gap-1.5 ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
+                            <input
+                              type="text"
+                              placeholder="Reply to admin..."
+                              value={myChatInput}
+                              onChange={e => setMyChatInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === 'Enter') sendReplyFromHistory(c.id) }}
+                              style={{ color: darkMode ? '#fff' : '#374151' }}
+                              className={`flex-1 text-xs rounded-lg px-2.5 py-1.5 outline-none border focus:border-green-500 transition ${
+                                darkMode ? 'bg-white/10 border-white/10 placeholder-gray-500' : 'border-gray-200 placeholder-gray-400'
+                              }`}
+                            />
+                            <button
+                              onClick={() => sendReplyFromHistory(c.id)}
+                              disabled={myChatSending || !myChatInput.trim()}
+                              className="px-2.5 py-1.5 bg-green-600 text-white rounded-lg disabled:opacity-40 hover:bg-green-700 transition flex-shrink-0"
+                            >
+                              <Send size={11} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
           </div>
         </div>
       )}
