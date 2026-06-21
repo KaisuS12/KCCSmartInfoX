@@ -5,10 +5,10 @@ import {
   AlertCircle, Users, FileText,
   TrendingUp, ThumbsUp, BookOpen,
   ArrowRight, RefreshCw, CheckCircle, AlertTriangle,
-  Megaphone, MessageCircle, Activity, Zap
+  Megaphone, MessageCircle, Activity, Zap, Info
 } from 'lucide-react'
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts'
 import axios from 'axios'
@@ -88,6 +88,7 @@ export default function AdminDashboard() {
   const [pendingConcerns, setPending] = useState(0)
   const [activeLiveChats, setActiveLiveChats] = useState(0)
   const [backendOnline, setBackendOnline] = useState(null)
+  const [chartRange, setChartRange]   = useState('week')   // 'week' | 'month'
   const navigate = useNavigate()
 
   function fetchData() {
@@ -111,10 +112,19 @@ export default function AdminDashboard() {
   }, [])
 
   // Chart data
-  const dailyData = (data?.daily_data || []).slice(-14).map(d => ({
+  const dailyDataAll = (data?.daily_data || []).slice(-14).map(d => ({
     date: new Date(d.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
     Questions: d.count,
+    Answered: d.answered ?? 0,
+    Unanswered: d.unanswered ?? 0,
   }))
+  const dailyData = chartRange === 'week' ? dailyDataAll.slice(-7) : dailyDataAll
+  const rangeTotals = dailyData.reduce((acc, d) => ({
+    questions:  acc.questions + d.Questions,
+    answered:   acc.answered + d.Answered,
+    unanswered: acc.unanswered + d.Unanswered,
+  }), { questions: 0, answered: 0, unanswered: 0 })
+  const rangeAnswerRate = rangeTotals.questions > 0 ? Math.round((rangeTotals.answered / rangeTotals.questions) * 1000) / 10 : 0
 
   const pieData = [
     { name: 'Answered',   value: data?.answered   || 0 },
@@ -170,14 +180,31 @@ export default function AdminDashboard() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: 'Total Questions', value: data?.total_questions ?? '—', color: 'text-kcc-blue' },
-                  { label: 'Answered',        value: data?.answered       ?? '—', color: 'text-green-400' },
-                  { label: 'Unanswered',      value: data?.unanswered     ?? '—', color: 'text-red-400' },
-                  { label: 'Answer Rate',     value: answerRate !== null ? `${answerRate}%` : '—', color: answerRate >= 80 ? 'text-green-400' : answerRate >= 50 ? 'text-yellow-400' : 'text-red-400' },
+                  { label: 'Total Questions', value: data?.total_questions ?? '—', color: 'text-kcc-blue',   icon: MessageCircle, iconBg: 'bg-kcc-blue/15',
+                    formula: 'Count of every question logged in chat_logs, all time.' },
+                  { label: 'Answered',        value: data?.answered       ?? '—', color: 'text-green-400',  icon: CheckCircle,   iconBg: 'bg-green-500/15',
+                    formula: 'Total Questions − Unanswered (questions where is_answered = true).' },
+                  { label: 'Unanswered',      value: data?.unanswered     ?? '—', color: 'text-red-400',    icon: AlertTriangle, iconBg: 'bg-red-500/15',
+                    formula: 'Count of questions where is_answered = false (AI had no good answer).' },
+                  { label: 'Answer Rate',     value: answerRate !== null ? `${answerRate}%` : '—', color: answerRate >= 80 ? 'text-green-400' : answerRate >= 50 ? 'text-yellow-400' : 'text-red-400', icon: Activity, iconBg: 'bg-yellow-500/15',
+                    formula: '(Answered ÷ Total Questions) × 100, rounded to 1 decimal.' },
                 ].map(s => (
-                  <div key={s.label} className="bg-white/5 rounded-xl px-3 py-2.5 border border-white/8">
-                    <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{s.label}</p>
+                  <div key={s.label} className="group relative bg-white/5 rounded-xl px-3 py-2.5 border border-white/8 flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${s.iconBg}`}>
+                      <s.icon size={15} className={s.color} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-xl font-bold leading-tight ${s.color}`}>{s.value}</p>
+                      <p className="text-gray-500 text-xs mt-0.5 truncate">{s.label}</p>
+                    </div>
+                    <Info size={12} className="text-gray-600 flex-shrink-0 cursor-help" />
+                    {/* Tooltip */}
+                    <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-52 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      <div className="bg-[#0a1228] border border-white/10 text-gray-300 text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-xl">
+                        <span className={`font-semibold ${s.color}`}>{s.label}</span> — {s.formula}
+                      </div>
+                      <div className="w-2 h-2 bg-[#0a1228] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -256,42 +283,76 @@ export default function AdminDashboard() {
 
           {/* Daily Questions Area Chart */}
           <div className="lg:col-span-2 bg-[#111c3a] border border-white/8 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-white font-semibold text-sm">Daily Questions</h3>
-                <p className="text-gray-500 text-xs mt-0.5">Last 14 days</p>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-kcc-blue bg-kcc-blue/10 px-2.5 py-1 rounded-full border border-kcc-blue/20">
-                <TrendingUp size={11} />
-                Chat Activity
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-semibold text-sm">Daily Questions</h3>
+              <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/8">
+                {['week', 'month'].map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setChartRange(r)}
+                    className={`text-xs px-3 py-1 rounded-md capitalize transition ${
+                      chartRange === r ? 'bg-kcc-blue text-white' : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
               </div>
             </div>
+
+            {/* Stat row */}
+            <div className="grid grid-cols-4 gap-3 mb-4">
+              {[
+                { label: 'Questions',   value: rangeTotals.questions,         color: 'text-kcc-blue' },
+                { label: 'Answered',    value: rangeTotals.answered,          color: 'text-green-400' },
+                { label: 'Unanswered',  value: rangeTotals.unanswered,        color: 'text-red-400' },
+                { label: 'Answer Rate', value: `${rangeAnswerRate}%`,         color: 'text-yellow-400' },
+              ].map(s => (
+                <div key={s.label}>
+                  <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                  <p className="text-gray-500 text-[11px] mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
             {dailyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={dailyData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={dailyData} margin={{ top: 5, right: 5, left: 5, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="qGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <linearGradient id="answeredGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#22c55e" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="unansweredGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#f97316" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
                   <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis hide domain={[0, 'dataMax']} />
                   <Tooltip content={<ChartTooltip />} />
                   <Area
                     type="monotone"
-                    dataKey="Questions"
-                    stroke="#3b82f6"
+                    dataKey="Unanswered"
+                    stroke="#f97316"
                     strokeWidth={2}
-                    fill="url(#qGrad)"
-                    dot={{ fill: '#3b82f6', r: 3, strokeWidth: 0 }}
-                    activeDot={{ r: 5, fill: '#3b82f6' }}
+                    fill="url(#unansweredGrad)"
+                    dot={false}
+                    activeDot={{ r: 4, fill: '#f97316', strokeWidth: 0 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Answered"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    fill="url(#answeredGrad)"
+                    dot={false}
+                    activeDot={{ r: 4, fill: '#22c55e', strokeWidth: 0 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-gray-600 text-sm">
+              <div className="h-[180px] flex items-center justify-center text-gray-600 text-sm">
                 No data available yet
               </div>
             )}

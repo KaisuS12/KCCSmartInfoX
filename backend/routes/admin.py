@@ -9,7 +9,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, cast, Integer
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -139,14 +139,31 @@ async def analytics(db: Session = Depends(get_db), admin=Depends(get_current_adm
     thumbs_up         = db.query(Feedback).filter(Feedback.rating == "up").count()
     thumbs_down       = db.query(Feedback).filter(Feedback.rating == "down").count()
 
-    # Questions per day — last 7 days
-    seven_days_ago = datetime.utcnow() - timedelta(days=7)
-    daily = (
-        db.query(func.date(ChatLog.created_at).label("date"), func.count().label("count"))
-        .filter(ChatLog.created_at >= seven_days_ago)
+    # Questions per day — last 14 days, zero-filled so the chart line is continuous
+    fourteen_days_ago = datetime.utcnow() - timedelta(days=14)
+    daily_rows = (
+        db.query(
+            func.date(ChatLog.created_at).label("date"),
+            func.count().label("count"),
+            func.sum(cast(ChatLog.is_answered == False, Integer)).label("unanswered_count"),
+        )
+        .filter(ChatLog.created_at >= fourteen_days_ago)
         .group_by(func.date(ChatLog.created_at))
         .all()
     )
+    by_date = {str(r.date): r for r in daily_rows}
+    daily = []
+    for i in range(13, -1, -1):
+        d = (datetime.utcnow() - timedelta(days=i)).date()
+        row = by_date.get(str(d))
+        total = row.count if row else 0
+        unans = (row.unanswered_count or 0) if row else 0
+        daily.append({
+            "date": str(d),
+            "count": total,
+            "answered": total - unans,
+            "unanswered": unans,
+        })
 
     # Top 10 most asked questions
     top_questions = (
@@ -185,7 +202,7 @@ async def analytics(db: Session = Depends(get_db), admin=Depends(get_current_adm
         "total_documents":   total_documents,
         "thumbs_up":         thumbs_up,
         "thumbs_down":       thumbs_down,
-        "daily_data":        [{"date": str(r.date), "count": r.count} for r in daily],
+        "daily_data":        daily,
         "top_questions":     [{"question": r.question, "count": r.count} for r in top_questions],
         "unanswered_questions": [
             {"id": q.id, "question": q.question, "created_at": str(q.created_at)}

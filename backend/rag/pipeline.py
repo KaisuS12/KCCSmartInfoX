@@ -52,8 +52,9 @@ TONE & PERSONALITY:
 ACCURACY:
 1. Answer using ONLY the provided context from KCC official documents.
 2. Answer SPECIFICALLY what was asked — don't dump everything you know about the topic.
-3. If the answer is NOT in the context, say: "I don't have information about that yet. Your question has been noted for review."
-4. Never make up specific details like fees, dates, or names that are not in the context.
+3. The context may contain multiple chunks from different documents. Some chunks may NOT be related to the student's question — if a chunk doesn't directly help answer what was asked, IGNORE it completely. Never mention or pull facts from a chunk that's off-topic just because it happened to be retrieved.
+4. If the answer is NOT in the context, say: "I don't have information about that yet. Your question has been noted for review." Do NOT pad this with unrelated facts from the context to seem more helpful.
+5. Never make up specific details like fees, dates, or names that are not in the context.
 
 LANGUAGE:
 - You understand Filipino, Taglish, and Bisaya mixed messages. Respond in clear, friendly English.
@@ -89,8 +90,9 @@ TONO AT PERSONALIDAD:
 KATUMPAKAN:
 1. Sagutin LAMANG gamit ang konteksto mula sa opisyal na mga dokumento ng KCC.
 2. Sagutin ESPESIPIKO ang tinanong — huwag i-dump ang lahat ng alam mo tungkol sa paksa.
-3. Kung ang sagot ay WALA sa konteksto, sabihin: "Wala pa akong impormasyon tungkol diyan. Ang iyong tanong ay naitala na para sa pagsusuri."
-4. Huwag gumawa ng mga detalye tulad ng bayad, petsa, o pangalan na wala sa konteksto.
+3. Maaaring may ilang chunks ang konteksto mula sa iba't ibang dokumento. Ang ibang chunks ay maaaring HINDI kaugnay sa tanong ng estudyante — kung ang isang chunk ay hindi direktang tumutulong sumagot sa tinanong, HUWAG itong banggitin o gamitin. Huwag kumuha ng impormasyon mula sa isang chunk na off-topic kahit na nakuha ito sa retrieval.
+4. Kung ang sagot ay WALA sa konteksto, sabihin: "Wala pa akong impormasyon tungkol diyan. Ang iyong tanong ay naitala na para sa pagsusuri." Huwag dagdagan ito ng mga hindi kaugnay na impormasyon mula sa konteksto.
+5. Huwag gumawa ng mga detalye tulad ng bayad, petsa, o pangalan na wala sa konteksto.
 
 WIKA:
 - Naiintindihan mo ang Taglish, Filipino, at Bisaya. Sumagot sa malinaw na Filipino o Taglish.
@@ -121,15 +123,19 @@ GREETING_PROMPT_FIL = """Ikaw si KCCSmartInfoX, ang palakaibigang AI assistant n
 
 Sumagot nang mainit at natural — parang isang matulunging ate o kuya sa paaralan. Gawing komportable ang estudyante na magtanong ng kahit ano. Ipaalam na makakatulong ka sa enrollment, mga kurso, tuition fees, scholarships, TOR requests, at mga patakaran ng paaralan. Maging maikli, masaya, at nakakaengganyong makipag-usap. Huwag gumawa ng mga detalye ng paaralan."""
 
-REWRITE_PROMPT = """You are a query understanding assistant. Your job is to interpret what a student is asking, even if they have:
+REWRITE_PROMPT = """You are a query understanding assistant for a school chatbot. Your job is to rewrite the student's latest message into one clear, standalone, fully-specified English question, even if they have:
 - typos or misspellings
 - Filipino/Bisaya/Taglish words mixed in
 - incomplete sentences or abbreviations
 - bad grammar
 
-Output ONLY the clean, corrected English question. Nothing else. No explanation.
+IMPORTANT — resolving follow-up / clarification questions:
+If a "Previous AI answer" is given below the student's message, the student's message may be a short follow-up that refers back to it using words like "this", "that", "it", "yun", "yan", "nothing else", "is that all", "how about", etc. In that case, REWRITE the message into a complete, standalone question that names the actual topic from the previous answer — do not leave pronouns unresolved.
+
+Output ONLY the clean, corrected, standalone English question. Nothing else. No explanation.
 
 Examples:
+
 Input: "magkano ang tution fe para sa bsit?"
 Output: "How much is the tuition fee for BSIT?"
 
@@ -165,6 +171,22 @@ Output: "What are all the courses offered in all departments at KCC?"
 
 Input: "all 3"
 Output: "What are all the courses offered in all 3 departments at KCC?"
+
+Previous AI answer: "You can enroll online through the KCC enrollment portal, or in person at the registrar's office."
+Student's message: "so is this the only way? nothing else?"
+Output: "Is online enrollment or in-person enrollment at the registrar's office the only way to enroll at KCC, or are there other enrollment options?"
+
+Previous AI answer: "BSIT tuition is around 15,000 pesos per semester."
+Student's message: "how about bsba?"
+Output: "How much is the tuition fee for BSBA?"
+
+Previous AI answer: "Scholarship requirements include a GWA of 85% and a recommendation letter."
+Student's message: "anong iba pa?"
+Output: "What other scholarship requirements are there at KCC?"
+
+Previous AI answer: "The registrar's office is open Mon-Fri 8AM-5PM."
+Student's message: "what about saturdays"
+Output: "Is the registrar's office open on Saturdays?"
 """
 
 UNANSWERED_PHRASE = "I don't have information about that yet"
@@ -288,6 +310,22 @@ MGA PATAKARAN:
 - Kung may 2 angkop na kurso, ipaliwanag ang pagkakaiba at hayaan silang pumili. Huwag ilista lahat.
 - Maging personal — banggitin ang sinabi mismo ng estudyante."""
 
+FOLLOWUP_PROMPT = """Based on the student's question and the AI's answer below about Kabankalan Catholic College (KCC), suggest exactly 3 short, natural follow-up questions a Filipino college student would realistically ask next on the SAME topic.
+
+Rules:
+- Each follow-up must be under 10 words.
+- Must be directly related to what was just discussed — do not change topics or invent unrelated questions.
+- Do NOT repeat the original question or restate something already answered in the AI's response.
+- Output ONLY the 3 questions, one per line. No numbering, no bullets, no extra text."""
+
+FOLLOWUP_PROMPT_FIL = """Batay sa tanong ng estudyante at sagot ng AI sa ibaba tungkol sa Kabankalan Catholic College (KCC), magmungkahi ng eksaktong 3 maikli at natural na follow-up na tanong na malamang itanong ng estudyante kasunod, sa PAREHONG paksa.
+
+Mga Patakaran:
+- Bawat follow-up ay dapat wala pang 10 salita.
+- Direktang kaugnay sa kasalukuyang pinag-uusapan — huwag magpalit ng paksa o gumawa ng hindi kaugnay na tanong.
+- HUWAG ulitin ang orihinal na tanong o ang nasagot na sa sagot ng AI.
+- Output LAMANG ang 3 tanong, isang linya bawat isa. Walang numero, walang bullets, walang ibang teksto."""
+
 
 # --- Helper Functions ---
 
@@ -333,32 +371,40 @@ def is_in_rec_conversation(history: list) -> bool:
             return bool(_REC_FOLLOWUP_RE.search(msg.get("content", "")))
     return False
 
-# Short affirmative/negative replies that are continuations of a prior AI question
+# Short affirmative/negative/acknowledgment replies that are continuations of a prior AI
+# question. Built from a single token list so combos like "okay got it!" or "sige salamat"
+# (multiple acknowledgment words back to back) match too, not just one exact phrase.
+_ACK_TOKEN = (
+    r"(?:yes+|yeah+|yep|yup|sure|ok+|okay|got\s*it|noted|roger|alright|of\s*course|"
+    r"go\s*ahead|please|why\s*not|do\s*it|tell\s*me|i\s*agree|sounds\s*good|let'?s\s*go|"
+    r"no+|nope|nah|never\s*mind|no\s*thanks|that'?s\s*fine|not\s*really|"
+    r"oo+|opo|sige+|sigi|oo\s*nga|oo\s*naman|ayaw|wag\s*na|hindi|"
+    r"salamat|thanks?|thank\s*you|maraming\s*salamat)"
+)
 CONTEXTUAL_REPLY_PATTERNS = re.compile(
-    r"^\s*(yes+|yeah+|yep|yup|sure|ok+|okay|go ahead|please|alright|of course|"
-    r"why not|do it|tell me|i agree|sounds good|let'?s go|"
-    r"no+|nope|nah|never mind|no thanks|that'?s fine|not really|"
-    r"oo+|opo|sige+|sigi|oo nga|oo naman|ayaw|wag na|hindi|nah)\s*[!?.]*\s*$",
+    rf"^\s*{_ACK_TOKEN}(?:[\s,!.]+{_ACK_TOKEN})*[\s!?.]*$",
     re.IGNORECASE
 )
 
 CONTINUATION_PROMPT = """You are KCCSmartInfoX, the friendly student assistant of Kabankalan Catholic College (KCC).
 
-The student is giving a short reply to a question YOU just asked. Look at the conversation history to understand the context, then continue naturally.
+The student is giving a short reply to something YOU just said. Look at the conversation history to understand the context, then respond naturally — do NOT search for or invent new information that wasn't already discussed.
 
-- If they said "yes" / "sure" / "go ahead" / "oo" / "sige" — do what you previously offered or asked about
-- If they said "no" / "never mind" / "nah" / "wag na" — acknowledge it warmly and offer to help with something else
+- If your last message ASKED them a yes/no question and they said "yes"/"sure"/"go ahead"/"oo"/"sige" — do what you previously offered or asked about
+- If your last message ASKED them a yes/no question and they said "no"/"never mind"/"nah"/"wag na" — acknowledge it warmly and offer to help with something else
+- If your last message was just an ANSWER (not a question) and they said "okay"/"got it"/"noted"/"thanks"/"salamat" — they are simply confirming they understood. Just give a brief, warm closing acknowledgment (e.g. "Glad that helped! 😊 Let me know if you have other questions.") — do NOT repeat the previous answer or bring up an unrelated topic.
 - Be warm and conversational. Don't repeat what you already said.
-- Keep your response brief and helpful."""
+- Keep your response brief — 1-2 sentences is enough."""
 
 CONTINUATION_PROMPT_FIL = """Ikaw si KCCSmartInfoX, ang palakaibigang AI assistant ng Kabankalan Catholic College (KCC).
 
-Ang estudyante ay nagbibigay ng maikling sagot sa tanong na IKAW ang nagtanong kanina. Tingnan ang kasaysayan ng usapan para maintindihan ang konteksto, at ituloy ang usapan nang natural.
+Ang estudyante ay nagbibigay ng maikling sagot sa sinabi mo kanina. Tingnan ang kasaysayan ng usapan para maintindihan ang konteksto, at sumagot nang natural — HUWAG maghanap o gumawa ng bagong impormasyon na hindi pa napag-usapan.
 
-- Kung sinabi nilang "oo" / "sige" / "yes" / "sure" — gawin ang inaalok o itinanong mo kanina
-- Kung sinabi nilang "hindi" / "wag na" / "no" / "nah" — kilalanin ito nang mainit at mag-alok ng ibang tulong
+- Kung ang huling mensahe mo ay isang tanong na yes/no at sinabi nilang "oo" / "sige" / "yes" / "sure" — gawin ang inaalok o itinanong mo kanina
+- Kung ang huling mensahe mo ay isang tanong na yes/no at sinabi nilang "hindi" / "wag na" / "no" / "nah" — kilalanin ito nang mainit at mag-alok ng ibang tulong
+- Kung ang huling mensahe mo ay isang SAGOT lamang (hindi tanong) at sinabi nilang "okay" / "got it" / "noted" / "salamat" — nagpapatunay lang sila na naintindihan nila. Magbigay lang ng maikli, mainit na pagsasara (hal. "Masaya akong nakatulong! 😊 Sabihin mo lang kung may iba ka pang tanong.") — HUWAG ulitin ang naunang sagot o magdala ng hindi kaugnay na paksa.
 - Maging mainit at natural. Huwag ulitin ang naibigay na impormasyon.
-- Panatilihing maikli at kapaki-pakinabang ang sagot."""
+- Panatilihing maikli — sapat na ang 1-2 pangungusap."""
 
 
 def quick_spell_fix(text: str) -> str:
@@ -378,21 +424,36 @@ def quick_spell_fix(text: str) -> str:
     return " ".join(corrected)
 
 
-def rewrite_query(question: str) -> str:
+def rewrite_query(question: str, history: list = None) -> str:
     """
     Use LLM to understand intent from messy/typo/Taglish input.
     Returns a clean English question for embedding retrieval.
     This is the same technique used by ChatGPT/Claude for robust understanding.
+
+    If `history` is given, the last AI answer is included so the rewriter can
+    resolve follow-up/clarification questions ("is this the only way?", "what
+    about Saturdays?") into a standalone question naming the actual topic.
     """
+    last_assistant = None
+    if history:
+        last_assistant = next(
+            (m.get("content") for m in reversed(history) if m.get("role") == "assistant"),
+            None,
+        )
+
+    user_content = question
+    if last_assistant:
+        user_content = f'Previous AI answer: "{last_assistant[:400]}"\nStudent\'s message: "{question}"'
+
     try:
         response = groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": REWRITE_PROMPT},
-                {"role": "user", "content": question},
+                {"role": "user", "content": user_content},
             ],
             temperature=0.0,
-            max_tokens=80,
+            max_tokens=100,
         )
         clean = response.choices[0].message.content.strip()
         # Safety: if LLM returns something too long or weird, fall back
@@ -405,10 +466,34 @@ def rewrite_query(question: str) -> str:
         return question
 
 
+def generate_followups(question: str, answer: str, use_fil: bool = False) -> list:
+    """
+    Generate 2-3 short, contextual follow-up questions from the actual Q&A pair —
+    replaces brittle keyword matching with real understanding of what was just discussed.
+    """
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": FOLLOWUP_PROMPT_FIL if use_fil else FOLLOWUP_PROMPT},
+                {"role": "user", "content": f"Student's question: {question}\nAI's answer: {answer[:600]}"},
+            ],
+            temperature=0.5,
+            max_tokens=80,
+        )
+        raw = response.choices[0].message.content.strip()
+        lines = [re.sub(r"^[\-\*\d\.\)\s]+", "", l).strip() for l in raw.split("\n")]
+        lines = [l for l in lines if l and len(l) <= 80]
+        return lines[:3]
+    except Exception as e:
+        logger.warning("Follow-up generation failed: %s", e)
+        return []
+
+
 # --- Main RAG Function ---
 
 def query_rag(question: str, history: list = None, user_profile: dict = None, lang: str = "en") -> tuple:
-    """Returns (answer: str, is_answered: bool, sources: list[str])"""
+    """Returns (answer: str, is_answered: bool, sources: list[str], followups: list[str])"""
 
     history = history or []
     use_fil = lang == "fil"
@@ -419,45 +504,11 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
     # 1a. Handle thank-you messages — instant canned reply, no LLM needed
     if is_thanks(question):
         replies = THANKS_REPLIES_FIL if use_fil else THANKS_REPLIES_EN
-        return random.choice(replies), True, []
+        return random.choice(replies), True, [], []
 
-    # 1b. Handle greetings / small talk — no RAG needed
-    if is_greeting(question):
-        logger.info("Greeting detected: %s", question[:80])
-        try:
-            response = groq_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
-                    {"role": "system", "content": GREETING_PROMPT_FIL if use_fil else GREETING_PROMPT},
-                    {"role": "user", "content": question},
-                ],
-                temperature=0.7,
-                max_tokens=150,
-            )
-            return response.choices[0].message.content.strip(), True, []
-        except Exception as e:
-            logger.error("Groq API error on greeting: %s", e)
-            return "Hello! I'm KCCSmartInfoX. I'm having trouble connecting right now — please try again in a moment.", True, []
-
-    # 1c. Handle "what course is best for me?" — conversational recommendation (initial trigger OR mid-convo follow-up)
-    if is_course_recommendation(question) or is_in_rec_conversation(history):
-        logger.info("Course recommendation request: %s", question[:80])
-        try:
-            rec_messages = [{"role": "system", "content": COURSE_RECOMMENDATION_PROMPT_FIL if use_fil else COURSE_RECOMMENDATION_PROMPT}]
-            rec_messages += history[-6:]  # keep more history for multi-turn Q&A
-            rec_messages.append({"role": "user", "content": question})
-            response = groq_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=rec_messages,
-                temperature=0.6,
-                max_tokens=500,
-            )
-            return response.choices[0].message.content.strip(), True, []
-        except Exception as e:
-            logger.error("Groq API error on course recommendation: %s", e)
-            return "I'd love to help you find the right course! Could you tell me what subjects you enjoy and what kind of career you're aiming for? 😊", True, []
-
-    # 1d. Handle short replies like "yes", "sure", "sige" — continue the prior conversation
+    # 1b. Handle short replies like "yes", "sure", "okay", "sige" that continue a prior
+    #     AI question — checked BEFORE greeting since words like "okay"/"got it" overlap
+    #     with greeting patterns, but only count as a continuation when history exists.
     if history and bool(CONTEXTUAL_REPLY_PATTERNS.match(question.strip())):
         logger.info("Contextual reply detected: %r — continuing from history", question)
         try:
@@ -470,23 +521,62 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
                 temperature=0.6,
                 max_tokens=400,
             )
-            return response.choices[0].message.content.strip(), True, []
+            return response.choices[0].message.content.strip(), True, [], []
         except Exception as e:
             logger.error("Groq API error on contextual reply: %s", e)
-            return "Sure! What would you like to know? 😊", True, []
+            return "Sure! What would you like to know? 😊", True, [], []
+
+    # 1c. Handle greetings / small talk — no RAG needed
+    if is_greeting(question):
+        logger.info("Greeting detected: %s", question[:80])
+        try:
+            response = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": GREETING_PROMPT_FIL if use_fil else GREETING_PROMPT},
+                    {"role": "user", "content": question},
+                ],
+                temperature=0.7,
+                max_tokens=150,
+            )
+            return response.choices[0].message.content.strip(), True, [], []
+        except Exception as e:
+            logger.error("Groq API error on greeting: %s", e)
+            return "Hello! I'm KCCSmartInfoX. I'm having trouble connecting right now — please try again in a moment.", True, [], []
+
+    # 1d. Handle "what course is best for me?" — conversational recommendation (initial trigger OR mid-convo follow-up)
+    if is_course_recommendation(question) or is_in_rec_conversation(history):
+        logger.info("Course recommendation request: %s", question[:80])
+        try:
+            rec_messages = [{"role": "system", "content": COURSE_RECOMMENDATION_PROMPT_FIL if use_fil else COURSE_RECOMMENDATION_PROMPT}]
+            rec_messages += history[-6:]  # keep more history for multi-turn Q&A
+            rec_messages.append({"role": "user", "content": question})
+            response = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=rec_messages,
+                temperature=0.6,
+                max_tokens=500,
+            )
+            rec_answer = response.choices[0].message.content.strip()
+            rec_followups = generate_followups(question, rec_answer, use_fil)
+            return rec_answer, True, [], rec_followups
+        except Exception as e:
+            logger.error("Groq API error on course recommendation: %s", e)
+            return "I'd love to help you find the right course! Could you tell me what subjects you enjoy and what kind of career you're aiming for? 😊", True, [], []
 
     # 2. Quick spell fix (fast, no API call)
     spell_fixed = quick_spell_fix(question)
 
-    # 3. LLM query rewrite — understands Taglish, typos, abbreviations
-    clean_question = rewrite_query(spell_fixed)
+    # 3. LLM query rewrite — understands Taglish, typos, abbreviations, and
+    #    resolves follow-up/clarification questions using the last AI answer
+    clean_question = rewrite_query(spell_fixed, history)
 
     # 4. Embed the clean question for semantic search
     question_embedding = embedding_model.encode(clean_question).tolist()
 
     doc_count = collection.count()
     if doc_count == 0:
-        return "I don't have any knowledge base documents yet. Please ask the admin to upload KCC documents.", False, []
+        return "I don't have any knowledge base documents yet. Please ask the admin to upload KCC documents.", False, [], []
 
     # Special case: student wants ALL departments' courses — fetch all 3 directly
     _cq = clean_question.lower()
@@ -519,7 +609,22 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
     # 5. No relevant docs found
     if not docs or (distances and distances[0] > 1.3):
         logger.warning("No relevant context for: %s (rewritten: %s)", question[:60], clean_question[:60])
-        return UNANSWERED_PHRASE + ". Your question has been noted for review.", False, []
+        return UNANSWERED_PHRASE + ". Your question has been noted for review.", False, [], []
+
+    # 5b. Drop individually irrelevant chunks — the check above only looks at the BEST
+    # match. Chunks 2-5 can still be loosely/unrelated and bleed off-topic facts into the
+    # answer if left in. Keep the best match always; only keep the rest if they're
+    # reasonably close too.
+    if not _wants_all and len(docs) > 1:
+        CHUNK_RELEVANCE_CUTOFF = 1.15
+        kept_docs, kept_meta = [docs[0]], [metadatas[0]]
+        for d, dist, m in zip(docs[1:], distances[1:], metadatas[1:]):
+            if dist <= CHUNK_RELEVANCE_CUTOFF:
+                kept_docs.append(d)
+                kept_meta.append(m)
+        if len(kept_docs) < len(docs):
+            logger.info("Dropped %d loosely-related chunk(s) above relevance cutoff", len(docs) - len(kept_docs))
+        docs, metadatas = kept_docs, kept_meta
 
     # Truncate each chunk to ~150 words to stay within Groq's free-tier token limit
     def trim(text, max_words=150):
@@ -539,7 +644,7 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
 
     # 6. Build messages: system + recent history (last 3 pairs) + current RAG question
     messages = [{"role": "system", "content": system_prompt}]
-    messages += history[-4:]   # last 2 user/assistant pairs
+    messages += history[-6:]   # last 3 user/assistant pairs
     messages.append({
         "role": "user",
         "content": (
@@ -564,9 +669,14 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
             "Please try again in a moment. If the problem persists, please contact the admin.",
             False,
             [],
+            [],
         )
 
     is_answered = "I don't have information" not in answer and UNANSWERED_PHRASE not in answer
 
+    # Generate contextual follow-ups from the real Q&A — only when there's an actual
+    # answer worth following up on.
+    followups = generate_followups(question, answer, use_fil) if is_answered else []
+
     logger.info("Answered=%s | original: %s | clean: %s", is_answered, question[:50], clean_question[:50])
-    return answer, is_answered, sources
+    return answer, is_answered, sources, followups

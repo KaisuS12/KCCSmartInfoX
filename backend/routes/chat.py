@@ -31,7 +31,7 @@ class FeedbackRequest(BaseModel):
 @limiter.limit("20/minute")
 async def chat(request: Request, body: ChatRequest, db: Session = Depends(get_db)):
     loop = asyncio.get_event_loop()
-    answer, is_answered, sources = await loop.run_in_executor(
+    answer, is_answered, sources, followups = await loop.run_in_executor(
         None, lambda: query_rag(body.question, history=body.history, lang=body.lang)
     )
 
@@ -49,6 +49,7 @@ async def chat(request: Request, body: ChatRequest, db: Session = Depends(get_db
         "is_answered": is_answered,
         "chat_log_id": log.id,
         "sources": sources,
+        "followups": followups,
     }
 
 

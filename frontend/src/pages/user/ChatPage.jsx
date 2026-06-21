@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Send, Megaphone, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, FileText, Phone, Mic, MicOff, Globe, X, AlertTriangle, RefreshCw, MessageCircle, LogOut, History, ChevronDown, ChevronUp } from 'lucide-react'
+import { Send, Megaphone, Copy, ThumbsUp, ThumbsDown, Home, Sun, Moon, Phone, Mic, MicOff, Globe, X, AlertTriangle, RefreshCw, MessageCircle, LogOut, History, ChevronDown, ChevronUp } from 'lucide-react'
 import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import AnnouncementsPanel from '../../components/user/AnnouncementsPanel'
@@ -259,7 +259,9 @@ export default function ChatPage() {
 
     try {
       const res = await axios.post('/api/chat', { question, history, lang })
-      const followups = getFollowups(question, res.data.answer)
+      const followups = res.data.followups?.length > 0
+        ? res.data.followups
+        : getFollowups(question, res.data.answer)
       setMessages(prev => [...prev, {
         role: 'ai',
         text: res.data.answer,
@@ -687,25 +689,6 @@ export default function ChatPage() {
                 ) : msg.text}
               </div>
             </div>
-
-            {/* Source tags */}
-            {msg.role === 'ai' && !msg.error && msg.sources?.length > 0 && (
-              <div className="ml-9 mt-1.5 flex flex-wrap gap-1.5">
-                {msg.sources.map(src => (
-                  <span
-                    key={src}
-                    className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${
-                      darkMode
-                        ? 'text-gray-500 bg-white/5 border-white/10'
-                        : 'text-gray-400 bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <FileText size={9} />
-                    {src}
-                  </span>
-                ))}
-              </div>
-            )}
 
             {/* Human fallback + Concern Form trigger */}
             {msg.role === 'ai' && msg.is_answered === false && (
