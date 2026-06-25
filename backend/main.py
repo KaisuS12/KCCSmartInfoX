@@ -54,6 +54,11 @@ app.include_router(concerns.router,           prefix="/api")
 app.include_router(live_chat.router,          prefix="/api")
 app.include_router(user_auth.router,          prefix="/api")
 
+# Mount announcement images BEFORE the SPA catch-all so it isn't intercepted
+_img_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "knowledge_base", "announcement_images")
+os.makedirs(_img_dir, exist_ok=True)
+app.mount("/api/announcement-images", StaticFiles(directory=_img_dir), name="announcement-images")
+
 
 async def scheduled_email_dispatcher():
     """Runs every 60 seconds. Finds scheduled announcements that have gone live
@@ -151,10 +156,6 @@ async def startup():
             logger.info("Migration: added admin_opened_at column to live_chats")
         except Exception:
             pass  # column already exists
-
-    img_dir = "./knowledge_base/announcement_images"
-    os.makedirs(img_dir, exist_ok=True)
-    app.mount("/api/announcement-images", StaticFiles(directory=img_dir), name="announcement-images")
 
     import json as _json
     db = SessionLocal()
