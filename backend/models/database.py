@@ -132,6 +132,7 @@ class LiveChat(Base):
     status           = Column(String(20), default="active")   # "active" | "closed"
     device_type      = Column(String(20), nullable=True)       # "Mobile" | "Tablet" | "Desktop"
     last_seen        = Column(DateTime, nullable=True)         # updated by heartbeat
+    admin_opened_at  = Column(DateTime, nullable=True)         # set when admin first opens the session
     created_at       = Column(DateTime, default=datetime.utcnow)
     closed_at        = Column(DateTime, nullable=True)
 

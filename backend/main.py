@@ -2,8 +2,9 @@ import asyncio
 import logging
 import os
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -24,18 +25,23 @@ app = FastAPI(title="KCCSmartInfoX API", version="1.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+_extra = os.getenv("ALLOWED_ORIGINS", "")
+_cors_origins = [o.strip() for o in _extra.split(",") if o.strip()] if _extra else []
+_cors_origins += [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:4173",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:4173",
-    ],
-    allow_credentials=True, 
+    allow_origins=_cors_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
 
 app.include_router(chat.router,          prefix="/api") 
 app.include_router(announcements.router, prefix="/api")
@@ -139,6 +145,12 @@ async def startup():
             logger.info("Migration: added last_seen column to live_chats")
         except Exception:
             pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN admin_opened_at DATETIME"))
+            conn.commit()
+            logger.info("Migration: added admin_opened_at column to live_chats")
+        except Exception:
+            pass  # column already exists
 
     img_dir = "./knowledge_base/announcement_images"
     os.makedirs(img_dir, exist_ok=True)
@@ -192,6 +204,16 @@ async def startup():
     logger.info("KCCSmartInfoX API is running")
 
 
-@app.get("/")
-def root():
-    return {"message": "KCCSmartInfoX API", "status": "running"}
+@app.get("/api/health", include_in_schema=False)
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa(full_path: str):
+    if not os.path.isdir(DIST_DIR):
+        return {"message": "KCCSmartInfoX API", "status": "running"}
+    target = os.path.join(DIST_DIR, full_path) if full_path else os.path.join(DIST_DIR, "index.html")
+    if os.path.isfile(target):
+        return FileResponse(target)
+    return FileResponse(os.path.join(DIST_DIR, "index.html"))

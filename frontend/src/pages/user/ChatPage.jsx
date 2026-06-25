@@ -461,7 +461,7 @@ export default function ChatPage() {
   async function openLiveChat(msgIndex, relatedQuestion) {
     if (!user) return
     liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
-    setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false } }))
+    setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false } }))
     try {
       const res = await axios.post('/api/live-chat/start',
         { related_question: relatedQuestion || null },
@@ -499,6 +499,9 @@ export default function ChatPage() {
           ...p,
           [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages] }
         }))
+      }
+      if (res.data.admin_opened) {
+        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true } }))
       }
       if (res.data.chat_status === 'closed') {
         clearInterval(ref.intervalId)
@@ -768,8 +771,18 @@ export default function ChatPage() {
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse ml-0.5" />
                         )}
                       </p>
-                      {liveChats[i].closed && (
+                      {liveChats[i].closed ? (
                         <span className="text-[10px] text-gray-400">Ended</span>
+                      ) : liveChats[i].adminJoined ? (
+                        <span className="flex items-center gap-1 text-[10px] text-green-500 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                          Admin is here
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] text-yellow-500">
+                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                          Waiting for admin...
+                        </span>
                       )}
                     </div>
                     {/* Messages */}

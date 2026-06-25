@@ -136,8 +136,9 @@ async def user_poll_messages(
         .all()
     )
     return {
-        "messages":    [_msg_dict(m) for m in messages],
-        "chat_status": chat.status,
+        "messages":     [_msg_dict(m) for m in messages],
+        "chat_status":  chat.status,
+        "admin_opened": chat.admin_opened_at is not None,
     }
 
 
@@ -174,6 +175,10 @@ async def admin_get_messages(
     chat = db.query(LiveChat).filter(LiveChat.id == chat_id).first()
     if not chat:
         raise HTTPException(status_code=404, detail="Chat session not found")
+
+    if not chat.admin_opened_at:
+        chat.admin_opened_at = datetime.utcnow()
+        db.commit()
 
     messages = (
         db.query(LiveMessage)
