@@ -1,6 +1,7 @@
 import os
 import io
 import csv
+import json
 import logging
 import shutil
 from datetime import datetime, timedelta
@@ -14,8 +15,9 @@ from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from models.database import get_db, AdminUser, ChatLog, KnowledgeDoc, Subscriber, Feedback, AdminLoginLog
+from models.database import get_db, AdminUser, StaffAccount, ChatLog, KnowledgeDoc, Subscriber, Feedback, AdminLoginLog, ActivityLog
 from utils.auth import verify_password, create_access_token, hash_password, get_current_admin
+from utils.audit import log_activity
 from rag.ingestion import ingest_pdf, ingest_docx, ingest_txt, ingest_text, delete_document
 from groq import Groq
 
@@ -60,15 +62,31 @@ class TextUpdate(BaseModel):
 async def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     ip = request.client.host if request.client else "unknown"
     ua = request.headers.get("user-agent", "")[:255]
+
+    # Check admin table first
     admin = db.query(AdminUser).filter(AdminUser.username == data.username).first()
-    if not admin or not verify_password(data.password, admin.password_hash):
-        db.add(AdminLoginLog(username=data.username, action="failed", ip_address=ip, user_agent=ua))
+    if admin and verify_password(data.password, admin.password_hash):
+        db.add(AdminLoginLog(username=admin.username, action="success", ip_address=ip, user_agent=ua))
         db.commit()
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    db.add(AdminLoginLog(username=admin.username, action="success", ip_address=ip, user_agent=ua))
+        log_activity(db, "Admin", "admin", "login", detail=f"Login from {ip}")
+        db.commit()
+        token = create_access_token({"sub": admin.username, "role": "admin"})
+        return {"token": token, "role": "admin", "permissions": [], "display_name": "Admin"}
+
+    # Check staff table
+    staff = db.query(StaffAccount).filter(StaffAccount.username == data.username).first()
+    if staff and staff.is_active and verify_password(data.password, staff.password_hash):
+        db.add(AdminLoginLog(username=staff.username, action="success", ip_address=ip, user_agent=ua))
+        display_name = staff.full_name or staff.username
+        log_activity(db, display_name, "staff", "login", detail=f"Login from {ip}")
+        db.commit()
+        perms = json.loads(staff.permissions or "[]")
+        token = create_access_token({"sub": staff.username, "role": "staff", "permissions": perms})
+        return {"token": token, "role": "staff", "permissions": perms, "display_name": display_name}
+
+    db.add(AdminLoginLog(username=data.username, action="failed", ip_address=ip, user_agent=ua))
     db.commit()
-    token = create_access_token({"sub": admin.username})
-    return {"token": token}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 @router.get("/admin/login-logs")
@@ -87,12 +105,49 @@ async def get_login_logs(db: Session = Depends(get_db), admin=Depends(get_curren
     ]
 
 
+@router.get("/admin/activity-logs")
+async def get_activity_logs(
+    actor: str = None,
+    action: str = None,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    q = db.query(ActivityLog).order_by(ActivityLog.created_at.desc())
+    if actor:
+        q = q.filter(ActivityLog.actor == actor)
+    if action:
+        q = q.filter(ActivityLog.action == action)
+    logs = q.limit(min(limit, 200)).all()
+    return [
+        {
+            "id":          l.id,
+            "actor":       l.actor,
+            "actor_role":  l.actor_role,
+            "action":      l.action,
+            "target_type": l.target_type,
+            "target_id":   l.target_id,
+            "detail":      l.detail,
+            "created_at":  l.created_at.isoformat() + "Z",
+        }
+        for l in logs
+    ]
+
+
 @router.post("/admin/logout-log")
 async def logout_log(data: LogoutAction, request: Request, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
     ip = request.client.host if request.client else "unknown"
     ua = request.headers.get("user-agent", "")[:255]
     username = admin.get("sub", "admin") if isinstance(admin, dict) else str(admin)
+    role = admin.get("role", "admin") if isinstance(admin, dict) else "admin"
+    # Resolve display name for activity log
+    if role == "staff":
+        staff_acc = db.query(StaffAccount).filter(StaffAccount.username == username).first()
+        display_name = staff_acc.full_name or username if staff_acc else username
+    else:
+        display_name = "Admin"
     db.add(AdminLoginLog(username=username, action=data.action, ip_address=ip, user_agent=ua))
+    log_activity(db, display_name, role, data.action, detail=f"From {ip}")
     db.commit()
     return {"ok": True}
 

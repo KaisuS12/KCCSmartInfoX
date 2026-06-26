@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from models.database import get_db, Concern
 from utils.auth import get_current_admin
+from utils.audit import resolve_actor, log_activity
 from notifications.service import send_concern_notification, send_concern_reply
 
 router = APIRouter()
@@ -34,6 +35,7 @@ def _concern_dict(c: Concern):
         "related_question": c.related_question,
         "status":           c.status,
         "admin_reply":      c.admin_reply,
+        "replied_by":       c.replied_by,
         "created_at":       str(c.created_at),
         "replied_at":       str(c.replied_at) if c.replied_at else None,
     }
@@ -84,9 +86,13 @@ async def reply_concern(
     if not concern:
         raise HTTPException(status_code=404, detail="Concern not found")
 
+    actor_name, actor_role = resolve_actor(admin, db)
     concern.admin_reply = data.reply.strip()
     concern.status      = "resolved"
     concern.replied_at  = datetime.utcnow()
+    concern.replied_by  = actor_name
+    log_activity(db, actor_name, actor_role, "concern_replied", "concern", id,
+                 f"Replied to concern from {concern.name}")
     db.commit()
 
     background_tasks.add_task(
@@ -103,8 +109,12 @@ async def resolve_concern(id: int, db: Session = Depends(get_db), admin=Depends(
     concern = db.query(Concern).filter(Concern.id == id).first()
     if not concern:
         raise HTTPException(status_code=404, detail="Concern not found")
+    actor_name, actor_role = resolve_actor(admin, db)
     concern.status     = "resolved"
     concern.replied_at = datetime.utcnow()
+    concern.replied_by = actor_name
+    log_activity(db, actor_name, actor_role, "concern_resolved", "concern", id,
+                 f"Resolved concern from {concern.name}")
     db.commit()
     return _concern_dict(concern)
 
@@ -114,6 +124,9 @@ async def delete_concern(id: int, db: Session = Depends(get_db), admin=Depends(g
     concern = db.query(Concern).filter(Concern.id == id).first()
     if not concern:
         raise HTTPException(status_code=404, detail="Concern not found")
+    actor_name, actor_role = resolve_actor(admin, db)
+    log_activity(db, actor_name, actor_role, "concern_deleted", "concern", id,
+                 f"Deleted concern from {concern.name}")
     db.delete(concern)
     db.commit()
     return {"message": "Deleted"}

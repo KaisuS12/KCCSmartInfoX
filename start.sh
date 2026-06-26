@@ -33,6 +33,10 @@ if [ ! -f "$FRONTEND_DIR/node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-
     npm install --legacy-peer-deps
 fi
 
+# Kill anything already on port 8000 or 5173
+fuser -k 8000/tcp 2>/dev/null
+fuser -k 5173/tcp 2>/dev/null
+
 # Start Backend
 echo "[1/2] Starting Backend..."
 cd "$BACKEND_DIR"

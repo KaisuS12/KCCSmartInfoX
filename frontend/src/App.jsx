@@ -14,6 +14,7 @@ import AdminChatLogs from './pages/admin/AdminChatLogs'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminConcerns from './pages/admin/AdminConcerns'
 import AdminLiveChats from './pages/admin/AdminLiveChats'
+import AdminStaff from './pages/admin/AdminStaff'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="settings"         element={<AdminSettings />} />
           <Route path="concerns"         element={<AdminConcerns />} />
           <Route path="live-chats"       element={<AdminLiveChats />} />
+          <Route path="staff"            element={<AdminStaff />} />
         </Route>
 
         {/* 404 */}

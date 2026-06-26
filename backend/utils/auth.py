@@ -32,6 +32,7 @@ def create_access_token(data: dict) -> str:
 def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        # Staff tokens are allowed through — admin-only routes enforce via _require_admin()
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")

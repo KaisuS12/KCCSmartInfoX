@@ -11,7 +11,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from models.database import init_db, engine, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
 from notifications.service import send_announcement_email
-from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns, live_chat, user_auth
+from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns, live_chat, user_auth, staff_mgmt
 
 logging.basicConfig(
     level=logging.INFO,
@@ -53,6 +53,7 @@ app.include_router(office_processes.router,   prefix="/api")
 app.include_router(concerns.router,           prefix="/api")
 app.include_router(live_chat.router,          prefix="/api")
 app.include_router(user_auth.router,          prefix="/api")
+app.include_router(staff_mgmt.router,         prefix="/api")
 
 # Mount announcement images BEFORE the SPA catch-all so it isn't intercepted
 _img_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "knowledge_base", "announcement_images")
@@ -154,6 +155,36 @@ async def startup():
             conn.execute(text("ALTER TABLE live_chats ADD COLUMN admin_opened_at DATETIME"))
             conn.commit()
             logger.info("Migration: added admin_opened_at column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN opened_by VARCHAR(255)"))
+            conn.commit()
+            logger.info("Migration: added opened_by column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN rating INTEGER"))
+            conn.commit()
+            logger.info("Migration: added rating column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN feedback_text TEXT"))
+            conn.commit()
+            logger.info("Migration: added feedback_text column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE live_chats ADD COLUMN closed_by VARCHAR(255)"))
+            conn.commit()
+            logger.info("Migration: added closed_by column to live_chats")
+        except Exception:
+            pass  # column already exists
+        try:
+            conn.execute(text("ALTER TABLE concerns ADD COLUMN replied_by VARCHAR(255)"))
+            conn.commit()
+            logger.info("Migration: added replied_by column to concerns")
         except Exception:
             pass  # column already exists
 

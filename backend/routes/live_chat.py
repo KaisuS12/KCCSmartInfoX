@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from models.database import get_db, LiveChat, LiveMessage
 from utils.auth import get_current_admin, get_current_user
+from utils.audit import resolve_actor, log_activity
 
 router = APIRouter()
 logger = logging.getLogger("kccsmartinfox.live_chat")
@@ -40,6 +41,11 @@ class SendMessageRequest(BaseModel):
     content: str
 
 
+class FeedbackRequest(BaseModel):
+    rating: int          # 1-5
+    feedback_text: Optional[str] = None
+
+
 def _msg_dict(m: LiveMessage):
     return {
         "id":      m.id,
@@ -65,6 +71,7 @@ def _chat_dict(c: LiveChat, db: Session):
         "closed_at":        str(c.closed_at) if c.closed_at else None,
         "message_count":    msgs.count(),
         "last_message_at":  str(last.sent_at) if last else None,
+        "opened_by":        c.opened_by,
     }
 
 
@@ -89,14 +96,6 @@ async def start_chat(
     db.add(chat)
     db.commit()
     db.refresh(chat)
-
-    greeting = LiveMessage(
-        chat_id=chat.id,
-        sender="admin",
-        content="You're now connected. An admin will reply shortly.",
-    )
-    db.add(greeting)
-    db.commit()
 
     logger.info("Live chat started: id=%s user=%s", chat.id, chat.user_name)
     return {"chat_id": chat.id, "user_name": chat.user_name, "status": chat.status}
@@ -139,7 +138,24 @@ async def user_poll_messages(
         "messages":     [_msg_dict(m) for m in messages],
         "chat_status":  chat.status,
         "admin_opened": chat.admin_opened_at is not None,
+        "opened_by":    chat.opened_by,
     }
+
+
+@router.post("/live-chat/{chat_id}/feedback")
+async def submit_feedback(chat_id: str, data: FeedbackRequest, db: Session = Depends(get_db)):
+    if not 1 <= data.rating <= 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    chat = db.query(LiveChat).filter(LiveChat.id == chat_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    if chat.rating is not None:
+        raise HTTPException(status_code=400, detail="Feedback already submitted")
+    chat.rating = data.rating
+    chat.feedback_text = data.feedback_text
+    db.commit()
+    logger.info("Feedback submitted for chat %s: %d stars", chat_id, data.rating)
+    return {"message": "Thank you for your feedback!"}
 
 
 @router.put("/live-chat/{chat_id}/heartbeat")
@@ -176,8 +192,25 @@ async def admin_get_messages(
     if not chat:
         raise HTTPException(status_code=404, detail="Chat session not found")
 
+    my_name, my_role = resolve_actor(admin, db)
+
+    # If already claimed by someone else, only admin can override
+    if chat.opened_by and chat.opened_by != my_name and my_role == "staff":
+        raise HTTPException(
+            status_code=403,
+            detail=f"This chat is already being handled by {chat.opened_by}",
+        )
+
     if not chat.admin_opened_at:
         chat.admin_opened_at = datetime.utcnow()
+        chat.opened_by = my_name
+        log_activity(db, my_name, my_role, "chat_opened", "live_chat", chat_id,
+                     f"Opened chat with {chat.user_name}")
+        db.add(LiveMessage(
+            chat_id=chat.id,
+            sender="admin",
+            content=f"Hi {chat.user_name}! 👋 {my_name} is here and will help with your concern and inquiries.",
+        ))
         db.commit()
 
     messages = (
@@ -207,8 +240,16 @@ async def admin_send_message(
     if not data.content.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
+    my_name, my_role = resolve_actor(admin, db)
+
+    # Staff can only reply to their own claimed chats
+    if my_role == "staff" and chat.opened_by and chat.opened_by != my_name:
+        raise HTTPException(status_code=403, detail="You are not the handler of this chat")
+
     msg = LiveMessage(chat_id=chat_id, sender="admin", content=data.content.strip())
     db.add(msg)
+    log_activity(db, my_name, my_role, "chat_message_sent", "live_chat", chat_id,
+                 f"Sent message in chat with {chat.user_name}")
     db.commit()
     db.refresh(msg)
     logger.info("Admin replied to chat id=%s", chat_id)
@@ -225,8 +266,12 @@ async def admin_close_chat(
     if not chat:
         raise HTTPException(status_code=404, detail="Chat session not found")
 
+    my_name, my_role = resolve_actor(admin, db)
     chat.status    = "closed"
     chat.closed_at = datetime.utcnow()
+    chat.closed_by = my_name
+    log_activity(db, my_name, my_role, "chat_closed", "live_chat", chat_id,
+                 f"Closed chat with {chat.user_name}")
     db.commit()
     logger.info("Admin closed chat id=%s", chat_id)
     return {"message": "Chat closed", "chat_id": chat_id}

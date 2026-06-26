@@ -16,7 +16,13 @@ export default function AdminLogin() {
     try {
       const res = await axios.post('/api/admin/login', form)
       localStorage.setItem('admin_token', res.data.token)
-      navigate('/admin/dashboard')
+      localStorage.setItem('admin_role', res.data.role || 'admin')
+      localStorage.setItem('admin_permissions', JSON.stringify(res.data.permissions || []))
+      localStorage.setItem('admin_display_name', res.data.display_name || 'Admin')
+      const firstPage = res.data.role === 'staff' && res.data.permissions?.length
+        ? `/admin/${res.data.permissions[0]}`
+        : '/admin/dashboard'
+      navigate(firstPage)
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Invalid credentials')
     } finally {

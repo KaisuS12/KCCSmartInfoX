@@ -180,9 +180,17 @@ export default function AdminConcerns() {
 
                       {c.admin_reply && (
                         <div>
-                          <p className="text-xs font-semibold text-green-600 mb-1">Your Reply (sent)</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs font-semibold text-green-600">Reply (sent)</p>
+                            {c.replied_by && (
+                              <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">by {c.replied_by}</span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600 whitespace-pre-wrap bg-green-50 rounded-xl p-3 border border-green-100">{c.admin_reply}</p>
                         </div>
+                      )}
+                      {!c.admin_reply && c.status === 'resolved' && c.replied_by && (
+                        <p className="text-[11px] text-gray-400 italic">Resolved by {c.replied_by}</p>
                       )}
 
                       {c.status === 'pending' && (

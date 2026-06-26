@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminLayout from '../../components/shared/AdminLayout'
-import { MessageCircle, Send, X, Clock, User, Mail, Smartphone, Monitor, Tablet } from 'lucide-react'
+import { MessageCircle, Send, X, Clock, User, Mail, Smartphone, Monitor, Tablet, Lock } from 'lucide-react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
@@ -37,6 +37,9 @@ function dateStr(ts) {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + timeStr(ts)
 }
 
+const myDisplayName = localStorage.getItem('admin_display_name') || 'Admin'
+const myRole        = localStorage.getItem('admin_role') || 'admin'
+
 export default function AdminLiveChats() {
   const [sessions, setSessions]   = useState([])
   const [selected, setSelected]   = useState(null)
@@ -45,6 +48,7 @@ export default function AdminLiveChats() {
   const [sending, setSending]     = useState(false)
   const [loading, setLoading]     = useState(true)
   const [filter, setFilter]       = useState('active')
+  const [blockedBy, setBlockedBy] = useState(null) // name of who claimed selected chat
   const lastMsgIdRef              = useRef(0)
   const sessionIntervalRef        = useRef(null)
   const msgIntervalRef            = useRef(null)
@@ -53,6 +57,12 @@ export default function AdminLiveChats() {
 
   const activeSession = sessions.find(s => s.id === selected)
   const activeCnt     = sessions.filter(s => s.status === 'active').length
+
+  function isOccupiedByOther(s) {
+    if (!s.opened_by) return false
+    if (myRole === 'admin') return false
+    return s.opened_by !== myDisplayName
+  }
 
   useEffect(() => {
     fetchSessions()
@@ -64,6 +74,7 @@ export default function AdminLiveChats() {
     clearInterval(msgIntervalRef.current)
     lastMsgIdRef.current = 0
     setMessages([])
+    setBlockedBy(null)
     if (!selected) return
     fetchMessages()
     msgIntervalRef.current = setInterval(fetchMessages, 4000)
@@ -87,7 +98,15 @@ export default function AdminLiveChats() {
     try {
       const res = await axios.get(`/api/admin/live-chats/${selected}/messages`, { headers: authHeader() })
       setMessages(res.data.messages)
-    } catch {}
+      setBlockedBy(null)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        const detail = err.response?.data?.detail || ''
+        const match = detail.match(/already being handled by (.+)/)
+        setBlockedBy(match ? match[1] : 'another staff')
+        clearInterval(msgIntervalRef.current)
+      }
+    }
   }
 
   async function sendReply() {
@@ -162,14 +181,19 @@ export default function AdminLiveChats() {
                   <p className="text-sm text-gray-400">No {filter !== 'all' ? filter : ''} sessions</p>
                 </div>
               ) : (
-                sessions.map(s => (
+                sessions.map(s => {
+                  const occupiedByOther = isOccupiedByOther(s)
+                  const isMine = s.opened_by && (myRole === 'admin' || s.opened_by === myDisplayName)
+                  return (
                   <div
                     key={s.id}
                     onClick={() => setSelected(s.id)}
                     className={`cursor-pointer rounded-xl border p-3.5 transition-all ${
                       selected === s.id
                         ? 'border-kcc-blue bg-blue-50 shadow-sm'
-                        : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'
+                        : occupiedByOther
+                          ? 'bg-gray-50 border-gray-200 opacity-70 hover:opacity-90'
+                          : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-1">
@@ -205,15 +229,43 @@ export default function AdminLiveChats() {
                       <span>{s.message_count} msg{s.message_count !== 1 ? 's' : ''}</span>
                       {s.last_message_at && <><span>·</span><Clock size={8} /><span>{timeStr(s.last_message_at)}</span></>}
                     </div>
+                    {/* Occupied / claimed indicator */}
+                    {s.opened_by && s.status === 'active' && (
+                      <div className={`flex items-center gap-1 mt-1.5 ml-8 text-[10px] font-medium ${
+                        occupiedByOther ? 'text-orange-500' : 'text-kcc-blue'
+                      }`}>
+                        {occupiedByOther
+                          ? <><Lock size={9} /> Occupied by {s.opened_by}</>
+                          : <><span className="w-1.5 h-1.5 rounded-full bg-kcc-blue inline-block" /> Handled by {s.opened_by}</>
+                        }
+                      </div>
+                    )}
                   </div>
-                ))
+                  )
+                })
               )}
             </div>
           </div>
 
           {/* Right: chat window */}
           <div className="flex-1 min-w-0 min-h-0">
-            {selected && activeSession ? (
+            {selected && activeSession && blockedBy ? (
+              <div className="h-full bg-white rounded-2xl border border-orange-100 flex flex-col items-center justify-center text-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center">
+                  <Lock size={22} className="text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Chat Occupied</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    This conversation is currently being handled by
+                  </p>
+                  <p className="text-sm font-bold text-orange-500 mt-0.5">{blockedBy}</p>
+                </div>
+                <p className="text-[11px] text-gray-300 max-w-[200px]">
+                  Only one staff member can handle a chat at a time to avoid confusion.
+                </p>
+              </div>
+            ) : selected && activeSession ? (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full overflow-hidden">
 
                 {/* Header */}

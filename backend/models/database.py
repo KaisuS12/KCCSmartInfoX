@@ -78,6 +78,17 @@ class AdminUser(Base):
     password_hash = Column(String(255), nullable=False)
 
 
+class StaffAccount(Base):
+    __tablename__ = "staff_accounts"
+    id            = Column(Integer, primary_key=True, index=True)
+    username      = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    full_name     = Column(String(255), nullable=True)
+    permissions   = Column(Text, default="[]")   # JSON array of page keys
+    is_active     = Column(Boolean, default=True)
+    created_at    = Column(DateTime, default=datetime.utcnow)
+
+
 class OfficeProcess(Base):
     __tablename__ = "office_processes"
     id         = Column(Integer, primary_key=True, index=True)
@@ -100,6 +111,18 @@ class AdminLoginLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class ActivityLog(Base):
+    __tablename__ = "activity_logs"
+    id          = Column(Integer, primary_key=True, index=True)
+    actor       = Column(String(255), nullable=False)   # display name, e.g. "Juan dela Cruz" or "Admin"
+    actor_role  = Column(String(20), nullable=False)    # "admin" | "staff"
+    action      = Column(String(50), nullable=False)    # e.g. "concern_replied"
+    target_type = Column(String(50), nullable=True)     # "concern" | "live_chat" | "staff_account"
+    target_id   = Column(String(100), nullable=True)    # resource ID
+    detail      = Column(Text, nullable=True)           # human-readable description
+    created_at  = Column(DateTime, default=datetime.utcnow)
+
+
 class Concern(Base):
     __tablename__ = "concerns"
     id               = Column(Integer, primary_key=True, index=True)
@@ -109,6 +132,7 @@ class Concern(Base):
     related_question = Column(Text, nullable=True)
     status           = Column(String(20), default="pending")  # "pending" | "resolved"
     admin_reply      = Column(Text, nullable=True)
+    replied_by       = Column(String(255), nullable=True)      # display name of who replied/resolved
     created_at       = Column(DateTime, default=datetime.utcnow)
     replied_at       = Column(DateTime, nullable=True)
 
@@ -132,7 +156,11 @@ class LiveChat(Base):
     status           = Column(String(20), default="active")   # "active" | "closed"
     device_type      = Column(String(20), nullable=True)       # "Mobile" | "Tablet" | "Desktop"
     last_seen        = Column(DateTime, nullable=True)         # updated by heartbeat
-    admin_opened_at  = Column(DateTime, nullable=True)         # set when admin first opens the session
+    admin_opened_at  = Column(DateTime, nullable=True)         # set when admin/staff first opens the session
+    opened_by        = Column(String(255), nullable=True)       # display name of who opened (admin or staff name)
+    closed_by        = Column(String(255), nullable=True)       # display name of who closed
+    rating           = Column(Integer, nullable=True)            # 1-5 star user rating after chat ends
+    feedback_text    = Column(Text, nullable=True)               # optional user comment
     created_at       = Column(DateTime, default=datetime.utcnow)
     closed_at        = Column(DateTime, nullable=True)
 

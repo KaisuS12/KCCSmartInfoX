@@ -461,7 +461,7 @@ export default function ChatPage() {
   async function openLiveChat(msgIndex, relatedQuestion) {
     if (!user) return
     liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
-    setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false } }))
+    setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false, openedBy: null, feedbackSubmitted: false, feedbackRating: 0, feedbackText: '' } }))
     try {
       const res = await axios.post('/api/live-chat/start',
         { related_question: relatedQuestion || null },
@@ -501,7 +501,7 @@ export default function ChatPage() {
         }))
       }
       if (res.data.admin_opened) {
-        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true } }))
+        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true, openedBy: res.data.opened_by || 'Admin' } }))
       }
       if (res.data.chat_status === 'closed') {
         clearInterval(ref.intervalId)
@@ -776,7 +776,7 @@ export default function ChatPage() {
                       ) : liveChats[i].adminJoined ? (
                         <span className="flex items-center gap-1 text-[10px] text-green-500 font-medium">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                          Admin is here
+                          {liveChats[i].openedBy || 'Admin'} is here
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 text-[10px] text-yellow-500">
@@ -797,9 +797,64 @@ export default function ChatPage() {
                         </div>
                       ))}
                       {liveChats[i].closed && (
-                        <p className={`text-center text-[10px] mt-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                          Chat ended by admin.
-                        </p>
+                        <div className="mt-3 px-1">
+                          <p className={`text-center text-[10px] mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Chat ended.
+                          </p>
+                          {!liveChats[i].feedbackSubmitted ? (
+                            <div className={`rounded-xl p-3 ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                              <p className={`text-[11px] font-semibold text-center mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                How was your experience? ⭐
+                              </p>
+                              {/* Stars */}
+                              <div className="flex justify-center gap-1 mb-2">
+                                {[1,2,3,4,5].map(star => (
+                                  <button
+                                    key={star}
+                                    onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackRating: star } }))}
+                                    className={`text-lg transition-transform hover:scale-110 ${
+                                      (liveChats[i].feedbackRating || 0) >= star ? 'text-yellow-400' : (darkMode ? 'text-gray-600' : 'text-gray-300')
+                                    }`}
+                                  >★</button>
+                                ))}
+                              </div>
+                              <textarea
+                                rows={2}
+                                placeholder="Leave a comment (optional)"
+                                value={liveChats[i].feedbackText || ''}
+                                onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackText: e.target.value } }))}
+                                className={`w-full text-[10px] rounded-lg px-2 py-1.5 outline-none border resize-none mb-2 ${
+                                  darkMode ? 'bg-white/10 border-white/10 text-gray-200 placeholder-gray-600' : 'border-gray-200 text-gray-600 placeholder-gray-400'
+                                }`}
+                              />
+                              <div className="flex gap-1.5 justify-end">
+                                <button
+                                  onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))}
+                                  className={`text-[10px] px-2 py-1 rounded-lg ${darkMode ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}`}
+                                >Skip</button>
+                                <button
+                                  disabled={!liveChats[i].feedbackRating}
+                                  onClick={async () => {
+                                    const ref = liveChatRefs.current[i]
+                                    if (!ref?.chatId || !liveChats[i].feedbackRating) return
+                                    try {
+                                      await axios.post(`/api/live-chat/${ref.chatId}/feedback`, {
+                                        rating: liveChats[i].feedbackRating,
+                                        feedback_text: liveChats[i].feedbackText || null,
+                                      })
+                                      setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))
+                                    } catch {}
+                                  }}
+                                  className="text-[10px] px-3 py-1 bg-green-600 text-white rounded-lg disabled:opacity-40 hover:bg-green-700 transition"
+                                >Submit</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className={`text-center text-[10px] ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                              Thank you for your feedback! 🙏
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                     {/* Input */}
