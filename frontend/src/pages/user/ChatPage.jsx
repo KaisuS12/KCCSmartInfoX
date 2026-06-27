@@ -409,6 +409,39 @@ export default function ChatPage() {
     myChatPollRef.current.intervalId = ivId
   }
 
+  // Reopen a chat from My Chats history as the floating Live Support panel
+  const RESTORED_KEY = 9999
+  async function reopenInFloatingPanel(chatId) {
+    // Clean up any previously restored chat slot
+    if (liveChatRefs.current[RESTORED_KEY]) {
+      clearInterval(liveChatRefs.current[RESTORED_KEY].intervalId)
+      stopHeartbeat(liveChatRefs.current[RESTORED_KEY].chatId)
+    }
+    try {
+      const res = await axios.get(`/api/live-chat/${chatId}/messages?offset=0`)
+      const msgs = res.data.messages || []
+      const lastId = msgs.length > 0 ? msgs[msgs.length - 1].id : 0
+      liveChatRefs.current[RESTORED_KEY] = { chatId, lastMsgId: lastId, intervalId: null }
+      setLiveChats(p => ({ ...p, [RESTORED_KEY]: {
+        phase: 'chat',
+        chatId,
+        messages: msgs,
+        inputText: '',
+        sending: false,
+        closed: false,
+        adminJoined: res.data.admin_opened || false,
+        openedBy: res.data.opened_by || null,
+        feedbackSubmitted: false,
+        feedbackRating: 0,
+        feedbackText: '',
+      }}))
+      const intervalId = setInterval(() => pollLiveChat(RESTORED_KEY), 4000)
+      liveChatRefs.current[RESTORED_KEY].intervalId = intervalId
+      startHeartbeat(chatId)
+      setShowMyChats(false)
+    } catch {}
+  }
+
   async function loadChatMessages(chatId, chatStatus) {
     if (expandedChat === chatId) {
       setExpandedChat(null)
@@ -1306,7 +1339,7 @@ export default function ChatPage() {
                   }`}>
                     {/* Header row */}
                     <button
-                      onClick={() => loadChatMessages(c.id, c.status)}
+                      onClick={() => isActive ? reopenInFloatingPanel(c.id) : loadChatMessages(c.id, c.status)}
                       className="w-full px-3 py-2.5 text-left flex items-center justify-between"
                     >
                       <div className="flex-1 min-w-0">
@@ -1330,10 +1363,12 @@ export default function ChatPage() {
                         )}
                         <p className={`text-[10px] mt-0.5 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>
                           {c.message_count} message{c.message_count !== 1 ? 's' : ''}
-                          {isActive && <span className="ml-1.5 text-green-400 font-medium">• tap to reply</span>}
+                          {isActive && <span className="ml-1.5 text-green-400 font-medium">• tap to open chat</span>}
                         </p>
                       </div>
-                      {isExpanded
+                      {isActive ? (
+                        <MessageCircle size={13} className="text-green-400 flex-shrink-0 ml-2" />
+                      ) : isExpanded
                         ? <ChevronUp size={12} className="text-gray-400 flex-shrink-0 ml-2" />
                         : <ChevronDown size={12} className="text-gray-400 flex-shrink-0 ml-2" />}
                     </button>
