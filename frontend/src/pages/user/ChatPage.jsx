@@ -126,6 +126,7 @@ export default function ChatPage() {
   const [chatMsgs, setChatMsgs]         = useState([])
   const [myChatInput, setMyChatInput]   = useState('')
   const [myChatSending, setMyChatSending] = useState(false)
+  const [loginError, setLoginError]     = useState('')
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
   const myChatBottomRef = useRef(null)
   const heartbeatRef = useRef({})   // { [chatId]: intervalId }
@@ -351,8 +352,7 @@ export default function ChatPage() {
       setLoginModal(false)
       setLoginForm({ email: '', name: '', password: '', mode: 'login' })
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Failed. Please try again.'
-      alert(msg)
+      setLoginError(err.response?.data?.detail || 'Failed. Please try again.')
     } finally {
       setLoginLoading(false)
     }
@@ -742,146 +742,35 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* Inline live chat panel */}
+            {/* Live chat status badge (inline) */}
             {msg.role === 'ai' && msg.is_answered === false && liveChats[i] && (
-              <>
-                {liveChats[i].phase === 'connecting' && (
-                  <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border px-4 py-3 text-xs ${
-                    darkMode ? 'bg-white/5 border-white/10 text-gray-400' : 'bg-white border-gray-200 shadow-sm text-gray-500'
-                  }`}>
-                    <p className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
-                      Connecting to admin...
-                    </p>
-                  </div>
+              <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border px-3.5 py-2.5 text-xs flex items-center gap-2 ${
+                darkMode ? 'bg-white/5 border-white/10 text-gray-400' : 'bg-white border-gray-200 shadow-sm text-gray-500'
+              }`}>
+                {liveChats[i].phase === 'connecting' ? (
+                  <>
+                    <span className="w-3 h-3 rounded-full border-2 border-green-500 border-t-transparent animate-spin flex-shrink-0" />
+                    Connecting to support...
+                  </>
+                ) : liveChats[i].closed ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                    Chat ended
+                  </>
+                ) : liveChats[i].adminJoined ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                    <span className="text-green-500 font-medium">{liveChats[i].openedBy || 'Admin'} is here</span>
+                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See chat ↘</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                    <span className="text-yellow-500">Waiting for admin...</span>
+                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See chat ↘</span>
+                  </>
                 )}
-
-                {liveChats[i].phase === 'chat' && (
-                  <div className={`ml-9 mt-2 max-w-[82%] rounded-xl border flex flex-col overflow-hidden ${
-                    darkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'
-                  }`} style={{ height: '280px' }}>
-                    {/* Chat header */}
-                    <div className={`px-3 py-2 border-b flex items-center justify-between flex-shrink-0 ${
-                      darkMode ? 'border-white/10' : 'border-gray-100'
-                    }`}>
-                      <p className={`text-[11px] font-semibold flex items-center gap-1.5 ${darkMode ? 'text-gray-200' : 'text-kcc-dark'}`}>
-                        <MessageCircle size={11} className="text-green-500" />
-                        Live Chat
-                        {!liveChats[i].closed && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse ml-0.5" />
-                        )}
-                      </p>
-                      {liveChats[i].closed ? (
-                        <span className="text-[10px] text-gray-400">Ended</span>
-                      ) : liveChats[i].adminJoined ? (
-                        <span className="flex items-center gap-1 text-[10px] text-green-500 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                          {liveChats[i].openedBy || 'Admin'} is here
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-[10px] text-yellow-500">
-                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                          Waiting for admin...
-                        </span>
-                      )}
-                    </div>
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-                      {liveChats[i].messages.map(m => (
-                        <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <span className={`text-xs px-3 py-1.5 rounded-2xl max-w-[80%] leading-relaxed ${
-                            m.sender === 'user'
-                              ? 'bg-kcc-blue text-white rounded-br-sm'
-                              : darkMode ? 'bg-white/10 text-gray-200 rounded-bl-sm' : 'bg-gray-100 text-gray-700 rounded-bl-sm'
-                          }`}>{m.content}</span>
-                        </div>
-                      ))}
-                      {liveChats[i].closed && (
-                        <div className="mt-3 px-1">
-                          <p className={`text-center text-[10px] mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                            Chat ended.
-                          </p>
-                          {!liveChats[i].feedbackSubmitted ? (
-                            <div className={`rounded-xl p-3 ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
-                              <p className={`text-[11px] font-semibold text-center mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                How was your experience? ⭐
-                              </p>
-                              {/* Stars */}
-                              <div className="flex justify-center gap-1 mb-2">
-                                {[1,2,3,4,5].map(star => (
-                                  <button
-                                    key={star}
-                                    onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackRating: star } }))}
-                                    className={`text-lg transition-transform hover:scale-110 ${
-                                      (liveChats[i].feedbackRating || 0) >= star ? 'text-yellow-400' : (darkMode ? 'text-gray-600' : 'text-gray-300')
-                                    }`}
-                                  >★</button>
-                                ))}
-                              </div>
-                              <textarea
-                                rows={2}
-                                placeholder="Leave a comment (optional)"
-                                value={liveChats[i].feedbackText || ''}
-                                onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackText: e.target.value } }))}
-                                className={`w-full text-[10px] rounded-lg px-2 py-1.5 outline-none border resize-none mb-2 ${
-                                  darkMode ? 'bg-white/10 border-white/10 text-gray-200 placeholder-gray-600' : 'border-gray-200 text-gray-600 placeholder-gray-400'
-                                }`}
-                              />
-                              <div className="flex gap-1.5 justify-end">
-                                <button
-                                  onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))}
-                                  className={`text-[10px] px-2 py-1 rounded-lg ${darkMode ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'}`}
-                                >Skip</button>
-                                <button
-                                  disabled={!liveChats[i].feedbackRating}
-                                  onClick={async () => {
-                                    const ref = liveChatRefs.current[i]
-                                    if (!ref?.chatId || !liveChats[i].feedbackRating) return
-                                    try {
-                                      await axios.post(`/api/live-chat/${ref.chatId}/feedback`, {
-                                        rating: liveChats[i].feedbackRating,
-                                        feedback_text: liveChats[i].feedbackText || null,
-                                      })
-                                      setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))
-                                    } catch {}
-                                  }}
-                                  className="text-[10px] px-3 py-1 bg-green-600 text-white rounded-lg disabled:opacity-40 hover:bg-green-700 transition"
-                                >Submit</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className={`text-center text-[10px] ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                              Thank you for your feedback! 🙏
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {/* Input */}
-                    {!liveChats[i].closed && (
-                      <div className={`border-t px-2 py-2 flex gap-2 flex-shrink-0 ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
-                        <input
-                          type="text"
-                          placeholder="Type a message..."
-                          value={liveChats[i].inputText}
-                          onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], inputText: e.target.value } }))}
-                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendLiveChatMessage(i) } }}
-                          className={`flex-1 text-xs rounded-lg px-2.5 py-1.5 outline-none border focus:border-green-500 ${
-                            darkMode ? 'bg-white/10 border-white/10 text-white placeholder-gray-500' : 'border-gray-200 text-gray-700'
-                          }`}
-                        />
-                        <button
-                          onClick={() => sendLiveChatMessage(i)}
-                          disabled={liveChats[i].sending || !liveChats[i].inputText?.trim()}
-                          className="px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs disabled:opacity-40 hover:bg-green-700 transition"
-                        >
-                          <Send size={11} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
+              </div>
             )}
 
             {/* Retry button on error */}
@@ -1063,6 +952,158 @@ export default function ChatPage() {
       {/* ── Panels ── */}
       {showAnnouncements && <div className="animate-slideDown"><AnnouncementsPanel onClose={() => setShowAnnouncements(false)} /></div>}
 
+      {/* ── Floating Live Chat Panel ── */}
+      {(() => {
+        const idx = Object.keys(liveChats).find(k => liveChats[k]?.phase === 'chat')
+        if (idx == null) return null
+        const i   = parseInt(idx)
+        const lc  = liveChats[i]
+        const ref = liveChatRefs.current[i]
+        return (
+          <div className={`
+            fixed z-40 flex flex-col overflow-hidden shadow-2xl
+            bottom-0 left-0 right-0 h-[72vh] rounded-t-3xl
+            md:bottom-4 md:right-4 md:left-auto md:w-96 md:h-[520px] md:rounded-2xl
+            ${darkMode ? 'bg-[#0d1426] border border-white/10' : 'bg-white border border-gray-200'}
+          `}>
+            {/* Header */}
+            <div className={`flex items-center justify-between px-4 py-3 flex-shrink-0 border-b ${
+              darkMode ? 'border-white/10' : 'border-gray-100'
+            }`}>
+              {/* Drag handle (mobile) */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-gray-300/50 md:hidden" />
+              <div className="flex items-center gap-2">
+                <MessageCircle size={14} className={lc.closed ? 'text-gray-400' : 'text-green-500'} />
+                <p className={`font-semibold text-sm ${darkMode ? 'text-white' : 'text-kcc-dark'}`}>
+                  Live Support
+                </p>
+                {!lc.closed && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
+              </div>
+              <div className="flex items-center gap-2">
+                {lc.closed ? (
+                  <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Chat ended</span>
+                ) : lc.adminJoined ? (
+                  <span className="text-xs text-green-500 font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    {lc.openedBy || 'Admin'} is here
+                  </span>
+                ) : (
+                  <span className="text-xs text-yellow-500 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                    Waiting...
+                  </span>
+                )}
+                <button
+                  onClick={() => {
+                    clearInterval(liveChatRefs.current[i]?.intervalId)
+                    stopHeartbeat(ref?.chatId)
+                    setLiveChats(p => { const n = { ...p }; delete n[i]; return n })
+                  }}
+                  className={`p-1 rounded-lg transition ${darkMode ? 'text-gray-500 hover:text-gray-300 hover:bg-white/10' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                  title="Close chat"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {lc.messages.map(m => (
+                <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <span className={`text-sm px-3.5 py-2 rounded-2xl max-w-[78%] leading-relaxed ${
+                    m.sender === 'user'
+                      ? 'bg-kcc-blue text-white rounded-br-sm'
+                      : darkMode ? 'bg-white/10 text-gray-200 rounded-bl-sm' : 'bg-gray-100 text-gray-700 rounded-bl-sm'
+                  }`}>{m.content}</span>
+                </div>
+              ))}
+
+              {/* Feedback after close */}
+              {lc.closed && (
+                <div className="pt-2">
+                  <div className={`h-px mb-4 ${darkMode ? 'bg-white/10' : 'bg-gray-100'}`} />
+                  {!lc.feedbackSubmitted ? (
+                    <div className={`rounded-2xl p-4 ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                      <p className={`text-sm font-semibold text-center mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                        How was your experience? ⭐
+                      </p>
+                      <div className="flex justify-center gap-2 mb-3">
+                        {[1,2,3,4,5].map(star => (
+                          <button
+                            key={star}
+                            onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackRating: star } }))}
+                            className={`text-2xl transition-transform hover:scale-110 ${
+                              (lc.feedbackRating || 0) >= star ? 'text-yellow-400' : (darkMode ? 'text-gray-600' : 'text-gray-300')
+                            }`}
+                          >★</button>
+                        ))}
+                      </div>
+                      <textarea
+                        rows={2}
+                        placeholder="Leave a comment (optional)"
+                        value={lc.feedbackText || ''}
+                        onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackText: e.target.value } }))}
+                        className={`w-full text-xs rounded-xl px-3 py-2 outline-none border resize-none mb-3 ${
+                          darkMode ? 'bg-white/10 border-white/10 text-gray-200 placeholder-gray-500' : 'border-gray-200 text-gray-700 placeholder-gray-400'
+                        }`}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))}
+                          className={`text-xs px-3 py-1.5 rounded-xl border transition ${darkMode ? 'border-white/10 text-gray-400 hover:text-gray-300' : 'border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+                        >Skip</button>
+                        <button
+                          disabled={!lc.feedbackRating}
+                          onClick={async () => {
+                            if (!ref?.chatId || !lc.feedbackRating) return
+                            try {
+                              await axios.post(`/api/live-chat/${ref.chatId}/feedback`, {
+                                rating: lc.feedbackRating,
+                                feedback_text: lc.feedbackText || null,
+                              })
+                              setLiveChats(p => ({ ...p, [i]: { ...p[i], feedbackSubmitted: true } }))
+                            } catch {}
+                          }}
+                          className="text-xs px-4 py-1.5 bg-green-600 text-white rounded-xl disabled:opacity-40 hover:bg-green-700 transition font-medium"
+                        >Submit</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={`text-center text-sm py-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                      Thank you for your feedback! 🙏
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Input */}
+            {!lc.closed && (
+              <div className={`border-t px-3 py-3 flex gap-2 flex-shrink-0 ${darkMode ? 'border-white/10' : 'border-gray-100'}`}>
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={lc.inputText || ''}
+                  onChange={e => setLiveChats(p => ({ ...p, [i]: { ...p[i], inputText: e.target.value } }))}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendLiveChatMessage(i) } }}
+                  className={`flex-1 text-sm rounded-xl px-3.5 py-2 outline-none border transition focus:border-green-500 ${
+                    darkMode ? 'bg-white/10 border-white/10 text-white placeholder-gray-500' : 'border-gray-200 text-gray-700 placeholder-gray-400'
+                  }`}
+                />
+                <button
+                  onClick={() => sendLiveChatMessage(i)}
+                  disabled={lc.sending || !lc.inputText?.trim()}
+                  className="px-3 py-2 bg-green-600 text-white rounded-xl disabled:opacity-40 hover:bg-green-700 transition flex-shrink-0"
+                >
+                  <Send size={14} />
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
       {/* ── Concern Modal ── */}
       {concernModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
@@ -1149,7 +1190,7 @@ export default function ChatPage() {
                   <p className="text-[11px] text-gray-400">Student Account</p>
                 </div>
               </div>
-              <button onClick={() => setLoginModal(false)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}>
+              <button onClick={() => { setLoginModal(false); setLoginError('') }} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}>
                 <X size={15} />
               </button>
             </div>
@@ -1159,7 +1200,7 @@ export default function ChatPage() {
               {['login', 'register'].map(m => (
                 <button
                   key={m}
-                  onClick={() => setLoginForm(p => ({ ...p, mode: m }))}
+                  onClick={() => { setLoginForm(p => ({ ...p, mode: m })); setLoginError('') }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
                     loginForm.mode === m
                       ? 'bg-kcc-blue text-white shadow-sm'
@@ -1172,6 +1213,12 @@ export default function ChatPage() {
             </div>
 
             <form onSubmit={handleLogin} className="space-y-3">
+              {loginError && (
+                <div className="flex items-start gap-2 text-xs text-red-500 bg-red-50 border border-red-100 px-3 py-2.5 rounded-xl">
+                  <span className="mt-px flex-shrink-0">⚠</span>
+                  <span>{loginError}</span>
+                </div>
+              )}
               <input
                 type="email"
                 required
