@@ -129,6 +129,7 @@ export default function ChatPage() {
   const [loginError, setLoginError]     = useState('')
   const [chatStartedMsgs, setChatStartedMsgs] = useState(new Set())
   const [unreadLive, setUnreadLive]     = useState(0)
+  const audioCtxRef                     = useRef(null)
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
   const myChatBottomRef = useRef(null)
   const heartbeatRef = useRef({})   // { [chatId]: intervalId }
@@ -331,16 +332,29 @@ export default function ChatPage() {
   }
 
   // ── notification helpers ──────────────────────────────────────────────────────
+  function initAudioCtx() {
+    // Must be called during a user gesture so the context starts in 'running' state
+    try {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)()
+      }
+      audioCtxRef.current.resume()
+    } catch {}
+  }
+
   function playPing() {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)()
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain); gain.connect(ctx.destination)
-      osc.type = 'sine'; osc.frequency.value = 880
-      gain.gain.setValueAtTime(0.12, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5)
+      const ctx = audioCtxRef.current
+      if (!ctx) return
+      ctx.resume().then(() => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain); gain.connect(ctx.destination)
+        osc.type = 'sine'; osc.frequency.value = 880
+        gain.gain.setValueAtTime(0.12, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5)
+      })
     } catch {}
   }
 
@@ -445,6 +459,7 @@ export default function ChatPage() {
   // Reopen a chat from My Chats history as the floating Live Support panel
   const RESTORED_KEY = 9999
   async function reopenInFloatingPanel(chatId) {
+    initAudioCtx()  // user gesture here — warm up AudioContext
     // Clean up any previously restored chat slot
     if (liveChatRefs.current[RESTORED_KEY]) {
       clearInterval(liveChatRefs.current[RESTORED_KEY].intervalId)
@@ -529,6 +544,7 @@ export default function ChatPage() {
     if (!user) return
     // Prevent multiple simultaneous live chats
     if (Object.keys(liveChats).length > 0) return
+    initAudioCtx()  // warm up AudioContext during user gesture so pings work later
     setChatStartedMsgs(prev => new Set([...prev, msgIndex]))
     liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
     setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false, openedBy: null, feedbackSubmitted: false, feedbackRating: 0, feedbackText: '' } }))
