@@ -879,6 +879,7 @@ export default function ChatPage() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
+            onFocus={() => setShowMyChats(false)}
             disabled={loading}
             placeholder={
               loading
