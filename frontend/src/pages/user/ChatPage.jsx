@@ -127,6 +127,7 @@ export default function ChatPage() {
   const [myChatInput, setMyChatInput]   = useState('')
   const [myChatSending, setMyChatSending] = useState(false)
   const [loginError, setLoginError]     = useState('')
+  const [chatStartedMsgs, setChatStartedMsgs] = useState(new Set())
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
   const myChatBottomRef = useRef(null)
   const heartbeatRef = useRef({})   // { [chatId]: intervalId }
@@ -460,6 +461,9 @@ export default function ChatPage() {
 
   async function openLiveChat(msgIndex, relatedQuestion) {
     if (!user) return
+    // Prevent multiple simultaneous live chats
+    if (Object.keys(liveChats).length > 0) return
+    setChatStartedMsgs(prev => new Set([...prev, msgIndex]))
     liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
     setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false, openedBy: null, feedbackSubmitted: false, feedbackRating: 0, feedbackText: '' } }))
     try {
@@ -712,12 +716,22 @@ export default function ChatPage() {
                   ) : (
                     <div className="flex flex-col gap-1.5">
                       <div className="flex gap-2 flex-wrap">
-                        {user && !liveChats[i] && (
+                        {user && !chatStartedMsgs.has(i) && Object.keys(liveChats).length === 0 && (
                           <button
                             onClick={() => openLiveChat(i, messages[i - 1]?.text || '')}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
                           >
                             <MessageCircle size={11} /> Chat with Admin
+                          </button>
+                        )}
+                        {user && chatStartedMsgs.has(i) && !liveChats[i] && (
+                          <button
+                            onClick={() => { setShowMyChats(true); loadMyChats() }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
+                              darkMode ? 'border-white/10 text-gray-400 hover:text-gray-200 hover:bg-white/10' : 'border-gray-200 text-gray-500 hover:bg-gray-100'
+                            }`}
+                          >
+                            <History size={11} /> View in My Chats
                           </button>
                         )}
                         <button
@@ -761,13 +775,13 @@ export default function ChatPage() {
                   <>
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
                     <span className="text-green-500 font-medium">{liveChats[i].openedBy || 'Admin'} is here</span>
-                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See chat ↘</span>
+                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See panel ↘</span>
                   </>
                 ) : (
                   <>
                     <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
                     <span className="text-yellow-500">Waiting for admin...</span>
-                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See chat ↘</span>
+                    <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See panel ↘</span>
                   </>
                 )}
               </div>
@@ -998,9 +1012,12 @@ export default function ChatPage() {
                     clearInterval(liveChatRefs.current[i]?.intervalId)
                     stopHeartbeat(ref?.chatId)
                     setLiveChats(p => { const n = { ...p }; delete n[i]; return n })
+                    // Open My Chats so user can continue from history
+                    loadMyChats()
+                    setShowMyChats(true)
                   }}
                   className={`p-1 rounded-lg transition ${darkMode ? 'text-gray-500 hover:text-gray-300 hover:bg-white/10' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
-                  title="Close chat"
+                  title="Minimise to My Chats"
                 >
                   <X size={15} />
                 </button>
