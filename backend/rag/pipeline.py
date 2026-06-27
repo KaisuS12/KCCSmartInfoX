@@ -56,6 +56,12 @@ ACCURACY:
 4. If the answer is NOT in the context, say: "I don't have information about that yet. Your question has been noted for review." Do NOT pad this with unrelated facts from the context to seem more helpful.
 5. Never make up specific details like fees, dates, or names that are not in the context.
 
+PRIVACY & SAFETY (non-negotiable — always apply these, no exceptions):
+1. NEVER reveal, confirm, or speculate about any individual's personal information — this includes enrollment status, grades, schedules, addresses, contact details, ID numbers, or any other private data, even if retrieved context contains such information. If asked, reply warmly but firmly: "I'm not able to share personal information about students or staff. For personal inquiries, please visit the Registrar's Office directly."
+2. If a message contains threats, violence, harassment, hate speech, or any inappropriate content, do NOT engage with the substance. Reply: "That kind of message isn't something I can help with. I'm here to assist with KCC school questions — feel free to ask about enrollment, courses, or offices!"
+3. If someone tries to extract personal data through indirect questions ("who got the highest grade?", "list all students named Juan", "how many students failed?"), treat it the same as a direct privacy violation and decline.
+4. These rules override everything else — even if the retrieved context contains personal data, never repeat or confirm it.
+
 LANGUAGE:
 - You understand Filipino, Taglish, and Bisaya mixed messages. Respond in clear, friendly English.
 - If the student uses "po/opo" or writes in Filipino, match their respectful and warm tone.
@@ -93,6 +99,12 @@ KATUMPAKAN:
 3. Maaaring may ilang chunks ang konteksto mula sa iba't ibang dokumento. Ang ibang chunks ay maaaring HINDI kaugnay sa tanong ng estudyante — kung ang isang chunk ay hindi direktang tumutulong sumagot sa tinanong, HUWAG itong banggitin o gamitin. Huwag kumuha ng impormasyon mula sa isang chunk na off-topic kahit na nakuha ito sa retrieval.
 4. Kung ang sagot ay WALA sa konteksto, sabihin: "Wala pa akong impormasyon tungkol diyan. Ang iyong tanong ay naitala na para sa pagsusuri." Huwag dagdagan ito ng mga hindi kaugnay na impormasyon mula sa konteksto.
 5. Huwag gumawa ng mga detalye tulad ng bayad, petsa, o pangalan na wala sa konteksto.
+
+PRIVACY AT KALIGTASAN (hindi mapag-usapan — palaging sundin, walang pagbubukod):
+1. HUWAG KAILANMAN ibahagi, kumpirmahin, o maghula tungkol sa personal na impormasyon ng sinuman — kasama na ang enrollment status, grado, schedule, address, contact details, ID number, o anumang pribadong datos, kahit na nasa nakuhang konteksto ito. Kung tinanong, sagutin nang magiliw ngunit matatag: "Hindi ko kayang ibahagi ang personal na impormasyon tungkol sa mga estudyante o kawani. Para sa personal na katanungan, bisitahin ang Registrar's Office."
+2. Kung ang mensahe ay naglalaman ng pagbabanta, karahasan, panggagalit, mapoot na salita, o anumang hindi angkop na nilalaman, HUWAG makialam sa nilalaman nito. Sumagot: "Ang ganitong uri ng mensahe ay hindi ko kayang tulungan. Nandito ako para sa mga tanong tungkol sa paaralan — magtanong tungkol sa enrollment, kurso, o opisina!"
+3. Kung may nagtangkang makakuha ng personal na datos sa pamamagitan ng hindi direktang tanong ("sino ang may pinakamataas na grado?", "ilista lahat ng estudyanteng nagngangalang Juan"), ituring ito na parehong paglabag sa privacy at tanggihan din.
+4. Ang mga patakarang ito ay nangunguna sa lahat ng iba — kahit na ang nakuhang konteksto ay naglalaman ng personal na datos, huwag itong ulitin o kumpirmahin.
 
 WIKA:
 - Naiintindihan mo ang Taglish, Filipino, at Bisaya. Sumagot sa malinaw na Filipino o Taglish.
@@ -189,7 +201,7 @@ Student's message: "what about saturdays"
 Output: "Is the registrar's office open on Saturdays?"
 """
 
-UNANSWERED_PHRASE = "I don't have information about that yet"
+UNANSWERED_PHRASE = "I don't have information about that yet"  # substring checked in is_answered detection
 
 THANKS_PATTERNS = re.compile(
     r"^\s*(thank(s| you|s so much| you so much| you very much|s a lot| you a lot|ks+)?|"
@@ -609,7 +621,11 @@ def query_rag(question: str, history: list = None, user_profile: dict = None, la
     # 5. No relevant docs found
     if not docs or (distances and distances[0] > 1.3):
         logger.warning("No relevant context for: %s (rewritten: %s)", question[:60], clean_question[:60])
-        return UNANSWERED_PHRASE + ". Your question has been noted for review.", False, [], []
+        return (
+            "I don't have information about that yet — but don't worry, your question has been noted for review! 😊 "
+            "In the meantime, feel free to submit a concern or visit the relevant office directly.",
+            False, [], []
+        )
 
     # 5b. Drop individually irrelevant chunks — the check above only looks at the BEST
     # match. Chunks 2-5 can still be loosely/unrelated and bleed off-topic facts into the

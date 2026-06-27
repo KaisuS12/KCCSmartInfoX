@@ -126,8 +126,14 @@ async def ai_chat(
             content = params.get("content", "").strip()
             source = params.get("source", "admin-ai-entry")
             if content:
+                # Replace old chunks with the same source so updates don't accumulate
+                existing = db.query(KnowledgeDoc).filter(KnowledgeDoc.filename == source).first()
+                if existing:
+                    delete_document(source)
+                    db.delete(existing)
+                    db.commit()
                 chunks = ingest_text(content, source)
-                db.add(KnowledgeDoc(filename=source, filepath="text://admin-ai"))
+                db.add(KnowledgeDoc(filename=source, filepath="text://admin-ai", content=content))
                 db.commit()
                 reply = f"✅ Done! Added **\"{source}\"** to the knowledge base ({chunks} chunks indexed)."
                 action_details = f"Added knowledge: {source} — {content[:120]}"

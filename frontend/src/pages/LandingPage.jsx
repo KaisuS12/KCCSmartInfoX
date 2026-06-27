@@ -315,27 +315,48 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* ── About Us ── */}
+      {/* ── How I Help + Privacy Notice ── */}
       <section className="relative px-6 pb-14 border-t border-white/10 pt-12">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-kcc-gold text-xs font-semibold uppercase tracking-widest mb-4">About Us</p>
-          <h2 className="text-white text-2xl font-bold mb-3">Kabankalan Catholic College</h2>
+          <p className="text-kcc-gold text-xs font-semibold uppercase tracking-widest mb-4">About This Assistant</p>
+          <h2 className="text-white text-2xl font-bold mb-3">What KCCSmartInfoX Can Do</h2>
           <p className="text-gray-400 text-sm leading-relaxed max-w-xl mx-auto mb-8">
-            A Catholic educational institution in Kabankalan City, Negros Occidental — committed to
-            quality education grounded in Christian values, academic excellence, and community service.
+            Your AI guide for KCC — fast, friendly answers about enrollment, courses, and school services, based only on official school information.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-8 text-left">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-kcc-gold/40 hover:shadow-lg hover:shadow-kcc-gold/10 transition-all duration-300">
-              <p className="text-kcc-gold text-xs font-bold uppercase tracking-widest mb-2">Vision</p>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                A leading Catholic institution forming competent, morally upright, and socially responsible citizens for God and country.
-              </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8 text-left">
+            {/* What I can help with */}
+            <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-5 hover:border-green-500/40 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300">
+              <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-3">What I Can Help With</p>
+              <ul className="space-y-2">
+                {[
+                  'Enrollment steps & requirements',
+                  'Courses offered by department',
+                  'Fees, scholarships & TOR requests',
+                  'Office hours & school processes',
+                  'Responds in English, Filipino & Bisaya',
+                ].map(item => (
+                  <li key={item} className="flex items-start gap-2 text-gray-300 text-sm">
+                    <span className="text-green-400 mt-0.5 flex-shrink-0">✓</span> {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-kcc-gold/40 hover:shadow-lg hover:shadow-kcc-gold/10 transition-all duration-300">
-              <p className="text-kcc-gold text-xs font-bold uppercase tracking-widest mb-2">Mission</p>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                To provide accessible, quality, and values-based education that develops the full potential of every student.
-              </p>
+            {/* Privacy & Limits */}
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300">
+              <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">Privacy & Limits</p>
+              <ul className="space-y-2">
+                {[
+                  'Will not share personal info about students or staff',
+                  'Questions like "Is [name] enrolled?" will be declined',
+                  'Violence & inappropriate messages are not allowed',
+                  'Answers are based only on official KCC documents',
+                  'For personal inquiries, visit the Registrar\'s Office',
+                ].map(item => (
+                  <li key={item} className="flex items-start gap-2 text-gray-300 text-sm">
+                    <span className="text-amber-400 mt-0.5 flex-shrink-0">!</span> {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-5 text-gray-500 text-xs">

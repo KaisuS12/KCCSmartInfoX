@@ -386,6 +386,14 @@ async def upload_document(
     with open(filepath, "wb") as f:
         f.write(content)
 
+    # Remove old vector chunks and DB record if this file was uploaded before
+    existing = db.query(KnowledgeDoc).filter(KnowledgeDoc.filename == file.filename).first()
+    if existing:
+        delete_document(file.filename)
+        db.delete(existing)
+        db.commit()
+        logger.info("Replaced existing knowledge: %s", file.filename)
+
     doc = KnowledgeDoc(filename=file.filename, filepath=filepath)
     db.add(doc)
     db.commit()

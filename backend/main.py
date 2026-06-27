@@ -9,9 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from models.database import init_db, engine, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess
+from models.database import init_db, engine, SessionLocal, Announcement, Subscriber, SchoolInfo, OfficeProcess, Settings
 from notifications.service import send_announcement_email
-from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns, live_chat, user_auth, staff_mgmt
+from routes import chat, announcements, subscribers, admin, admin_ai, school_info, office_processes, concerns, live_chat, user_auth, staff_mgmt, settings as settings_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -54,6 +54,7 @@ app.include_router(concerns.router,           prefix="/api")
 app.include_router(live_chat.router,          prefix="/api")
 app.include_router(user_auth.router,          prefix="/api")
 app.include_router(staff_mgmt.router,         prefix="/api")
+app.include_router(settings_router.router,    prefix="/api")
 
 # Mount announcement images BEFORE the SPA catch-all so it isn't intercepted
 _img_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "knowledge_base", "announcement_images")
@@ -220,6 +221,13 @@ async def startup():
             db.add(op)
         db.commit()
         logger.info("Office processes seeded with %d entries", len(defaults))
+
+    # Seed chat settings defaults (includes any newly added keys)
+    from routes.settings import CHAT_DEFAULTS
+    for k, v in CHAT_DEFAULTS.items():
+        if not db.query(Settings).filter(Settings.key == k).first():
+            db.add(Settings(key=k, value=v))
+    db.commit()
 
     # Sync all office processes into AI knowledge base on every startup
     from rag.ingestion import ingest_text, delete_document

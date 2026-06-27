@@ -123,6 +123,13 @@ class ActivityLog(Base):
     created_at  = Column(DateTime, default=datetime.utcnow)
 
 
+class Settings(Base):
+    __tablename__ = "settings"
+    key        = Column(String(100), primary_key=True)
+    value      = Column(Text, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Concern(Base):
     __tablename__ = "concerns"
     id               = Column(Integer, primary_key=True, index=True)

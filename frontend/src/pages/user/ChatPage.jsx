@@ -129,6 +129,7 @@ export default function ChatPage() {
   const [loginError, setLoginError]     = useState('')
   const [chatStartedMsgs, setChatStartedMsgs] = useState(new Set())
   const [unreadLive, setUnreadLive]     = useState(0)
+  const [chatSettings, setChatSettings] = useState(null)
   const audioCtxRef                     = useRef(null)
   const bgPollRef                       = useRef({ intervalId: null, chatId: null, lastMsgId: 0, adminJoined: false })
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
@@ -143,6 +144,8 @@ export default function ChatPage() {
       sendMessage(location.state.initialQuestion)
       window.history.replaceState({}, '')
     }
+    // Fetch chat availability settings (public, no auth needed)
+    axios.get('/api/settings/chat').then(r => setChatSettings(r.data)).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -621,9 +624,19 @@ export default function ChatPage() {
         if (res.data.messages.some(m => m.sender === 'admin')) shouldNotify = true
         setLiveChats(p => ({
           ...p,
-          [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages] }
+          [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages],
+                        queuePosition: res.data.queue_position || 0,
+                        estimatedWait: res.data.estimated_wait_minutes || 0 }
         }))
       }
+      // Always update queue position (even if no messages)
+      setLiveChats(p => ({
+        ...p,
+        [msgIndex]: { ...p[msgIndex],
+          queuePosition: res.data.queue_position || 0,
+          estimatedWait: res.data.estimated_wait_minutes || 0 }
+      }))
+
       if (res.data.admin_opened && !ref.adminJoined) {
         liveChatRefs.current[msgIndex] = { ...liveChatRefs.current[msgIndex], adminJoined: true }
         if (!shouldNotify) shouldNotify = true  // only notify for join if no message already did
@@ -846,12 +859,19 @@ export default function ChatPage() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex gap-2 flex-wrap">
                         {user && !chatStartedMsgs.has(i) && Object.keys(liveChats).length === 0 && (
-                          <button
-                            onClick={() => openLiveChat(i, messages[i - 1]?.text || '')}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
-                          >
-                            <MessageCircle size={11} /> Chat with Admin
-                          </button>
+                          chatSettings?.is_available === false ? (
+                            <div className={`text-xs rounded-lg px-3 py-2 border border-dashed ${darkMode ? 'bg-white/5 border-white/10 text-gray-500' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
+                              💬 Chat unavailable · {chatSettings.office_hours_start}–{chatSettings.office_hours_end}
+                              <p className="mt-0.5 text-[10px]">{chatSettings.chat_offline_message}</p>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => openLiveChat(i, messages[i - 1]?.text || '')}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition"
+                            >
+                              <MessageCircle size={11} /> Chat with Admin
+                            </button>
+                          )
                         )}
                         {user && chatStartedMsgs.has(i) && !liveChats[i] && (
                           <button
@@ -910,6 +930,11 @@ export default function ChatPage() {
                   <>
                     <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
                     <span className="text-yellow-500">Waiting for admin...</span>
+                    {liveChats[i]?.queuePosition > 0 && (
+                      <span className={`text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                        · #{liveChats[i].queuePosition} in queue
+                      </span>
+                    )}
                     <span className={`ml-auto text-[10px] ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>See panel ↘</span>
                   </>
                 )}
@@ -1133,10 +1158,18 @@ export default function ChatPage() {
                     {lc.openedBy || 'Admin'} is here
                   </span>
                 ) : (
-                  <span className="text-xs text-yellow-500 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                    Waiting...
-                  </span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="text-xs text-yellow-500 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                      Waiting for support...
+                    </span>
+                    {lc.queuePosition > 0 && (
+                      <span className="text-[10px] text-gray-400">#{lc.queuePosition} in queue</span>
+                    )}
+                    {lc.estimatedWait > 0 && (
+                      <span className="text-[10px] text-gray-400">~{lc.estimatedWait} min wait</span>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={() => {

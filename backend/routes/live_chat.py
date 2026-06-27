@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from models.database import get_db, LiveChat, LiveMessage
 from utils.auth import get_current_admin, get_current_user
 from utils.audit import resolve_actor, log_activity
+from routes.settings import is_chat_available
 
 router = APIRouter()
 logger = logging.getLogger("kccsmartinfox.live_chat")
@@ -84,6 +85,10 @@ async def start_chat(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
+    avail = is_chat_available(db)
+    if not avail["is_available"]:
+        raise HTTPException(status_code=503, detail=avail.get("chat_offline_message", "Live chat is currently unavailable."))
+
     ua = request.headers.get("User-Agent", "")
     chat = LiveChat(
         user_id=int(user["sub"]),
@@ -134,11 +139,36 @@ async def user_poll_messages(
         .order_by(LiveMessage.sent_at.asc())
         .all()
     )
+
+    # Queue position + estimated wait (only relevant while waiting)
+    if not chat.admin_opened_at and chat.status == "active":
+        waiting_before = db.query(LiveChat).filter(
+            LiveChat.status == "active",
+            LiveChat.admin_opened_at == None,
+            LiveChat.created_at < chat.created_at,
+            LiveChat.id != chat_id,
+        ).count()
+        queue_position = waiting_before + 1
+        recent = db.query(LiveChat).filter(
+            LiveChat.admin_opened_at != None,
+        ).order_by(LiveChat.created_at.desc()).limit(20).all()
+        times = [
+            min(15, (c.admin_opened_at - c.created_at).total_seconds() / 60)
+            for c in recent if c.admin_opened_at and c.created_at
+        ]
+        avg_min = min(10, max(5, int(sum(times) / len(times)))) if times else 5
+        estimated_wait = queue_position * avg_min
+    else:
+        queue_position = 0
+        estimated_wait = 0
+
     return {
-        "messages":     [_msg_dict(m) for m in messages],
-        "chat_status":  chat.status,
-        "admin_opened": chat.admin_opened_at is not None,
-        "opened_by":    chat.opened_by,
+        "messages":              [_msg_dict(m) for m in messages],
+        "chat_status":           chat.status,
+        "admin_opened":          chat.admin_opened_at is not None,
+        "opened_by":             chat.opened_by,
+        "queue_position":        queue_position,
+        "estimated_wait_minutes": estimated_wait,
     }
 
 
@@ -178,7 +208,7 @@ async def admin_list_chats(
     q = db.query(LiveChat)
     if status:
         q = q.filter(LiveChat.status == status)
-    chats = q.order_by(LiveChat.created_at.desc()).all()
+    chats = q.order_by(LiveChat.created_at.asc()).all()
     return [_chat_dict(c, db) for c in chats]
 
 
