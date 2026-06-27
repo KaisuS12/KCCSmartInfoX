@@ -385,17 +385,17 @@ export default function ChatPage() {
       if (!ref.chatId) return
       try {
         const res = await axios.get(`/api/live-chat/${ref.chatId}/messages?offset=${ref.lastMsgId}`)
-        // New admin messages → notify
+        const notifName = res.data.opened_by || 'Admin'
+        let shouldNotify = false
         if (res.data.messages.length > 0) {
-          const adminMsgs = res.data.messages.filter(m => m.sender === 'admin')
-          if (adminMsgs.length > 0) notifyUser(res.data.opened_by || 'Admin')
+          if (res.data.messages.some(m => m.sender === 'admin')) shouldNotify = true
           bgPollRef.current.lastMsgId = res.data.messages[res.data.messages.length - 1].id
         }
-        // Admin just joined for the first time → notify
         if (res.data.admin_opened && !bgPollRef.current.adminJoined) {
           bgPollRef.current.adminJoined = true
-          notifyUser(res.data.opened_by || 'Admin')
+          if (!shouldNotify) shouldNotify = true
         }
+        if (shouldNotify) notifyUser(notifName)
         if (res.data.chat_status === 'closed') stopBgPoll()
       } catch {}
     }, 4000)
@@ -580,7 +580,7 @@ export default function ChatPage() {
     if (Object.keys(liveChats).length > 0) return
     initAudioCtx()  // warm up AudioContext during user gesture so pings work later
     setChatStartedMsgs(prev => new Set([...prev, msgIndex]))
-    liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null }
+    liveChatRefs.current[msgIndex] = { lastMsgId: 0, intervalId: null, chatId: null, adminJoined: false }
     setLiveChats(p => ({ ...p, [msgIndex]: { phase: 'connecting', relatedQuestion, messages: [], inputText: '', sending: false, closed: false, adminJoined: false, openedBy: null, feedbackSubmitted: false, feedbackRating: 0, feedbackText: '' } }))
     try {
       const res = await axios.post('/api/live-chat/start',
@@ -612,27 +612,25 @@ export default function ChatPage() {
     if (!ref?.chatId) return
     try {
       const res = await axios.get(`/api/live-chat/${ref.chatId}/messages?offset=${ref.lastMsgId}`)
+      const notifName = res.data.opened_by || 'Admin'
+      let shouldNotify = false
+
       if (res.data.messages.length > 0) {
         const lastId = res.data.messages[res.data.messages.length - 1].id
         liveChatRefs.current[msgIndex] = { ...ref, lastMsgId: lastId }
-        const adminMsgs = res.data.messages.filter(m => m.sender === 'admin')
-        if (adminMsgs.length > 0) {
-          const senderName = res.data.opened_by || 'Admin'
-          notifyUser(senderName)
-        }
+        if (res.data.messages.some(m => m.sender === 'admin')) shouldNotify = true
         setLiveChats(p => ({
           ...p,
           [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages] }
         }))
       }
-      if (res.data.admin_opened) {
-        const name = res.data.opened_by || 'Admin'
-        setLiveChats(p => {
-          const wasJoined = p[msgIndex]?.adminJoined
-          if (!wasJoined) notifyUser(name)  // ping once when staff first joins
-          return { ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true, openedBy: name } }
-        })
+      if (res.data.admin_opened && !ref.adminJoined) {
+        liveChatRefs.current[msgIndex] = { ...liveChatRefs.current[msgIndex], adminJoined: true }
+        if (!shouldNotify) shouldNotify = true  // only notify for join if no message already did
+        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true, openedBy: notifName } }))
       }
+      if (shouldNotify) notifyUser(notifName)
+
       if (res.data.chat_status === 'closed') {
         clearInterval(ref.intervalId)
         stopHeartbeat(ref.chatId)
