@@ -128,6 +128,7 @@ export default function ChatPage() {
   const [myChatSending, setMyChatSending] = useState(false)
   const [loginError, setLoginError]     = useState('')
   const [chatStartedMsgs, setChatStartedMsgs] = useState(new Set())
+  const [unreadLive, setUnreadLive]     = useState(0)
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
   const myChatBottomRef = useRef(null)
   const heartbeatRef = useRef({})   // { [chatId]: intervalId }
@@ -329,6 +330,37 @@ export default function ChatPage() {
     }
   }
 
+  // ── notification helpers ──────────────────────────────────────────────────────
+  function playPing() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
+      osc.type = 'sine'; osc.frequency.value = 880
+      gain.gain.setValueAtTime(0.12, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5)
+    } catch {}
+  }
+
+  function notifyUser(senderName) {
+    setUnreadLive(n => n + 1)
+    playPing()
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+      new Notification('KCCSmartInfoX — Live Support', {
+        body: `${senderName} replied to your message`,
+        icon: '/favicon.ico',
+      })
+    }
+  }
+
+  function requestNotifPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }
+
   // ── User Auth ─────────────────────────────────────────────────────────────────
 
   function userAuthHeader() {
@@ -352,6 +384,7 @@ export default function ChatPage() {
       setUser(me.data)
       setLoginModal(false)
       setLoginForm({ email: '', name: '', password: '', mode: 'login' })
+      requestNotifPermission()
     } catch (err) {
       setLoginError(err.response?.data?.detail || 'Failed. Please try again.')
     } finally {
@@ -532,13 +565,23 @@ export default function ChatPage() {
       if (res.data.messages.length > 0) {
         const lastId = res.data.messages[res.data.messages.length - 1].id
         liveChatRefs.current[msgIndex] = { ...ref, lastMsgId: lastId }
+        const adminMsgs = res.data.messages.filter(m => m.sender === 'admin')
+        if (adminMsgs.length > 0) {
+          const senderName = res.data.opened_by || 'Admin'
+          notifyUser(senderName)
+        }
         setLiveChats(p => ({
           ...p,
           [msgIndex]: { ...p[msgIndex], messages: [...(p[msgIndex]?.messages || []), ...res.data.messages] }
         }))
       }
       if (res.data.admin_opened) {
-        setLiveChats(p => ({ ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true, openedBy: res.data.opened_by || 'Admin' } }))
+        const name = res.data.opened_by || 'Admin'
+        setLiveChats(p => {
+          const wasJoined = p[msgIndex]?.adminJoined
+          if (!wasJoined) notifyUser(name)  // ping once when staff first joins
+          return { ...p, [msgIndex]: { ...p[msgIndex], adminJoined: true, openedBy: name } }
+        })
       }
       if (res.data.chat_status === 'closed') {
         clearInterval(ref.intervalId)
@@ -645,14 +688,19 @@ export default function ChatPage() {
           {user ? (
             <div className="flex items-center gap-1">
               <button
-                onClick={() => { setShowMyChats(v => !v); if (!showMyChats) loadMyChats() }}
+                onClick={() => { setShowMyChats(v => !v); if (!showMyChats) loadMyChats(); setUnreadLive(0) }}
                 title="My Chats"
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   darkMode ? 'bg-white/8 hover:bg-white/15 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                 }`}
               >
                 <History size={12} />
                 <span className="hidden sm:inline max-w-[70px] truncate">{user.name}</span>
+                {unreadLive > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {unreadLive > 9 ? '9+' : unreadLive}
+                  </span>
+                )}
               </button>
               <button
                 onClick={handleLogout}
@@ -1339,7 +1387,7 @@ export default function ChatPage() {
                   }`}>
                     {/* Header row */}
                     <button
-                      onClick={() => isActive ? reopenInFloatingPanel(c.id) : loadChatMessages(c.id, c.status)}
+                      onClick={() => { if (isActive) { reopenInFloatingPanel(c.id); setUnreadLive(0) } else loadChatMessages(c.id, c.status) }}
                       className="w-full px-3 py-2.5 text-left flex items-center justify-between"
                     >
                       <div className="flex-1 min-w-0">
