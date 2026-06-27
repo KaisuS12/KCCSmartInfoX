@@ -377,9 +377,9 @@ export default function ChatPage() {
   }
 
   // Background poll: keeps running after the floating panel is closed
-  function startBgPoll(chatId, lastMsgId) {
+  function startBgPoll(chatId, lastMsgId, adminAlreadyJoined = false) {
     stopBgPoll()
-    bgPollRef.current = { chatId, lastMsgId, intervalId: null, adminJoined: false }
+    bgPollRef.current = { chatId, lastMsgId, intervalId: null, adminJoined: adminAlreadyJoined }
     const id = setInterval(async () => {
       const ref = bgPollRef.current
       if (!ref.chatId) return
@@ -503,7 +503,7 @@ export default function ChatPage() {
       const res = await axios.get(`/api/live-chat/${chatId}/messages?offset=0`)
       const msgs = res.data.messages || []
       const lastId = msgs.length > 0 ? msgs[msgs.length - 1].id : 0
-      liveChatRefs.current[RESTORED_KEY] = { chatId, lastMsgId: lastId, intervalId: null }
+      liveChatRefs.current[RESTORED_KEY] = { chatId, lastMsgId: lastId, intervalId: null, adminJoined: res.data.admin_opened || false }
       setLiveChats(p => ({ ...p, [RESTORED_KEY]: {
         phase: 'chat',
         chatId,
@@ -1140,13 +1140,14 @@ export default function ChatPage() {
                 )}
                 <button
                   onClick={() => {
-                    const chatId   = ref?.chatId
+                    const chatId    = ref?.chatId
                     const lastMsgId = liveChatRefs.current[i]?.lastMsgId || 0
+                    const alreadyJoined = liveChatRefs.current[i]?.adminJoined || false
                     clearInterval(liveChatRefs.current[i]?.intervalId)
                     stopHeartbeat(chatId)
                     setLiveChats(p => { const n = { ...p }; delete n[i]; return n })
                     // Keep background poll running so notifications still arrive
-                    if (chatId) startBgPoll(chatId, lastMsgId)
+                    if (chatId) startBgPoll(chatId, lastMsgId, alreadyJoined)
                     loadMyChats()
                     setShowMyChats(true)
                   }}
