@@ -130,6 +130,7 @@ export default function ChatPage() {
   const [chatStartedMsgs, setChatStartedMsgs] = useState(new Set())
   const [unreadLive, setUnreadLive]     = useState(0)
   const audioCtxRef                     = useRef(null)
+  const bgPollRef                       = useRef({ intervalId: null, chatId: null, lastMsgId: 0, adminJoined: false })
   const myChatPollRef = useRef({ intervalId: null, lastMsgId: 0, chatId: null })
   const myChatBottomRef = useRef(null)
   const heartbeatRef = useRef({})   // { [chatId]: intervalId }
@@ -375,6 +376,37 @@ export default function ChatPage() {
     }
   }
 
+  // Background poll: keeps running after the floating panel is closed
+  function startBgPoll(chatId, lastMsgId) {
+    stopBgPoll()
+    bgPollRef.current = { chatId, lastMsgId, intervalId: null, adminJoined: false }
+    const id = setInterval(async () => {
+      const ref = bgPollRef.current
+      if (!ref.chatId) return
+      try {
+        const res = await axios.get(`/api/live-chat/${ref.chatId}/messages?offset=${ref.lastMsgId}`)
+        // New admin messages → notify
+        if (res.data.messages.length > 0) {
+          const adminMsgs = res.data.messages.filter(m => m.sender === 'admin')
+          if (adminMsgs.length > 0) notifyUser(res.data.opened_by || 'Admin')
+          bgPollRef.current.lastMsgId = res.data.messages[res.data.messages.length - 1].id
+        }
+        // Admin just joined for the first time → notify
+        if (res.data.admin_opened && !bgPollRef.current.adminJoined) {
+          bgPollRef.current.adminJoined = true
+          notifyUser(res.data.opened_by || 'Admin')
+        }
+        if (res.data.chat_status === 'closed') stopBgPoll()
+      } catch {}
+    }, 4000)
+    bgPollRef.current.intervalId = id
+  }
+
+  function stopBgPoll() {
+    clearInterval(bgPollRef.current.intervalId)
+    bgPollRef.current = { intervalId: null, chatId: null, lastMsgId: 0, adminJoined: false }
+  }
+
   // ── User Auth ─────────────────────────────────────────────────────────────────
 
   function userAuthHeader() {
@@ -412,6 +444,7 @@ export default function ChatPage() {
     setUser(null)
     setShowMyChats(false)
     setLiveChats({})
+    stopBgPoll()
     Object.values(liveChatRefs.current).forEach(r => clearInterval(r?.intervalId))
     liveChatRefs.current = {}
     Object.values(heartbeatRef.current).forEach(id => clearInterval(id))
@@ -460,6 +493,7 @@ export default function ChatPage() {
   const RESTORED_KEY = 9999
   async function reopenInFloatingPanel(chatId) {
     initAudioCtx()  // user gesture here — warm up AudioContext
+    stopBgPoll()    // stop background poll since floating panel will take over
     // Clean up any previously restored chat slot
     if (liveChatRefs.current[RESTORED_KEY]) {
       clearInterval(liveChatRefs.current[RESTORED_KEY].intervalId)
@@ -1108,10 +1142,13 @@ export default function ChatPage() {
                 )}
                 <button
                   onClick={() => {
+                    const chatId   = ref?.chatId
+                    const lastMsgId = liveChatRefs.current[i]?.lastMsgId || 0
                     clearInterval(liveChatRefs.current[i]?.intervalId)
-                    stopHeartbeat(ref?.chatId)
+                    stopHeartbeat(chatId)
                     setLiveChats(p => { const n = { ...p }; delete n[i]; return n })
-                    // Open My Chats so user can continue from history
+                    // Keep background poll running so notifications still arrive
+                    if (chatId) startBgPoll(chatId, lastMsgId)
                     loadMyChats()
                     setShowMyChats(true)
                   }}
