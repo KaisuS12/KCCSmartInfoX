@@ -844,7 +844,8 @@ export default function ChatPage() {
                   <button
                     key={fq}
                     onClick={() => sendMessage(fq)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-all hover:border-kcc-gold/60 hover:text-kcc-gold ${
+                    disabled={loading}
+                    className={`text-xs px-3 py-1 rounded-full border transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:border-kcc-gold/60 hover:text-kcc-gold ${
                       darkMode
                         ? 'bg-white/5 border-white/10 text-gray-400'
                         : 'bg-gray-50 border-gray-200 text-gray-500'
